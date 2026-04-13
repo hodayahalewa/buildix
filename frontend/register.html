@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BUILDIX - Register</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-light">
+
+  <!-- תפריט עליון -->
+  <nav class="navbar navbar-dark bg-primary">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="index.html">
+        <i class="bi bi-building"></i> BUILDIX
+      </a>
+    </div>
+  </nav>
+
+  <!-- טופס הרשמה -->
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card auth-card">
+          <div class="card-header text-center">
+            <h4 class="text-white fw-bold mb-0">
+              <i class="bi bi-person-plus"></i> Create Account
+            </h4>
+            <p class="text-white-50 mt-1 mb-0">Join BUILDIX today</p>
+          </div>
+
+          <div class="card-body p-4">
+            <div id="errorMsg" class="alert alert-danger d-none"></div>
+            <div id="successMsg" class="alert alert-success d-none"></div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">Full Name *</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input type="text" id="full_name" class="form-control" placeholder="Enter your full name">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">Email Address *</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                <input type="email" id="email" class="form-control" placeholder="Enter your email">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">Phone Number *</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                <input type="tel" id="phone" class="form-control" placeholder="Enter your phone number">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">Password *</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                <input type="password" id="password" class="form-control" placeholder="Create a password">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">Role *</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
+                <select id="role" class="form-select" onchange="toggleFields()">
+                  <option value="">Select your role</option>
+                  <option value="tenant">Tenant / Resident</option>
+                  <option value="technician">Technician</option>
+                  <option value="manager">Building Manager</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- שדות נוספים לדייר בלבד -->
+            <div id="tenantFields" class="d-none">
+              <div class="mb-3">
+                <label class="form-label fw-bold">Floor</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-layers"></i></span>
+                  <input type="text" id="floor" class="form-control" placeholder="e.g. 3">
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Unit Number</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-door-open"></i></span>
+                  <input type="text" id="unit_number" class="form-control" placeholder="e.g. 12">
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Owner's Phone Number</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-telephone-fill"></i></span>
+                  <input type="tel" id="owner_phone" class="form-control" placeholder="Property owner's phone">
+                </div>
+              </div>
+            </div>
+
+            <div class="d-grid mt-4">
+              <button onclick="register()" class="btn btn-primary btn-lg">
+                <i class="bi bi-person-check"></i> Create Account
+              </button>
+            </div>
+
+            <div class="text-center mt-3">
+              <p class="text-muted">
+                Already have an account?
+                <a href="login.html" class="text-primary fw-bold">Login here</a>
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // הצגת שדות נוספים לפי תפקיד שנבחר
+    function toggleFields() {
+      const role = document.getElementById('role').value;
+      const tenantFields = document.getElementById('tenantFields');
+      if (role === 'tenant') {
+        tenantFields.classList.remove('d-none');
+      } else {
+        tenantFields.classList.add('d-none');
+      }
+    }
+
+    // פונקציית הרשמה
+    async function register() {
+      const errorMsg = document.getElementById('errorMsg');
+      const successMsg = document.getElementById('successMsg');
+
+      const full_name = document.getElementById('full_name').value;
+      const email = document.getElementById('email').value;
+      const phone = document.getElementById('phone').value;
+      const password = document.getElementById('password').value;
+      const role = document.getElementById('role').value;
+      const floor = document.getElementById('floor')?.value;
+      const unit_number = document.getElementById('unit_number')?.value;
+      const owner_phone = document.getElementById('owner_phone')?.value;
+
+      errorMsg.classList.add('d-none');
+      successMsg.classList.add('d-none');
+
+      if (!full_name || !email || !phone || !password || !role) {
+        errorMsg.textContent = 'Please fill in all required fields.';
+        errorMsg.classList.remove('d-none');
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:3000/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            full_name, email, phone, password, role,
+            floor, unit_number, owner_phone
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          successMsg.textContent = 'Account created successfully! Please wait for manager approval.';
+          successMsg.classList.remove('d-none');
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 2000);
+        } else {
+          errorMsg.textContent = data.message;
+          errorMsg.classList.remove('d-none');
+        }
+
+      } catch (err) {
+        errorMsg.textContent = 'Connection error. Please try again.';
+        errorMsg.classList.remove('d-none');
+      }
+    }
+  </script>
+
+</body>
+</html>

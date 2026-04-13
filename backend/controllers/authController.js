@@ -96,5 +96,50 @@ const login = async (req, res) => {
     res.status(500).json({ message: 'Server error. Please try again.' });
   }
 };
+// קבלת כל המשתמשים הממתינים לאישור - למנהל בלבד
+const getPendingUsers = async (req, res) => {
+  try {
+    const [users] = await db.query(
+      'SELECT id, full_name, email, phone, role, unit_number, floor, created_at FROM users WHERE is_approved = 0'
+    );
+    res.status(200).json({ users });
+  } catch (err) {
+    console.error('Get pending users error:', err.message);
+    res.status(500).json({ message: 'Server error. Please try again.' });
+  }
+};
 
-module.exports = { register, login };
+// אישור או דחיית משתמש חדש - למנהל בלבד
+const approveUser = async (req, res) => {
+  try {
+    const { user_id, approved } = req.body;
+
+    if (approved) {
+      await db.query('UPDATE users SET is_approved = 1 WHERE id = ?', [user_id]);
+      res.status(200).json({ message: 'User approved successfully!' });
+    } else {
+      await db.query('DELETE FROM users WHERE id = ?', [user_id]);
+      res.status(200).json({ message: 'User rejected and removed.' });
+    }
+
+  } catch (err) {
+    console.error('Approve user error:', err.message);
+    res.status(500).json({ message: 'Server error. Please try again.' });
+  }
+};
+
+// קבלת כל הטכנאים - למנהל בלבד
+const getTechnicians = async (req, res) => {
+  try {
+    const [technicians] = await db.query(
+      'SELECT id, full_name, email, phone FROM users WHERE role = ? AND is_approved = 1',
+      ['technician']
+    );
+    res.status(200).json({ technicians });
+  } catch (err) {
+    console.error('Get technicians error:', err.message);
+    res.status(500).json({ message: 'Server error. Please try again.' });
+  }
+};
+
+module.exports = { register, login, getPendingUsers, approveUser, getTechnicians };

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BUILDIX - Manager Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="text-center py-4">
+      <h5 class="text-white fw-bold">
+        <i class="bi bi-building"></i> BUILDIX
+      </h5>
+      <small class="text-secondary" id="managerName"></small>
+    </div>
+
+    <ul class="nav flex-column px-2">
+      <li class="nav-item">
+        <a class="nav-link active" href="dashboard-manager.html">
+          <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="faults.html">
+          <i class="bi bi-exclamation-triangle"></i> Faults
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="maintenance.html">
+          <i class="bi bi-tools"></i> Maintenance
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="energy.html">
+          <i class="bi bi-lightning"></i> Energy
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="announcements.html">
+          <i class="bi bi-megaphone"></i> Announcements
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="reports.html">
+          <i class="bi bi-bar-chart"></i> Reports
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="users.html">
+          <i class="bi bi-people"></i> Users
+        </a>
+      </li>
+      <li class="nav-item mt-4">
+        <a class="nav-link text-danger" href="#" onclick="logout()">
+          <i class="bi bi-box-arrow-left"></i> Logout
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h4 class="fw-bold mb-0">Manager Dashboard</h4>
+        <small class="text-muted">Welcome back, <span id="welcomeName"></span></small>
+      </div>
+      <div>
+        <span class="badge bg-primary">Manager</span>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-3">
+        <div class="card stat-card bg-primary text-white">
+          <div class="stat-number" id="totalFaults">0</div>
+          <div class="stat-label text-white-50">Total Faults</div>
+          <i class="bi bi-exclamation-triangle fs-1 opacity-25 float-end mt-n4"></i>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card bg-warning text-white">
+          <div class="stat-number" id="openFaults">0</div>
+          <div class="stat-label text-white-50">Open Faults</div>
+          <i class="bi bi-clock fs-1 opacity-25 float-end mt-n4"></i>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card bg-info text-white">
+          <div class="stat-number" id="inProgressFaults">0</div>
+          <div class="stat-label text-white-50">In Progress</div>
+          <i class="bi bi-gear fs-1 opacity-25 float-end mt-n4"></i>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card bg-success text-white">
+          <div class="stat-number" id="closedFaults">0</div>
+          <div class="stat-label text-white-50">Closed Faults</div>
+          <i class="bi bi-check-circle fs-1 opacity-25 float-end mt-n4"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Faults Table -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h6 class="fw-bold mb-0">
+          <i class="bi bi-exclamation-triangle text-warning"></i> Recent Faults
+        </h6>
+        <a href="faults.html" class="btn btn-sm btn-primary">View All</a>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>#</th>
+                <th>Title</th>
+                <th>Reported By</th>
+                <th>Urgency</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="faultsTable">
+              <tr>
+                <td colspan="6" class="text-center py-4 text-muted">
+                  Loading faults...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // בדיקה שהמשתמש מחובר ושהוא מנהל
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (!token || !user || user.role !== 'manager') {
+      window.location.href = 'login.html';
+    }
+
+    // הצגת שם המנהל
+    document.getElementById('managerName').textContent = user.full_name;
+    document.getElementById('welcomeName').textContent = user.full_name;
+
+    // טעינת נתוני התקלות מהשרת
+    async function loadFaults() {
+      try {
+        const response = await fetch('http://localhost:3000/api/faults/all', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const data = await response.json();
+        const faults = data.faults;
+
+        // חישוב סטטיסטיקות
+        document.getElementById('totalFaults').textContent = faults.length;
+        document.getElementById('openFaults').textContent = faults.filter(f => f.status === 'open').length;
+        document.getElementById('inProgressFaults').textContent = faults.filter(f => f.status === 'in_progress').length;
+        document.getElementById('closedFaults').textContent = faults.filter(f => f.status === 'closed').length;
+
+        // הצגת 5 התקלות האחרונות בטבלה
+        const tbody = document.getElementById('faultsTable');
+        if (faults.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No faults found</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = faults.slice(0, 5).map(fault => `
+          <tr>
+            <td>${fault.id}</td>
+            <td>${fault.title}</td>
+            <td>${fault.reported_by_name || 'N/A'}</td>
+            <td><span class="badge-${fault.urgency}">${fault.urgency}</span></td>
+            <td><span class="badge-${fault.status.replace('_', '-')}">${fault.status.replace('_', ' ')}</span></td>
+            <td>${new Date(fault.created_at).toLocaleDateString()}</td>
+          </tr>
+        `).join('');
+
+      } catch (err) {
+        console.error('Error loading faults:', err);
+      }
+    }
+
+    // פונקציית התנתקות
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'login.html';
+    }
+
+    // טעינת הנתונים בעת פתיחת הדף
+    loadFaults();
+  </script>
+
+</body>
+</html>

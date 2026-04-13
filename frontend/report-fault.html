@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BUILDIX - Report Fault</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="text-center py-4">
+      <h5 class="text-white fw-bold">
+        <i class="bi bi-building"></i> BUILDIX
+      </h5>
+      <small class="text-secondary" id="userName"></small>
+    </div>
+
+    <ul class="nav flex-column px-2">
+      <li class="nav-item">
+        <a class="nav-link" href="dashboard-tenant.html">
+          <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" href="report-fault.html">
+          <i class="bi bi-plus-circle"></i> Report Fault
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="my-faults.html">
+          <i class="bi bi-exclamation-triangle"></i> My Faults
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="announcements.html">
+          <i class="bi bi-megaphone"></i> Announcements
+        </a>
+      </li>
+      <li class="nav-item mt-4">
+        <a class="nav-link text-danger" href="#" onclick="logout()">
+          <i class="bi bi-box-arrow-left"></i> Logout
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+
+    <!-- Header -->
+    <div class="mb-4">
+      <h4 class="fw-bold mb-0">Report New Fault</h4>
+      <small class="text-muted">Fill in the details below to report a fault</small>
+    </div>
+
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+
+            <!-- הודעת שגיאה -->
+            <div id="errorMsg" class="alert alert-danger d-none"></div>
+            <!-- הודעת הצלחה -->
+            <div id="successMsg" class="alert alert-success d-none"></div>
+
+            <!-- שדה כותרת -->
+            <div class="mb-3">
+              <label class="form-label fw-bold">Fault Title *</label>
+              <input type="text" id="title" class="form-control" placeholder="e.g. Water leak in bathroom">
+            </div>
+
+            <!-- שדה סוג תקלה -->
+            <div class="mb-3">
+              <label class="form-label fw-bold">Fault Type *</label>
+              <select id="fault_type" class="form-select">
+                <option value="">Select fault type</option>
+                <option value="plumbing">Plumbing</option>
+                <option value="electrical">Electrical</option>
+                <option value="elevator">Elevator</option>
+                <option value="cleaning">Cleaning</option>
+                <option value="security">Security</option>
+                <option value="ac">Air Conditioning</option>
+                <option value="structural">Structural</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <!-- שדה תיאור -->
+            <div class="mb-3">
+              <label class="form-label fw-bold">Description</label>
+              <textarea id="description" class="form-control" rows="4" placeholder="Describe the fault in detail..."></textarea>
+            </div>
+
+            <!-- שורה של קומה ויחידה -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Floor</label>
+                <input type="text" id="floor" class="form-control" placeholder="e.g. 3">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Unit Number</label>
+                <input type="text" id="unit_number" class="form-control" placeholder="e.g. 12">
+              </div>
+            </div>
+
+            <!-- שדה דחיפות -->
+            <div class="mb-3">
+              <label class="form-label fw-bold">Urgency Level *</label>
+              <div class="d-flex gap-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="urgency" id="low" value="low">
+                  <label class="form-check-label text-success fw-bold" for="low">
+                    <i class="bi bi-circle-fill"></i> Low
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="urgency" id="medium" value="medium" checked>
+                  <label class="form-check-label text-warning fw-bold" for="medium">
+                    <i class="bi bi-circle-fill"></i> Medium
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="urgency" id="high" value="high">
+                  <label class="form-check-label text-danger fw-bold" for="high">
+                    <i class="bi bi-circle-fill"></i> High
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- כפתור שליחה -->
+            <div class="d-grid mt-4">
+              <button onclick="reportFault()" class="btn btn-primary btn-lg">
+                <i class="bi bi-send"></i> Submit Fault Report
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Tips Card -->
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm bg-light">
+          <div class="card-body p-4">
+            <h6 class="fw-bold mb-3">
+              <i class="bi bi-lightbulb text-warning"></i> Tips
+            </h6>
+            <ul class="list-unstyled text-muted small">
+              <li class="mb-2">
+                <i class="bi bi-check-circle text-success"></i>
+                Be specific about the fault location
+              </li>
+              <li class="mb-2">
+                <i class="bi bi-check-circle text-success"></i>
+                Describe the fault clearly
+              </li>
+              <li class="mb-2">
+                <i class="bi bi-check-circle text-success"></i>
+                Select the correct urgency level
+              </li>
+              <li class="mb-2">
+                <i class="bi bi-check-circle text-success"></i>
+                High urgency = immediate danger
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // בדיקה שהמשתמש מחובר
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (!token || !user) {
+      window.location.href = 'login.html';
+    }
+
+    // הצגת שם המשתמש
+    document.getElementById('userName').textContent = user.full_name;
+
+    // פונקציית דיווח תקלה - שולחת בקשה לשרת
+    async function reportFault() {
+      const errorMsg = document.getElementById('errorMsg');
+      const successMsg = document.getElementById('successMsg');
+
+      // קריאת הערכים מהטופס
+      const title = document.getElementById('title').value;
+      const fault_type = document.getElementById('fault_type').value;
+      const description = document.getElementById('description').value;
+      const floor = document.getElementById('floor').value;
+      const unit_number = document.getElementById('unit_number').value;
+      const urgency = document.querySelector('input[name="urgency"]:checked').value;
+
+      // איפוס הודעות קודמות
+      errorMsg.classList.add('d-none');
+      successMsg.classList.add('d-none');
+
+      // בדיקה שכל השדות החובה מלאים
+      if (!title || !fault_type) {
+        errorMsg.textContent = 'Please fill in all required fields.';
+        errorMsg.classList.remove('d-none');
+        return;
+      }
+
+      try {
+        // שליחת בקשת דיווח תקלה לשרת
+        const response = await fetch('http://localhost:3000/api/faults/report', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            title, fault_type, description,
+            floor, unit_number, urgency
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          successMsg.textContent = `Fault reported successfully! Fault ID: #${data.fault_id}`;
+          successMsg.classList.remove('d-none');
+
+          // איפוס הטופס
+          document.getElementById('title').value = '';
+          document.getElementById('fault_type').value = '';
+          document.getElementById('description').value = '';
+          document.getElementById('floor').value = '';
+          document.getElementById('unit_number').value = '';
+
+          // הפניה לדשבורד אחרי 2 שניות
+          setTimeout(() => {
+            window.location.href = 'dashboard-tenant.html';
+          }, 2000);
+
+        } else {
+          errorMsg.textContent = data.message;
+          errorMsg.classList.remove('d-none');
+        }
+
+      } catch (err) {
+        errorMsg.textContent = 'Connection error. Please try again.';
+        errorMsg.classList.remove('d-none');
+      }
+    }
+
+    // פונקציית התנתקות
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'login.html';
+    }
+  </script>
+
+</body>
+</html>
