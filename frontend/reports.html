@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/translations.js"></script>
+  <script src="js/lang-switcher.js"></script>
 </head>
 <body>
 
@@ -22,42 +24,42 @@
     <ul class="nav flex-column px-2">
       <li class="nav-item">
         <a class="nav-link" href="dashboard-manager.html">
-          <i class="bi bi-speedometer2"></i> Dashboard
+          <i class="bi bi-speedometer2"></i> <span id="nav-dashboard"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="faults.html">
-          <i class="bi bi-exclamation-triangle"></i> Faults
+          <i class="bi bi-exclamation-triangle"></i> <span id="nav-faults"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="maintenance.html">
-          <i class="bi bi-tools"></i> Maintenance
+          <i class="bi bi-tools"></i> <span id="nav-maintenance"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="energy.html">
-          <i class="bi bi-lightning"></i> Energy
+          <i class="bi bi-lightning"></i> <span id="nav-energy"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="announcements.html">
-          <i class="bi bi-megaphone"></i> Announcements
+          <i class="bi bi-megaphone"></i> <span id="nav-announcements"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link active" href="reports.html">
-          <i class="bi bi-bar-chart"></i> Reports
+          <i class="bi bi-bar-chart"></i> <span id="nav-reports"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="users.html">
-          <i class="bi bi-people"></i> Users
+          <i class="bi bi-people"></i> <span id="nav-users"></span>
         </a>
       </li>
       <li class="nav-item mt-4">
         <a class="nav-link text-danger" href="#" onclick="logout()">
-          <i class="bi bi-box-arrow-left"></i> Logout
+          <i class="bi bi-box-arrow-left"></i> <span id="nav-logout"></span>
         </a>
       </li>
     </ul>
@@ -66,11 +68,10 @@
   <!-- Main Content -->
   <div class="main-content">
 
-    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="fw-bold mb-0">Reports & Analytics</h4>
-        <small class="text-muted">Building performance overview</small>
+        <h4 class="fw-bold mb-0" id="pageTitle"></h4>
+        <small class="text-muted" id="pageSubtitle"></small>
       </div>
     </div>
 
@@ -79,25 +80,25 @@
       <div class="col-md-3">
         <div class="card stat-card bg-primary text-white">
           <div class="stat-number" id="totalFaults">0</div>
-          <div class="stat-label text-white-50">Total Faults</div>
+          <div class="stat-label text-white-50" id="statTotal"></div>
         </div>
       </div>
       <div class="col-md-3">
         <div class="card stat-card bg-warning text-white">
           <div class="stat-number" id="openFaults">0</div>
-          <div class="stat-label text-white-50">Open Faults</div>
+          <div class="stat-label text-white-50" id="statOpen"></div>
         </div>
       </div>
       <div class="col-md-3">
         <div class="card stat-card bg-success text-white">
           <div class="stat-number" id="closedFaults">0</div>
-          <div class="stat-label text-white-50">Closed Faults</div>
+          <div class="stat-label text-white-50" id="statClosed"></div>
         </div>
       </div>
       <div class="col-md-3">
         <div class="card stat-card bg-info text-white">
           <div class="stat-number" id="avgResponse">-</div>
-          <div class="stat-label text-white-50">Avg Response (hrs)</div>
+          <div class="stat-label text-white-50" id="statAvg"></div>
         </div>
       </div>
     </div>
@@ -107,9 +108,7 @@
       <div class="col-md-6">
         <div class="card border-0 shadow-sm">
           <div class="card-header bg-white">
-            <h6 class="fw-bold mb-0">
-              <i class="bi bi-pie-chart text-primary"></i> Faults by Status
-            </h6>
+            <h6 class="fw-bold mb-0" id="statusChartTitle"></h6>
           </div>
           <div class="card-body">
             <canvas id="statusChart"></canvas>
@@ -119,9 +118,7 @@
       <div class="col-md-6">
         <div class="card border-0 shadow-sm">
           <div class="card-header bg-white">
-            <h6 class="fw-bold mb-0">
-              <i class="bi bi-bar-chart text-danger"></i> Faults by Urgency
-            </h6>
+            <h6 class="fw-bold mb-0" id="urgencyChartTitle"></h6>
           </div>
           <div class="card-body">
             <canvas id="urgencyChart"></canvas>
@@ -135,9 +132,7 @@
       <div class="col-md-6">
         <div class="card border-0 shadow-sm">
           <div class="card-header bg-white">
-            <h6 class="fw-bold mb-0">
-              <i class="bi bi-bar-chart text-success"></i> Faults by Type
-            </h6>
+            <h6 class="fw-bold mb-0" id="typeChartTitle"></h6>
           </div>
           <div class="card-body">
             <canvas id="typeChart"></canvas>
@@ -147,9 +142,7 @@
       <div class="col-md-6">
         <div class="card border-0 shadow-sm">
           <div class="card-header bg-white">
-            <h6 class="fw-bold mb-0">
-              <i class="bi bi-lightning text-warning"></i> Energy Consumption
-            </h6>
+            <h6 class="fw-bold mb-0" id="energyChartTitle"></h6>
           </div>
           <div class="card-body">
             <canvas id="energyChart"></canvas>
@@ -163,7 +156,6 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    // בדיקה שהמשתמש מחובר ושהוא מנהל
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user'));
 
@@ -173,22 +165,43 @@
 
     document.getElementById('managerName').textContent = user.full_name;
 
-    // טעינת כל הנתונים לדוחות
+    // החלת תרגומים
+    function applyTranslations() {
+      const isHe = getLang() === 'he';
+      document.getElementById('nav-dashboard').textContent = t('dashboard');
+      document.getElementById('nav-faults').textContent = t('faults');
+      document.getElementById('nav-maintenance').textContent = t('maintenance');
+      document.getElementById('nav-energy').textContent = t('energy');
+      document.getElementById('nav-announcements').textContent = t('announcements');
+      document.getElementById('nav-reports').textContent = t('reports');
+      document.getElementById('nav-users').textContent = t('users');
+      document.getElementById('nav-logout').textContent = t('logout');
+      document.getElementById('pageTitle').textContent = t('reportsTitle');
+      document.getElementById('pageSubtitle').textContent = isHe ? 'סקירת ביצועי הבניין' : 'Building performance overview';
+      document.getElementById('statTotal').textContent = t('totalFaults');
+      document.getElementById('statOpen').textContent = t('openFaults');
+      document.getElementById('statClosed').textContent = t('closedFaults');
+      document.getElementById('statAvg').textContent = t('avgResponse');
+      document.getElementById('statusChartTitle').innerHTML = `<i class="bi bi-pie-chart text-primary"></i> ${t('faultsByStatus')}`;
+      document.getElementById('urgencyChartTitle').innerHTML = `<i class="bi bi-bar-chart text-danger"></i> ${t('faultsByUrgency')}`;
+      document.getElementById('typeChartTitle').innerHTML = `<i class="bi bi-bar-chart text-success"></i> ${t('faultsByType')}`;
+      document.getElementById('energyChartTitle').innerHTML = `<i class="bi bi-lightning text-warning"></i> ${t('energyConsumption')}`;
+    }
+
+    // טעינת דוחות
     async function loadReports() {
+      const isHe = getLang() === 'he';
       try {
-        // טעינת תקלות
         const faultsRes = await fetch('http://localhost:3000/api/faults/all', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const faultsData = await faultsRes.json();
         const faults = faultsData.faults;
 
-        // עדכון סטטיסטיקות
         document.getElementById('totalFaults').textContent = faults.length;
         document.getElementById('openFaults').textContent = faults.filter(f => f.status === 'open').length;
         document.getElementById('closedFaults').textContent = faults.filter(f => f.status === 'closed').length;
 
-        // חישוב זמן תגובה ממוצע
         const closedFaults = faults.filter(f => f.status === 'closed' && f.closed_at);
         if (closedFaults.length > 0) {
           const avgHours = closedFaults.reduce((sum, f) => {
@@ -200,8 +213,8 @@
         }
 
         // גרף סטטוס
-        buildPieChart('statusChart', 
-          ['Open', 'In Progress', 'Waiting Part', 'Closed'],
+        buildPieChart('statusChart',
+          [t('open'), t('in_progress'), t('waiting_part'), t('closed')],
           [
             faults.filter(f => f.status === 'open').length,
             faults.filter(f => f.status === 'in_progress').length,
@@ -213,7 +226,7 @@
 
         // גרף דחיפות
         buildBarChart('urgencyChart',
-          ['Low', 'Medium', 'High'],
+          [t('low'), t('medium'), t('high')],
           [
             faults.filter(f => f.urgency === 'low').length,
             faults.filter(f => f.urgency === 'medium').length,
@@ -242,7 +255,7 @@
         buildLineChart('energyChart',
           electricity.map(r => r.month),
           electricity.map(r => r.reading),
-          'Electricity (kWh)',
+          isHe ? 'חשמל (קוט"ש)' : 'Electricity (kWh)',
           '#f59e0b'
         );
 
@@ -251,37 +264,25 @@
       }
     }
 
-    // בניית גרף עוגה
     function buildPieChart(id, labels, data, colors) {
       new Chart(document.getElementById(id), {
         type: 'doughnut',
-        data: {
-          labels,
-          datasets: [{ data, backgroundColor: colors }]
-        },
+        data: { labels, datasets: [{ data, backgroundColor: colors }] },
         options: { responsive: true }
       });
     }
 
-    // בניית גרף עמודות
     function buildBarChart(id, labels, data, colors) {
       new Chart(document.getElementById(id), {
         type: 'bar',
         data: {
           labels,
-          datasets: [{
-            data,
-            backgroundColor: colors.length === 1 ? colors[0] : colors
-          }]
+          datasets: [{ data, backgroundColor: colors.length === 1 ? colors[0] : colors }]
         },
-        options: {
-          responsive: true,
-          plugins: { legend: { display: false } }
-        }
+        options: { responsive: true, plugins: { legend: { display: false } } }
       });
     }
 
-    // בניית גרף קו
     function buildLineChart(id, labels, data, label, color) {
       new Chart(document.getElementById(id), {
         type: 'line',
@@ -296,21 +297,20 @@
             fill: true
           }]
         },
-        options: {
-          responsive: true,
-          plugins: { legend: { display: false } }
-        }
+        options: { responsive: true, plugins: { legend: { display: false } } }
       });
     }
 
-    // פונקציית התנתקות
     function logout() {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = 'login.html';
     }
 
-    loadReports();
+    document.addEventListener('DOMContentLoaded', () => {
+      applyTranslations();
+      loadReports();
+    });
   </script>
 
 </body>

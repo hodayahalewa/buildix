@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/translations.js"></script>
+  <script src="js/lang-switcher.js"></script>
 </head>
 <body>
 
@@ -18,31 +20,30 @@
       </h5>
       <small class="text-secondary" id="userName"></small>
     </div>
-
     <ul class="nav flex-column px-2">
       <li class="nav-item">
         <a class="nav-link" href="dashboard-tenant.html">
-          <i class="bi bi-speedometer2"></i> Dashboard
+          <i class="bi bi-speedometer2"></i> <span id="nav-dashboard"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link active" href="report-fault.html">
-          <i class="bi bi-plus-circle"></i> Report Fault
+          <i class="bi bi-plus-circle"></i> <span id="nav-reportFault"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="my-faults.html">
-          <i class="bi bi-exclamation-triangle"></i> My Faults
+          <i class="bi bi-exclamation-triangle"></i> <span id="nav-myFaults"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="announcements.html">
-          <i class="bi bi-megaphone"></i> Announcements
+          <i class="bi bi-megaphone"></i> <span id="nav-announcements"></span>
         </a>
       </li>
       <li class="nav-item mt-4">
         <a class="nav-link text-danger" href="#" onclick="logout()">
-          <i class="bi bi-box-arrow-left"></i> Logout
+          <i class="bi bi-box-arrow-left"></i> <span id="nav-logout"></span>
         </a>
       </li>
     </ul>
@@ -51,10 +52,9 @@
   <!-- Main Content -->
   <div class="main-content">
 
-    <!-- Header -->
     <div class="mb-4">
-      <h4 class="fw-bold mb-0">Report New Fault</h4>
-      <small class="text-muted">Fill in the details below to report a fault</small>
+      <h4 class="fw-bold mb-0" id="pageTitle"></h4>
+      <small class="text-muted" id="pageSubtitle"></small>
     </div>
 
     <div class="row">
@@ -62,81 +62,65 @@
         <div class="card border-0 shadow-sm">
           <div class="card-body p-4">
 
-            <!-- הודעת שגיאה -->
             <div id="errorMsg" class="alert alert-danger d-none"></div>
-            <!-- הודעת הצלחה -->
             <div id="successMsg" class="alert alert-success d-none"></div>
 
-            <!-- שדה כותרת -->
             <div class="mb-3">
-              <label class="form-label fw-bold">Fault Title *</label>
-              <input type="text" id="title" class="form-control" placeholder="e.g. Water leak in bathroom">
+              <label class="form-label fw-bold" id="titleLabel"></label>
+              <input type="text" id="title" class="form-control">
             </div>
 
-            <!-- שדה סוג תקלה -->
             <div class="mb-3">
-              <label class="form-label fw-bold">Fault Type *</label>
+              <label class="form-label fw-bold" id="typeLabel"></label>
               <select id="fault_type" class="form-select">
-                <option value="">Select fault type</option>
-                <option value="plumbing">Plumbing</option>
-                <option value="electrical">Electrical</option>
-                <option value="elevator">Elevator</option>
-                <option value="cleaning">Cleaning</option>
-                <option value="security">Security</option>
-                <option value="ac">Air Conditioning</option>
-                <option value="structural">Structural</option>
-                <option value="other">Other</option>
+                <option value="" id="selectType"></option>
+                <option value="plumbing" id="plumbing"></option>
+                <option value="electrical" id="electrical"></option>
+                <option value="elevator" id="elevator"></option>
+                <option value="cleaning" id="cleaning"></option>
+                <option value="security" id="security"></option>
+                <option value="ac" id="ac"></option>
+                <option value="structural" id="structural"></option>
+                <option value="other" id="other"></option>
               </select>
             </div>
 
-            <!-- שדה תיאור -->
             <div class="mb-3">
-              <label class="form-label fw-bold">Description</label>
-              <textarea id="description" class="form-control" rows="4" placeholder="Describe the fault in detail..."></textarea>
+              <label class="form-label fw-bold" id="descLabel"></label>
+              <textarea id="description" class="form-control" rows="4"></textarea>
             </div>
 
-            <!-- שורה של קומה ויחידה -->
             <div class="row">
               <div class="col-md-6 mb-3">
-                <label class="form-label fw-bold">Floor</label>
+                <label class="form-label fw-bold" id="floorLabel"></label>
                 <input type="text" id="floor" class="form-control" placeholder="e.g. 3">
               </div>
               <div class="col-md-6 mb-3">
-                <label class="form-label fw-bold">Unit Number</label>
+                <label class="form-label fw-bold" id="unitLabel"></label>
                 <input type="text" id="unit_number" class="form-control" placeholder="e.g. 12">
               </div>
             </div>
 
-            <!-- שדה דחיפות -->
             <div class="mb-3">
-              <label class="form-label fw-bold">Urgency Level *</label>
+              <label class="form-label fw-bold" id="urgencyLabel"></label>
               <div class="d-flex gap-3">
                 <div class="form-check">
                   <input class="form-check-input" type="radio" name="urgency" id="low" value="low">
-                  <label class="form-check-label text-success fw-bold" for="low">
-                    <i class="bi bi-circle-fill"></i> Low
-                  </label>
+                  <label class="form-check-label text-success fw-bold" for="low" id="lowLabel"></label>
                 </div>
                 <div class="form-check">
                   <input class="form-check-input" type="radio" name="urgency" id="medium" value="medium" checked>
-                  <label class="form-check-label text-warning fw-bold" for="medium">
-                    <i class="bi bi-circle-fill"></i> Medium
-                  </label>
+                  <label class="form-check-label text-warning fw-bold" for="medium" id="mediumLabel"></label>
                 </div>
                 <div class="form-check">
                   <input class="form-check-input" type="radio" name="urgency" id="high" value="high">
-                  <label class="form-check-label text-danger fw-bold" for="high">
-                    <i class="bi bi-circle-fill"></i> High
-                  </label>
+                  <label class="form-check-label text-danger fw-bold" for="high" id="highLabel"></label>
                 </div>
               </div>
             </div>
 
-            <!-- כפתור שליחה -->
             <div class="d-grid mt-4">
-              <button onclick="reportFault()" class="btn btn-primary btn-lg">
-                <i class="bi bi-send"></i> Submit Fault Report
-              </button>
+              <button onclick="reportFault()" class="btn btn-primary btn-lg" id="submitBtn"></button>
             </div>
 
           </div>
@@ -148,26 +132,9 @@
         <div class="card border-0 shadow-sm bg-light">
           <div class="card-body p-4">
             <h6 class="fw-bold mb-3">
-              <i class="bi bi-lightbulb text-warning"></i> Tips
+              <i class="bi bi-lightbulb text-warning"></i> <span id="tipsTitle"></span>
             </h6>
-            <ul class="list-unstyled text-muted small">
-              <li class="mb-2">
-                <i class="bi bi-check-circle text-success"></i>
-                Be specific about the fault location
-              </li>
-              <li class="mb-2">
-                <i class="bi bi-check-circle text-success"></i>
-                Describe the fault clearly
-              </li>
-              <li class="mb-2">
-                <i class="bi bi-check-circle text-success"></i>
-                Select the correct urgency level
-              </li>
-              <li class="mb-2">
-                <i class="bi bi-check-circle text-success"></i>
-                High urgency = immediate danger
-              </li>
-            </ul>
+            <ul class="list-unstyled text-muted small" id="tipsList"></ul>
           </div>
         </div>
       </div>
@@ -186,15 +153,64 @@
       window.location.href = 'login.html';
     }
 
-    // הצגת שם המשתמש
-    document.getElementById('userName').textContent = user.full_name;
+    // החלת תרגומים
+    function applyTranslations() {
+      const isHe = getLang() === 'he';
+      document.getElementById('userName').textContent = user.full_name;
+      document.getElementById('nav-dashboard').textContent = t('dashboard');
+      document.getElementById('nav-reportFault').textContent = t('reportFault');
+      document.getElementById('nav-myFaults').textContent = t('myFaults');
+      document.getElementById('nav-announcements').textContent = t('announcements');
+      document.getElementById('nav-logout').textContent = t('logout');
+      document.getElementById('pageTitle').textContent = t('reportFault');
+      document.getElementById('pageSubtitle').textContent = isHe ? 'מלא את הפרטים הבאים לדיווח תקלה' : 'Fill in the details below to report a fault';
+      document.getElementById('titleLabel').textContent = t('title') + ' *';
+      document.getElementById('typeLabel').textContent = t('type') + ' *';
+      document.getElementById('descLabel').textContent = isHe ? 'תיאור' : 'Description';
+      document.getElementById('floorLabel').textContent = t('floor');
+      document.getElementById('unitLabel').textContent = t('unitNumber');
+      document.getElementById('urgencyLabel').textContent = t('urgency') + ' *';
+      document.getElementById('lowLabel').textContent = t('low');
+      document.getElementById('mediumLabel').textContent = t('medium');
+      document.getElementById('highLabel').textContent = t('high');
+      document.getElementById('submitBtn').innerHTML = `<i class="bi bi-send"></i> ${isHe ? 'שלח דיווח תקלה' : 'Submit Fault Report'}`;
+      document.getElementById('tipsTitle').textContent = isHe ? 'טיפים' : 'Tips';
 
-    // פונקציית דיווח תקלה - שולחת בקשה לשרת
+      // סוגי תקלות
+      document.getElementById('selectType').textContent = isHe ? 'בחר סוג תקלה' : 'Select fault type';
+      document.getElementById('plumbing').textContent = isHe ? 'אינסטלציה' : 'Plumbing';
+      document.getElementById('electrical').textContent = isHe ? 'חשמל' : 'Electrical';
+      document.getElementById('elevator').textContent = isHe ? 'מעלית' : 'Elevator';
+      document.getElementById('cleaning').textContent = isHe ? 'ניקיון' : 'Cleaning';
+      document.getElementById('security').textContent = isHe ? 'אבטחה' : 'Security';
+      document.getElementById('ac').textContent = isHe ? 'מיזוג אוויר' : 'Air Conditioning';
+      document.getElementById('structural').textContent = isHe ? 'מבני' : 'Structural';
+      document.getElementById('other').textContent = isHe ? 'אחר' : 'Other';
+
+      // טיפים
+      document.getElementById('tipsList').innerHTML = isHe ? `
+        <li class="mb-2"><i class="bi bi-check-circle text-success"></i> היה ספציפי לגבי מיקום התקלה</li>
+        <li class="mb-2"><i class="bi bi-check-circle text-success"></i> תאר את התקלה בבירור</li>
+        <li class="mb-2"><i class="bi bi-check-circle text-success"></i> בחר את רמת הדחיפות הנכונה</li>
+        <li class="mb-2"><i class="bi bi-check-circle text-success"></i> דחיפות גבוהה = סכנה מיידית</li>
+      ` : `
+        <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Be specific about the fault location</li>
+        <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Describe the fault clearly</li>
+        <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Select the correct urgency level</li>
+        <li class="mb-2"><i class="bi bi-check-circle text-success"></i> High urgency = immediate danger</li>
+      `;
+
+      // placeholders
+      document.getElementById('title').placeholder = isHe ? 'לדוגמה: נזילת מים בשירותים' : 'e.g. Water leak in bathroom';
+      document.getElementById('description').placeholder = isHe ? 'תאר את התקלה בפירוט...' : 'Describe the fault in detail...';
+    }
+
+    // פונקציית דיווח תקלה
     async function reportFault() {
+      const isHe = getLang() === 'he';
       const errorMsg = document.getElementById('errorMsg');
       const successMsg = document.getElementById('successMsg');
 
-      // קריאת הערכים מהטופס
       const title = document.getElementById('title').value;
       const fault_type = document.getElementById('fault_type').value;
       const description = document.getElementById('description').value;
@@ -202,66 +218,56 @@
       const unit_number = document.getElementById('unit_number').value;
       const urgency = document.querySelector('input[name="urgency"]:checked').value;
 
-      // איפוס הודעות קודמות
       errorMsg.classList.add('d-none');
       successMsg.classList.add('d-none');
 
-      // בדיקה שכל השדות החובה מלאים
       if (!title || !fault_type) {
-        errorMsg.textContent = 'Please fill in all required fields.';
+        errorMsg.textContent = isHe ? 'אנא מלא את כל השדות הנדרשים.' : 'Please fill in all required fields.';
         errorMsg.classList.remove('d-none');
         return;
       }
 
       try {
-        // שליחת בקשת דיווח תקלה לשרת
         const response = await fetch('http://localhost:3000/api/faults/report', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({
-            title, fault_type, description,
-            floor, unit_number, urgency
-          })
+          body: JSON.stringify({ title, fault_type, description, floor, unit_number, urgency })
         });
 
         const data = await response.json();
 
         if (response.ok) {
-          successMsg.textContent = `Fault reported successfully! Fault ID: #${data.fault_id}`;
+          successMsg.textContent = isHe ? `התקלה דווחה בהצלחה! מספר תקלה: #${data.fault_id}` : `Fault reported successfully! Fault ID: #${data.fault_id}`;
           successMsg.classList.remove('d-none');
 
-          // איפוס הטופס
           document.getElementById('title').value = '';
           document.getElementById('fault_type').value = '';
           document.getElementById('description').value = '';
           document.getElementById('floor').value = '';
           document.getElementById('unit_number').value = '';
 
-          // הפניה לדשבורד אחרי 2 שניות
-          setTimeout(() => {
-            window.location.href = 'dashboard-tenant.html';
-          }, 2000);
-
+          setTimeout(() => { window.location.href = 'dashboard-tenant.html'; }, 2000);
         } else {
           errorMsg.textContent = data.message;
           errorMsg.classList.remove('d-none');
         }
 
       } catch (err) {
-        errorMsg.textContent = 'Connection error. Please try again.';
+        errorMsg.textContent = isHe ? 'שגיאת חיבור. אנא נסה שוב.' : 'Connection error. Please try again.';
         errorMsg.classList.remove('d-none');
       }
     }
 
-    // פונקציית התנתקות
     function logout() {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = 'login.html';
     }
+
+    document.addEventListener('DOMContentLoaded', applyTranslations);
   </script>
 
 </body>

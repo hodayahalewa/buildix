@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/translations.js"></script>
+  <script src="js/lang-switcher.js"></script>
 </head>
 <body>
 
@@ -18,46 +20,45 @@
       </h5>
       <small class="text-secondary" id="managerName"></small>
     </div>
-
     <ul class="nav flex-column px-2">
       <li class="nav-item">
         <a class="nav-link" href="dashboard-manager.html">
-          <i class="bi bi-speedometer2"></i> Dashboard
+          <i class="bi bi-speedometer2"></i> <span id="nav-dashboard"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="faults.html">
-          <i class="bi bi-exclamation-triangle"></i> Faults
+          <i class="bi bi-exclamation-triangle"></i> <span id="nav-faults"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="maintenance.html">
-          <i class="bi bi-tools"></i> Maintenance
+          <i class="bi bi-tools"></i> <span id="nav-maintenance"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="energy.html">
-          <i class="bi bi-lightning"></i> Energy
+          <i class="bi bi-lightning"></i> <span id="nav-energy"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="announcements.html">
-          <i class="bi bi-megaphone"></i> Announcements
+          <i class="bi bi-megaphone"></i> <span id="nav-announcements"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="reports.html">
-          <i class="bi bi-bar-chart"></i> Reports
+          <i class="bi bi-bar-chart"></i> <span id="nav-reports"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link active" href="users.html">
-          <i class="bi bi-people"></i> Users
+          <i class="bi bi-people"></i> <span id="nav-users"></span>
         </a>
       </li>
       <li class="nav-item mt-4">
         <a class="nav-link text-danger" href="#" onclick="logout()">
-          <i class="bi bi-box-arrow-left"></i> Logout
+          <i class="bi bi-box-arrow-left"></i> <span id="nav-logout"></span>
         </a>
       </li>
     </ul>
@@ -66,11 +67,10 @@
   <!-- Main Content -->
   <div class="main-content">
 
-    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="fw-bold mb-0">Manage Users</h4>
-        <small class="text-muted">Approve or reject new user registrations</small>
+        <h4 class="fw-bold mb-0" id="pageTitle"></h4>
+        <small class="text-muted" id="pageSubtitle"></small>
       </div>
     </div>
 
@@ -78,7 +78,8 @@
     <div class="card border-0 shadow-sm mb-4">
       <div class="card-header bg-white">
         <h6 class="fw-bold mb-0">
-          <i class="bi bi-clock text-warning"></i> Pending Approvals
+          <i class="bi bi-clock text-warning"></i>
+          <span id="pendingTitle"></span>
           <span id="pendingCount" class="badge bg-warning text-dark ms-2">0</span>
         </h6>
       </div>
@@ -88,21 +89,19 @@
             <thead class="table-light">
               <tr>
                 <th>#</th>
-                <th>Full Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Role</th>
-                <th>Floor</th>
-                <th>Unit</th>
-                <th>Date</th>
-                <th>Actions</th>
+                <th id="thName"></th>
+                <th id="thEmail"></th>
+                <th id="thPhone"></th>
+                <th id="thRole"></th>
+                <th id="thFloor"></th>
+                <th id="thUnit"></th>
+                <th id="thDate"></th>
+                <th id="thActions"></th>
               </tr>
             </thead>
             <tbody id="pendingTable">
               <tr>
-                <td colspan="9" class="text-center py-4 text-muted">
-                  Loading pending users...
-                </td>
+                <td colspan="9" class="text-center py-4 text-muted" id="loadingText"></td>
               </tr>
             </tbody>
           </table>
@@ -115,7 +114,6 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    // בדיקה שהמשתמש מחובר ושהוא מנהל
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user'));
 
@@ -123,10 +121,34 @@
       window.location.href = 'login.html';
     }
 
-    // הצגת שם המנהל
     document.getElementById('managerName').textContent = user.full_name;
 
-    // טעינת המשתמשים הממתינים לאישור
+    // החלת תרגומים
+    function applyTranslations() {
+      const isHe = getLang() === 'he';
+      document.getElementById('nav-dashboard').textContent = t('dashboard');
+      document.getElementById('nav-faults').textContent = t('faults');
+      document.getElementById('nav-maintenance').textContent = t('maintenance');
+      document.getElementById('nav-energy').textContent = t('energy');
+      document.getElementById('nav-announcements').textContent = t('announcements');
+      document.getElementById('nav-reports').textContent = t('reports');
+      document.getElementById('nav-users').textContent = t('users');
+      document.getElementById('nav-logout').textContent = t('logout');
+      document.getElementById('pageTitle').textContent = isHe ? 'ניהול משתמשים' : 'Manage Users';
+      document.getElementById('pageSubtitle').textContent = isHe ? 'אשר או דחה משתמשים חדשים' : 'Approve or reject new user registrations';
+      document.getElementById('pendingTitle').textContent = t('pendingApprovals');
+      document.getElementById('thName').textContent = t('fullName');
+      document.getElementById('thEmail').textContent = t('emailAddress');
+      document.getElementById('thPhone').textContent = t('phoneNumber');
+      document.getElementById('thRole').textContent = t('role');
+      document.getElementById('thFloor').textContent = t('floor');
+      document.getElementById('thUnit').textContent = t('unitNumber');
+      document.getElementById('thDate').textContent = t('date');
+      document.getElementById('thActions').textContent = t('actions');
+      document.getElementById('loadingText').textContent = t('loading');
+    }
+
+    // טעינת משתמשים ממתינים
     async function loadPendingUsers() {
       try {
         const response = await fetch('http://localhost:3000/api/auth/pending', {
@@ -135,34 +157,31 @@
 
         const data = await response.json();
         const users = data.users;
-
-        // עדכון מספר הממתינים
         document.getElementById('pendingCount').textContent = users.length;
 
         const tbody = document.getElementById('pendingTable');
 
         if (users.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-muted">No pending users</td></tr>';
+          tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-muted">${getLang() === 'he' ? 'אין משתמשים ממתינים' : 'No pending users'}</td></tr>`;
           return;
         }
 
-        // הצגת המשתמשים הממתינים בטבלה
         tbody.innerHTML = users.map(u => `
           <tr>
             <td>${u.id}</td>
             <td>${u.full_name}</td>
             <td>${u.email}</td>
             <td>${u.phone || 'N/A'}</td>
-            <td><span class="badge bg-secondary">${u.role}</span></td>
+            <td><span class="badge bg-secondary">${t(u.role)}</span></td>
             <td>${u.floor || 'N/A'}</td>
             <td>${u.unit_number || 'N/A'}</td>
             <td>${new Date(u.created_at).toLocaleDateString()}</td>
             <td>
               <button class="btn btn-sm btn-success me-1" onclick="approveUser(${u.id}, true)">
-                <i class="bi bi-check-lg"></i> Approve
+                <i class="bi bi-check-lg"></i> ${t('approve')}
               </button>
               <button class="btn btn-sm btn-danger" onclick="approveUser(${u.id}, false)">
-                <i class="bi bi-x-lg"></i> Reject
+                <i class="bi bi-x-lg"></i> ${t('reject')}
               </button>
             </td>
           </tr>
@@ -175,8 +194,9 @@
 
     // אישור או דחיית משתמש
     async function approveUser(userId, approved) {
-      const action = approved ? 'approve' : 'reject';
-      if (!confirm(`Are you sure you want to ${action} this user?`)) return;
+      const isHe = getLang() === 'he';
+      const action = approved ? (isHe ? 'לאשר' : 'approve') : (isHe ? 'לדחות' : 'reject');
+      if (!confirm(isHe ? `האם אתה בטוח שברצונך ${action} משתמש זה?` : `Are you sure you want to ${action} this user?`)) return;
 
       try {
         const response = await fetch('http://localhost:3000/api/auth/approve', {
@@ -189,28 +209,26 @@
         });
 
         const data = await response.json();
-
         if (response.ok) {
-          alert(data.message);
           loadPendingUsers();
         } else {
           alert(data.message);
         }
-
       } catch (err) {
-        alert('Error. Please try again.');
+        alert(isHe ? 'שגיאה. אנא נסה שוב.' : 'Error. Please try again.');
       }
     }
 
-    // פונקציית התנתקות
     function logout() {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = 'login.html';
     }
 
-    // טעינת הנתונים בעת פתיחת הדף
-    loadPendingUsers();
+    document.addEventListener('DOMContentLoaded', () => {
+      applyTranslations();
+      loadPendingUsers();
+    });
   </script>
 
 </body>

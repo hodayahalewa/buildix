@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/translations.js"></script>
+  <script src="js/lang-switcher.js"></script>
 </head>
 <body>
 
@@ -21,27 +23,27 @@
     <ul class="nav flex-column px-2">
       <li class="nav-item">
         <a class="nav-link" href="dashboard-tenant.html">
-          <i class="bi bi-speedometer2"></i> Dashboard
+          <i class="bi bi-speedometer2"></i> <span id="nav-dashboard"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="report-fault.html">
-          <i class="bi bi-plus-circle"></i> Report Fault
+          <i class="bi bi-plus-circle"></i> <span id="nav-reportFault"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link active" href="my-faults.html">
-          <i class="bi bi-exclamation-triangle"></i> My Faults
+          <i class="bi bi-exclamation-triangle"></i> <span id="nav-myFaults"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="announcements.html">
-          <i class="bi bi-megaphone"></i> Announcements
+          <i class="bi bi-megaphone"></i> <span id="nav-announcements"></span>
         </a>
       </li>
       <li class="nav-item mt-4">
         <a class="nav-link text-danger" href="#" onclick="logout()">
-          <i class="bi bi-box-arrow-left"></i> Logout
+          <i class="bi bi-box-arrow-left"></i> <span id="nav-logout"></span>
         </a>
       </li>
     </ul>
@@ -50,15 +52,12 @@
   <!-- Main Content -->
   <div class="main-content">
 
-    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="fw-bold mb-0">My Faults</h4>
-        <small class="text-muted">Track all your reported faults</small>
+        <h4 class="fw-bold mb-0" id="pageTitle"></h4>
+        <small class="text-muted" id="pageSubtitle"></small>
       </div>
-      <a href="report-fault.html" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> Report New Fault
-      </a>
+      <a href="report-fault.html" class="btn btn-primary" id="reportBtn"></a>
     </div>
 
     <!-- Filters -->
@@ -67,25 +66,23 @@
         <div class="row g-3">
           <div class="col-md-4">
             <select id="filterStatus" class="form-select" onchange="filterFaults()">
-              <option value="">All Statuses</option>
-              <option value="open">Open</option>
-              <option value="in_progress">In Progress</option>
-              <option value="waiting_part">Waiting Part</option>
-              <option value="closed">Closed</option>
+              <option value="" id="allStatuses"></option>
+              <option value="open" id="statusOpen"></option>
+              <option value="in_progress" id="statusInProgress"></option>
+              <option value="waiting_part" id="statusWaiting"></option>
+              <option value="closed" id="statusClosed"></option>
             </select>
           </div>
           <div class="col-md-4">
             <select id="filterUrgency" class="form-select" onchange="filterFaults()">
-              <option value="">All Urgencies</option>
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
+              <option value="" id="allUrgencies"></option>
+              <option value="low" id="urgencyLow"></option>
+              <option value="medium" id="urgencyMedium"></option>
+              <option value="high" id="urgencyHigh"></option>
             </select>
           </div>
           <div class="col-md-4">
-            <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
-              <i class="bi bi-arrow-counterclockwise"></i> Reset
-            </button>
+            <button class="btn btn-outline-secondary w-100" onclick="resetFilters()" id="resetBtn"></button>
           </div>
         </div>
       </div>
@@ -93,9 +90,7 @@
 
     <!-- Faults List -->
     <div id="faultsList" class="row g-4">
-      <div class="col-12 text-center py-4 text-muted">
-        Loading your faults...
-      </div>
+      <div class="col-12 text-center py-4 text-muted" id="loadingText"></div>
     </div>
 
   </div>
@@ -112,11 +107,33 @@
     }
 
     document.getElementById('userName').textContent = user.full_name;
-
-    // משתנה לשמירת כל התקלות
     let allFaults = [];
 
-    // טעינת התקלות של הדייר
+    // החלת תרגומים
+    function applyTranslations() {
+      const isHe = getLang() === 'he';
+      document.getElementById('nav-dashboard').textContent = t('dashboard');
+      document.getElementById('nav-reportFault').textContent = t('reportFault');
+      document.getElementById('nav-myFaults').textContent = t('myFaults');
+      document.getElementById('nav-announcements').textContent = t('announcements');
+      document.getElementById('nav-logout').textContent = t('logout');
+      document.getElementById('pageTitle').textContent = t('myFaults');
+      document.getElementById('pageSubtitle').textContent = isHe ? 'עקוב אחרי כל התקלות שדווחת' : 'Track all your reported faults';
+      document.getElementById('reportBtn').innerHTML = `<i class="bi bi-plus-circle"></i> ${t('reportNewFault')}`;
+      document.getElementById('allStatuses').textContent = isHe ? 'כל הסטטוסים' : 'All Statuses';
+      document.getElementById('statusOpen').textContent = t('open');
+      document.getElementById('statusInProgress').textContent = t('in_progress');
+      document.getElementById('statusWaiting').textContent = t('waiting_part');
+      document.getElementById('statusClosed').textContent = t('closed');
+      document.getElementById('allUrgencies').textContent = isHe ? 'כל הדחיפויות' : 'All Urgencies';
+      document.getElementById('urgencyLow').textContent = t('low');
+      document.getElementById('urgencyMedium').textContent = t('medium');
+      document.getElementById('urgencyHigh').textContent = t('high');
+      document.getElementById('resetBtn').innerHTML = `<i class="bi bi-arrow-counterclockwise"></i> ${t('reset')}`;
+      document.getElementById('loadingText').textContent = t('loading');
+    }
+
+    // טעינת התקלות
     async function loadMyFaults() {
       try {
         const response = await fetch('http://localhost:3000/api/faults/my', {
@@ -132,17 +149,18 @@
       }
     }
 
-    // הצגת התקלות כקלפים
+    // הצגת תקלות כקלפים
     function renderFaults(faults) {
+      const isHe = getLang() === 'he';
       const list = document.getElementById('faultsList');
 
       if (faults.length === 0) {
         list.innerHTML = `
           <div class="col-12 text-center py-5">
             <i class="bi bi-check-circle text-success fs-1"></i>
-            <h5 class="mt-3 text-muted">No faults reported yet</h5>
+            <h5 class="mt-3 text-muted">${t('noFaults')}</h5>
             <a href="report-fault.html" class="btn btn-primary mt-2">
-              <i class="bi bi-plus-circle"></i> Report Your First Fault
+              <i class="bi bi-plus-circle"></i> ${t('reportNewFault')}
             </a>
           </div>`;
         return;
@@ -153,18 +171,18 @@
           <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
               <h6 class="fw-bold mb-0">#${fault.id} - ${fault.title}</h6>
-              <span class="badge-${fault.status.replace('_', '-')}">${fault.status.replace('_', ' ')}</span>
+              <span class="badge-${fault.status.replace('_', '-')}">${t(fault.status)}</span>
             </div>
             <div class="card-body">
-              <p class="text-muted small mb-2">${fault.description || 'No description provided'}</p>
+              <p class="text-muted small mb-2">${fault.description || (isHe ? 'אין תיאור' : 'No description provided')}</p>
               <div class="d-flex gap-3 small text-muted">
                 <span><i class="bi bi-tag"></i> ${fault.fault_type}</span>
-                <span><i class="bi bi-layers"></i> Floor ${fault.floor || 'N/A'}</span>
-                <span><i class="bi bi-door-open"></i> Unit ${fault.unit_number || 'N/A'}</span>
+                <span><i class="bi bi-layers"></i> ${t('floor')} ${fault.floor || 'N/A'}</span>
+                <span><i class="bi bi-door-open"></i> ${fault.unit_number || 'N/A'}</span>
               </div>
             </div>
             <div class="card-footer bg-white d-flex justify-content-between align-items-center">
-              <span class="badge-${fault.urgency}">${fault.urgency}</span>
+              <span class="badge-${fault.urgency}">${t(fault.urgency)}</span>
               <small class="text-muted">
                 <i class="bi bi-calendar"></i> ${new Date(fault.created_at).toLocaleDateString()}
               </small>
@@ -195,14 +213,16 @@
       renderFaults(allFaults);
     }
 
-    // פונקציית התנתקות
     function logout() {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = 'login.html';
     }
 
-    loadMyFaults();
+    document.addEventListener('DOMContentLoaded', () => {
+      applyTranslations();
+      loadMyFaults();
+    });
   </script>
 
 </body>

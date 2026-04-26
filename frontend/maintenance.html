@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/translations.js"></script>
+  <script src="js/lang-switcher.js"></script>
 </head>
 <body>
 
@@ -21,42 +23,42 @@
     <ul class="nav flex-column px-2">
       <li class="nav-item">
         <a class="nav-link" href="dashboard-manager.html">
-          <i class="bi bi-speedometer2"></i> Dashboard
+          <i class="bi bi-speedometer2"></i> <span id="nav-dashboard"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="faults.html">
-          <i class="bi bi-exclamation-triangle"></i> Faults
+          <i class="bi bi-exclamation-triangle"></i> <span id="nav-faults"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link active" href="maintenance.html">
-          <i class="bi bi-tools"></i> Maintenance
+          <i class="bi bi-tools"></i> <span id="nav-maintenance"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="energy.html">
-          <i class="bi bi-lightning"></i> Energy
+          <i class="bi bi-lightning"></i> <span id="nav-energy"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="announcements.html">
-          <i class="bi bi-megaphone"></i> Announcements
+          <i class="bi bi-megaphone"></i> <span id="nav-announcements"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="reports.html">
-          <i class="bi bi-bar-chart"></i> Reports
+          <i class="bi bi-bar-chart"></i> <span id="nav-reports"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="users.html">
-          <i class="bi bi-people"></i> Users
+          <i class="bi bi-people"></i> <span id="nav-users"></span>
         </a>
       </li>
       <li class="nav-item mt-4">
         <a class="nav-link text-danger" href="#" onclick="logout()">
-          <i class="bi bi-box-arrow-left"></i> Logout
+          <i class="bi bi-box-arrow-left"></i> <span id="nav-logout"></span>
         </a>
       </li>
     </ul>
@@ -65,15 +67,12 @@
   <!-- Main Content -->
   <div class="main-content">
 
-    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="fw-bold mb-0">Preventive Maintenance</h4>
-        <small class="text-muted">Manage scheduled maintenance tasks</small>
+        <h4 class="fw-bold mb-0" id="pageTitle"></h4>
+        <small class="text-muted" id="pageSubtitle"></small>
       </div>
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMaintenanceModal">
-        <i class="bi bi-plus-circle"></i> Add Maintenance
-      </button>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMaintenanceModal" id="addBtn"></button>
     </div>
 
     <!-- Maintenance Table -->
@@ -84,20 +83,18 @@
             <thead class="table-light">
               <tr>
                 <th>#</th>
-                <th>Title</th>
-                <th>Category</th>
-                <th>Frequency</th>
-                <th>Last Done</th>
-                <th>Next Due</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th id="thTitle"></th>
+                <th id="thCategory"></th>
+                <th id="thFrequency"></th>
+                <th id="thLastDone"></th>
+                <th id="thNextDue"></th>
+                <th id="thStatus"></th>
+                <th id="thActions"></th>
               </tr>
             </thead>
             <tbody id="maintenanceTable">
               <tr>
-                <td colspan="8" class="text-center py-4 text-muted">
-                  Loading maintenance tasks...
-                </td>
+                <td colspan="8" class="text-center py-4 text-muted" id="loadingText"></td>
               </tr>
             </tbody>
           </table>
@@ -112,66 +109,62 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">
-            <i class="bi bi-tools"></i> Add Maintenance Task
-          </h5>
+          <h5 class="modal-title" id="modalTitle"></h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
           <div id="modalError" class="alert alert-danger d-none"></div>
 
           <div class="mb-3">
-            <label class="form-label fw-bold">Title *</label>
-            <input type="text" id="title" class="form-control" placeholder="e.g. Elevator inspection">
+            <label class="form-label fw-bold" id="titleLabel"></label>
+            <input type="text" id="title" class="form-control">
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-bold">Category *</label>
+            <label class="form-label fw-bold" id="categoryLabel"></label>
             <select id="category" class="form-select">
-              <option value="">Select category</option>
-              <option value="elevator">Elevator</option>
-              <option value="pumps">Pumps</option>
-              <option value="gardening">Gardening</option>
-              <option value="electrical">Electrical</option>
-              <option value="cleaning">Cleaning</option>
-              <option value="fire_safety">Fire Safety</option>
-              <option value="other">Other</option>
+              <option value="" id="selectCategory"></option>
+              <option value="elevator" id="elevatorOpt"></option>
+              <option value="pumps" id="pumpsOpt"></option>
+              <option value="gardening" id="gardeningOpt"></option>
+              <option value="electrical" id="electricalOpt"></option>
+              <option value="cleaning" id="cleaningOpt"></option>
+              <option value="fire_safety" id="fireOpt"></option>
+              <option value="other" id="otherOpt"></option>
             </select>
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-bold">Description</label>
-            <textarea id="description" class="form-control" rows="3" placeholder="Describe the maintenance task..."></textarea>
+            <label class="form-label fw-bold" id="descLabel"></label>
+            <textarea id="description" class="form-control" rows="3"></textarea>
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-bold">Frequency *</label>
+            <label class="form-label fw-bold" id="frequencyLabel"></label>
             <select id="frequency" class="form-select">
-              <option value="">Select frequency</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-              <option value="quarterly">Quarterly</option>
-              <option value="yearly">Yearly</option>
+              <option value="" id="selectFrequency"></option>
+              <option value="weekly" id="weeklyOpt"></option>
+              <option value="monthly" id="monthlyOpt"></option>
+              <option value="quarterly" id="quarterlyOpt"></option>
+              <option value="yearly" id="yearlyOpt"></option>
             </select>
           </div>
 
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label class="form-label fw-bold">Last Done</label>
+              <label class="form-label fw-bold" id="lastDoneLabel"></label>
               <input type="date" id="last_done" class="form-control">
             </div>
             <div class="col-md-6 mb-3">
-              <label class="form-label fw-bold">Next Due *</label>
+              <label class="form-label fw-bold" id="nextDueLabel"></label>
               <input type="date" id="next_due" class="form-control">
             </div>
           </div>
 
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" onclick="addMaintenance()">
-            <i class="bi bi-check-lg"></i> Add Task
-          </button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelBtn"></button>
+          <button type="button" class="btn btn-primary" onclick="addMaintenance()" id="addTaskBtn"></button>
         </div>
       </div>
     </div>
@@ -180,7 +173,6 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    // בדיקה שהמשתמש מחובר ושהוא מנהל
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user'));
 
@@ -190,7 +182,61 @@
 
     document.getElementById('managerName').textContent = user.full_name;
 
-    // טעינת משימות התחזוקה מהשרת
+    // החלת תרגומים
+    function applyTranslations() {
+      const isHe = getLang() === 'he';
+      document.getElementById('nav-dashboard').textContent = t('dashboard');
+      document.getElementById('nav-faults').textContent = t('faults');
+      document.getElementById('nav-maintenance').textContent = t('maintenance');
+      document.getElementById('nav-energy').textContent = t('energy');
+      document.getElementById('nav-announcements').textContent = t('announcements');
+      document.getElementById('nav-reports').textContent = t('reports');
+      document.getElementById('nav-users').textContent = t('users');
+      document.getElementById('nav-logout').textContent = t('logout');
+      document.getElementById('pageTitle').textContent = isHe ? 'תחזוקה מונעת' : 'Preventive Maintenance';
+      document.getElementById('pageSubtitle').textContent = isHe ? 'נהל משימות תחזוקה מתוזמנות' : 'Manage scheduled maintenance tasks';
+      document.getElementById('addBtn').innerHTML = `<i class="bi bi-plus-circle"></i> ${t('addMaintenance')}`;
+      document.getElementById('thTitle').textContent = t('title');
+      document.getElementById('thCategory').textContent = t('category');
+      document.getElementById('thFrequency').textContent = t('frequency');
+      document.getElementById('thLastDone').textContent = t('lastDone');
+      document.getElementById('thNextDue').textContent = t('nextDue');
+      document.getElementById('thStatus').textContent = t('status');
+      document.getElementById('thActions').textContent = t('actions');
+      document.getElementById('loadingText').textContent = t('loading');
+      document.getElementById('modalTitle').textContent = t('addMaintenance');
+      document.getElementById('titleLabel').textContent = t('title') + ' *';
+      document.getElementById('categoryLabel').textContent = t('category') + ' *';
+      document.getElementById('descLabel').textContent = isHe ? 'תיאור' : 'Description';
+      document.getElementById('frequencyLabel').textContent = t('frequency') + ' *';
+      document.getElementById('lastDoneLabel').textContent = t('lastDone');
+      document.getElementById('nextDueLabel').textContent = t('nextDue') + ' *';
+      document.getElementById('cancelBtn').textContent = t('cancel');
+      document.getElementById('addTaskBtn').innerHTML = `<i class="bi bi-check-lg"></i> ${isHe ? 'הוסף משימה' : 'Add Task'}`;
+
+      // אפשרויות קטגוריה
+      document.getElementById('selectCategory').textContent = isHe ? 'בחר קטגוריה' : 'Select category';
+      document.getElementById('elevatorOpt').textContent = isHe ? 'מעלית' : 'Elevator';
+      document.getElementById('pumpsOpt').textContent = isHe ? 'משאבות' : 'Pumps';
+      document.getElementById('gardeningOpt').textContent = isHe ? 'גינון' : 'Gardening';
+      document.getElementById('electricalOpt').textContent = isHe ? 'חשמל' : 'Electrical';
+      document.getElementById('cleaningOpt').textContent = isHe ? 'ניקיון' : 'Cleaning';
+      document.getElementById('fireOpt').textContent = isHe ? 'בטיחות אש' : 'Fire Safety';
+      document.getElementById('otherOpt').textContent = isHe ? 'אחר' : 'Other';
+
+      // אפשרויות תדירות
+      document.getElementById('selectFrequency').textContent = isHe ? 'בחר תדירות' : 'Select frequency';
+      document.getElementById('weeklyOpt').textContent = isHe ? 'שבועי' : 'Weekly';
+      document.getElementById('monthlyOpt').textContent = isHe ? 'חודשי' : 'Monthly';
+      document.getElementById('quarterlyOpt').textContent = isHe ? 'רבעוני' : 'Quarterly';
+      document.getElementById('yearlyOpt').textContent = isHe ? 'שנתי' : 'Yearly';
+
+      // placeholder
+      document.getElementById('title').placeholder = isHe ? 'לדוגמה: בדיקת מעלית' : 'e.g. Elevator inspection';
+      document.getElementById('description').placeholder = isHe ? 'תאר את משימת התחזוקה...' : 'Describe the maintenance task...';
+    }
+
+    // טעינת משימות תחזוקה
     async function loadMaintenance() {
       try {
         const response = await fetch('http://localhost:3000/api/maintenance/all', {
@@ -200,9 +246,10 @@
         const data = await response.json();
         const tasks = data.tasks;
         const tbody = document.getElementById('maintenanceTable');
+        const isHe = getLang() === 'he';
 
         if (tasks.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">No maintenance tasks found</td></tr>';
+          tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted">${isHe ? 'לא נמצאו משימות תחזוקה' : 'No maintenance tasks found'}</td></tr>`;
           return;
         }
 
@@ -216,12 +263,12 @@
             <td>${task.next_due ? new Date(task.next_due).toLocaleDateString() : 'N/A'}</td>
             <td>
               <span class="badge ${task.status === 'done' ? 'bg-success' : 'bg-warning text-dark'}">
-                ${task.status}
+                ${task.status === 'done' ? (isHe ? 'בוצע' : 'Done') : (isHe ? 'ממתין' : 'Pending')}
               </span>
             </td>
             <td>
               <button class="btn btn-sm btn-success" onclick="markDone(${task.id})">
-                <i class="bi bi-check-lg"></i> Done
+                <i class="bi bi-check-lg"></i> ${t('markDone')}
               </button>
             </td>
           </tr>
@@ -232,8 +279,9 @@
       }
     }
 
-    // הוספת משימת תחזוקה חדשה
+    // הוספת משימת תחזוקה
     async function addMaintenance() {
+      const isHe = getLang() === 'he';
       const title = document.getElementById('title').value;
       const category = document.getElementById('category').value;
       const description = document.getElementById('description').value;
@@ -245,7 +293,7 @@
       modalError.classList.add('d-none');
 
       if (!title || !category || !frequency || !next_due) {
-        modalError.textContent = 'Please fill in all required fields.';
+        modalError.textContent = isHe ? 'אנא מלא את כל השדות הנדרשים.' : 'Please fill in all required fields.';
         modalError.classList.remove('d-none');
         return;
       }
@@ -261,7 +309,6 @@
         });
 
         const data = await response.json();
-
         if (response.ok) {
           bootstrap.Modal.getInstance(document.getElementById('addMaintenanceModal')).hide();
           loadMaintenance();
@@ -269,16 +316,16 @@
           modalError.textContent = data.message;
           modalError.classList.remove('d-none');
         }
-
       } catch (err) {
-        modalError.textContent = 'Connection error. Please try again.';
+        modalError.textContent = isHe ? 'שגיאת חיבור.' : 'Connection error.';
         modalError.classList.remove('d-none');
       }
     }
 
     // סימון משימה כבוצעה
     async function markDone(taskId) {
-      if (!confirm('Mark this task as done?')) return;
+      const isHe = getLang() === 'he';
+      if (!confirm(isHe ? 'לסמן משימה זו כבוצעה?' : 'Mark this task as done?')) return;
 
       try {
         const response = await fetch('http://localhost:3000/api/maintenance/done', {
@@ -290,26 +337,24 @@
           body: JSON.stringify({ task_id: taskId })
         });
 
-        const data = await response.json();
         if (response.ok) {
           loadMaintenance();
-        } else {
-          alert(data.message);
         }
-
       } catch (err) {
-        alert('Error. Please try again.');
+        alert(isHe ? 'שגיאה. אנא נסה שוב.' : 'Error. Please try again.');
       }
     }
 
-    // פונקציית התנתקות
     function logout() {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = 'login.html';
     }
 
-    loadMaintenance();
+    document.addEventListener('DOMContentLoaded', () => {
+      applyTranslations();
+      loadMaintenance();
+    });
   </script>
 
 </body>

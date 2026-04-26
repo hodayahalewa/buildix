@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/translations.js"></script>
+  <script src="js/lang-switcher.js"></script>
 </head>
 <body>
 
@@ -18,26 +20,25 @@
       </h5>
       <small class="text-secondary" id="techName"></small>
     </div>
-
     <ul class="nav flex-column px-2">
       <li class="nav-item">
         <a class="nav-link active" href="dashboard-technician.html">
-          <i class="bi bi-speedometer2"></i> Dashboard
+          <i class="bi bi-speedometer2"></i> <span id="nav-dashboard"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="assigned-faults.html">
-          <i class="bi bi-exclamation-triangle"></i> Assigned Faults
+          <i class="bi bi-exclamation-triangle"></i> <span id="nav-assignedFaults"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="announcements.html">
-          <i class="bi bi-megaphone"></i> Announcements
+          <i class="bi bi-megaphone"></i> <span id="nav-announcements"></span>
         </a>
       </li>
       <li class="nav-item mt-4">
         <a class="nav-link text-danger" href="#" onclick="logout()">
-          <i class="bi bi-box-arrow-left"></i> Logout
+          <i class="bi bi-box-arrow-left"></i> <span id="nav-logout"></span>
         </a>
       </li>
     </ul>
@@ -46,11 +47,10 @@
   <!-- Main Content -->
   <div class="main-content">
 
-    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="fw-bold mb-0">Technician Dashboard</h4>
-        <small class="text-muted">Welcome back, <span id="welcomeName"></span></small>
+        <h4 class="fw-bold mb-0" id="pageTitle"></h4>
+        <small class="text-muted"><span id="welcomeText"></span>, <span id="welcomeName"></span></small>
       </div>
       <div>
         <span class="badge bg-warning text-dark">Technician</span>
@@ -62,19 +62,19 @@
       <div class="col-md-4">
         <div class="card stat-card bg-primary text-white">
           <div class="stat-number" id="totalAssigned">0</div>
-          <div class="stat-label text-white-50">Total Assigned</div>
+          <div class="stat-label text-white-50" id="statTotal"></div>
         </div>
       </div>
       <div class="col-md-4">
         <div class="card stat-card bg-warning text-white">
           <div class="stat-number" id="inProgress">0</div>
-          <div class="stat-label text-white-50">In Progress</div>
+          <div class="stat-label text-white-50" id="statProgress"></div>
         </div>
       </div>
       <div class="col-md-4">
         <div class="card stat-card bg-success text-white">
           <div class="stat-number" id="completed">0</div>
-          <div class="stat-label text-white-50">Completed</div>
+          <div class="stat-label text-white-50" id="statClosed"></div>
         </div>
       </div>
     </div>
@@ -83,9 +83,10 @@
     <div class="card border-0 shadow-sm">
       <div class="card-header bg-white d-flex justify-content-between align-items-center">
         <h6 class="fw-bold mb-0">
-          <i class="bi bi-tools text-warning"></i> My Assigned Faults
+          <i class="bi bi-tools text-warning"></i>
+          <span id="assignedFaultsTitle"></span>
         </h6>
-        <a href="assigned-faults.html" class="btn btn-sm btn-primary">View All</a>
+        <a href="assigned-faults.html" class="btn btn-sm btn-primary" id="viewAllBtn"></a>
       </div>
       <div class="card-body p-0">
         <div class="table-responsive">
@@ -93,19 +94,17 @@
             <thead class="table-light">
               <tr>
                 <th>#</th>
-                <th>Title</th>
-                <th>Floor</th>
-                <th>Unit</th>
-                <th>Urgency</th>
-                <th>Status</th>
-                <th>Action</th>
+                <th id="thTitle"></th>
+                <th id="thFloor"></th>
+                <th id="thUnit"></th>
+                <th id="thUrgency"></th>
+                <th id="thStatus"></th>
+                <th id="thActions"></th>
               </tr>
             </thead>
             <tbody id="faultsTable">
               <tr>
-                <td colspan="7" class="text-center py-4 text-muted">
-                  Loading assigned faults...
-                </td>
+                <td colspan="7" class="text-center py-4 text-muted" id="loadingText"></td>
               </tr>
             </tbody>
           </table>
@@ -126,11 +125,31 @@
       window.location.href = 'login.html';
     }
 
-    // הצגת שם הטכנאי
-    document.getElementById('techName').textContent = user.full_name;
-    document.getElementById('welcomeName').textContent = user.full_name;
+    // החלת תרגומים
+    function applyTranslations() {
+      document.getElementById('techName').textContent = user.full_name;
+      document.getElementById('welcomeName').textContent = user.full_name;
+      document.getElementById('pageTitle').textContent = t('dashboard');
+      document.getElementById('welcomeText').textContent = t('welcome');
+      document.getElementById('nav-dashboard').textContent = t('dashboard');
+      document.getElementById('nav-assignedFaults').textContent = t('assignedFaults');
+      document.getElementById('nav-announcements').textContent = t('announcements');
+      document.getElementById('nav-logout').textContent = t('logout');
+      document.getElementById('statTotal').textContent = t('totalFaults');
+      document.getElementById('statProgress').textContent = t('inProgress');
+      document.getElementById('statClosed').textContent = t('closedFaults');
+      document.getElementById('assignedFaultsTitle').textContent = t('assignedFaults');
+      document.getElementById('viewAllBtn').textContent = t('viewAll');
+      document.getElementById('thTitle').textContent = t('title');
+      document.getElementById('thFloor').textContent = t('floor');
+      document.getElementById('thUnit').textContent = t('unitNumber');
+      document.getElementById('thUrgency').textContent = t('urgency');
+      document.getElementById('thStatus').textContent = t('status');
+      document.getElementById('thActions').textContent = t('actions');
+      document.getElementById('loadingText').textContent = t('loading');
+    }
 
-    // טעינת התקלות המוקצות לטכנאי
+    // טעינת תקלות מוקצות
     async function loadAssignedFaults() {
       try {
         const response = await fetch('http://localhost:3000/api/faults/assigned', {
@@ -140,15 +159,13 @@
         const data = await response.json();
         const faults = data.faults;
 
-        // חישוב סטטיסטיקות
         document.getElementById('totalAssigned').textContent = faults.length;
         document.getElementById('inProgress').textContent = faults.filter(f => f.status === 'in_progress').length;
         document.getElementById('completed').textContent = faults.filter(f => f.status === 'closed').length;
 
-        // הצגת התקלות בטבלה
         const tbody = document.getElementById('faultsTable');
         if (faults.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">No faults assigned yet</td></tr>';
+          tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">${t('noFaults')}</td></tr>`;
           return;
         }
 
@@ -158,11 +175,11 @@
             <td>${fault.title}</td>
             <td>${fault.floor || 'N/A'}</td>
             <td>${fault.unit_number || 'N/A'}</td>
-            <td><span class="badge-${fault.urgency}">${fault.urgency}</span></td>
-            <td><span class="badge-${fault.status.replace('_', '-')}">${fault.status.replace('_', ' ')}</span></td>
+            <td><span class="badge-${fault.urgency}">${t(fault.urgency)}</span></td>
+            <td><span class="badge-${fault.status.replace('_', '-')}">${t(fault.status)}</span></td>
             <td>
               <button class="btn btn-sm btn-primary" onclick="updateStatus(${fault.id})">
-                <i class="bi bi-pencil"></i> Update
+                <i class="bi bi-pencil"></i> ${t('edit')}
               </button>
             </td>
           </tr>
@@ -173,12 +190,12 @@
       }
     }
 
-    // עדכון סטטוס תקלה על ידי הטכנאי
+    // עדכון סטטוס תקלה
     async function updateStatus(faultId) {
-      const status = prompt('Enter new status:\n- in_progress\n- waiting_part\n- closed');
+      const status = prompt(getLang() === 'he' ? 'הזן סטטוס חדש:\n- in_progress\n- waiting_part\n- closed' : 'Enter new status:\n- in_progress\n- waiting_part\n- closed');
       if (!status) return;
 
-      const note = prompt('Add a note (optional):');
+      const note = prompt(getLang() === 'he' ? 'הוסף הערה (אופציונלי):' : 'Add a note (optional):');
 
       try {
         const response = await fetch('http://localhost:3000/api/faults/status', {
@@ -192,25 +209,26 @@
 
         const data = await response.json();
         if (response.ok) {
-          alert('Status updated successfully!');
+          alert(getLang() === 'he' ? 'הסטטוס עודכן בהצלחה!' : 'Status updated successfully!');
           loadAssignedFaults();
         } else {
           alert(data.message);
         }
       } catch (err) {
-        alert('Error updating status. Please try again.');
+        alert(getLang() === 'he' ? 'שגיאה. אנא נסה שוב.' : 'Error. Please try again.');
       }
     }
 
-    // פונקציית התנתקות
     function logout() {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = 'login.html';
     }
 
-    // טעינת הנתונים בעת פתיחת הדף
-    loadAssignedFaults();
+    document.addEventListener('DOMContentLoaded', () => {
+      applyTranslations();
+      loadAssignedFaults();
+    });
   </script>
 
 </body>

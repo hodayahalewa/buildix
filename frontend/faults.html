@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/translations.js"></script>
+  <script src="js/lang-switcher.js"></script>
 </head>
 <body>
 
@@ -21,42 +23,42 @@
     <ul class="nav flex-column px-2">
       <li class="nav-item">
         <a class="nav-link" href="dashboard-manager.html">
-          <i class="bi bi-speedometer2"></i> Dashboard
+          <i class="bi bi-speedometer2"></i> <span id="nav-dashboard"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link active" href="faults.html">
-          <i class="bi bi-exclamation-triangle"></i> Faults
+          <i class="bi bi-exclamation-triangle"></i> <span id="nav-faults"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="maintenance.html">
-          <i class="bi bi-tools"></i> Maintenance
+          <i class="bi bi-tools"></i> <span id="nav-maintenance"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="energy.html">
-          <i class="bi bi-lightning"></i> Energy
+          <i class="bi bi-lightning"></i> <span id="nav-energy"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="announcements.html">
-          <i class="bi bi-megaphone"></i> Announcements
+          <i class="bi bi-megaphone"></i> <span id="nav-announcements"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="reports.html">
-          <i class="bi bi-bar-chart"></i> Reports
+          <i class="bi bi-bar-chart"></i> <span id="nav-reports"></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="users.html">
-          <i class="bi bi-people"></i> Users
+          <i class="bi bi-people"></i> <span id="nav-users"></span>
         </a>
       </li>
       <li class="nav-item mt-4">
         <a class="nav-link text-danger" href="#" onclick="logout()">
-          <i class="bi bi-box-arrow-left"></i> Logout
+          <i class="bi bi-box-arrow-left"></i> <span id="nav-logout"></span>
         </a>
       </li>
     </ul>
@@ -65,11 +67,10 @@
   <!-- Main Content -->
   <div class="main-content">
 
-    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="fw-bold mb-0">Manage Faults</h4>
-        <small class="text-muted">View and manage all building faults</small>
+        <h4 class="fw-bold mb-0" id="pageTitle"></h4>
+        <small class="text-muted" id="pageSubtitle"></small>
       </div>
     </div>
 
@@ -79,28 +80,26 @@
         <div class="row g-3">
           <div class="col-md-3">
             <select id="filterStatus" class="form-select" onchange="filterFaults()">
-              <option value="">All Statuses</option>
-              <option value="open">Open</option>
-              <option value="in_progress">In Progress</option>
-              <option value="waiting_part">Waiting Part</option>
-              <option value="closed">Closed</option>
+              <option value="" id="allStatuses"></option>
+              <option value="open" id="statusOpen"></option>
+              <option value="in_progress" id="statusInProgress"></option>
+              <option value="waiting_part" id="statusWaiting"></option>
+              <option value="closed" id="statusClosed"></option>
             </select>
           </div>
           <div class="col-md-3">
             <select id="filterUrgency" class="form-select" onchange="filterFaults()">
-              <option value="">All Urgencies</option>
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
+              <option value="" id="allUrgencies"></option>
+              <option value="low" id="urgencyLow"></option>
+              <option value="medium" id="urgencyMedium"></option>
+              <option value="high" id="urgencyHigh"></option>
             </select>
           </div>
           <div class="col-md-4">
-            <input type="text" id="searchInput" class="form-control" placeholder="Search faults..." oninput="filterFaults()">
+            <input type="text" id="searchInput" class="form-control" oninput="filterFaults()" id="searchInput">
           </div>
           <div class="col-md-2">
-            <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
-              <i class="bi bi-arrow-counterclockwise"></i> Reset
-            </button>
+            <button class="btn btn-outline-secondary w-100" onclick="resetFilters()" id="resetBtn"></button>
           </div>
         </div>
       </div>
@@ -114,22 +113,20 @@
             <thead class="table-light">
               <tr>
                 <th>#</th>
-                <th>Title</th>
-                <th>Type</th>
-                <th>Reported By</th>
-                <th>Floor</th>
-                <th>Urgency</th>
-                <th>Status</th>
-                <th>Assigned To</th>
-                <th>Date</th>
-                <th>Actions</th>
+                <th id="thTitle"></th>
+                <th id="thType"></th>
+                <th id="thReportedBy"></th>
+                <th id="thFloor"></th>
+                <th id="thUrgency"></th>
+                <th id="thStatus"></th>
+                <th id="thAssigned"></th>
+                <th id="thDate"></th>
+                <th id="thActions"></th>
               </tr>
             </thead>
             <tbody id="faultsTable">
               <tr>
-                <td colspan="10" class="text-center py-4 text-muted">
-                  Loading faults...
-                </td>
+                <td colspan="10" class="text-center py-4 text-muted" id="loadingText"></td>
               </tr>
             </tbody>
           </table>
@@ -139,30 +136,24 @@
 
   </div>
 
-  <!-- Assign Fault Modal -->
+  <!-- Assign Modal -->
   <div class="modal fade" id="assignModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">
-            <i class="bi bi-person-check"></i> Assign Fault
-          </h5>
+          <h5 class="modal-title" id="assignModalTitle"></h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
           <input type="hidden" id="assignFaultId">
           <div class="mb-3">
-            <label class="form-label fw-bold">Select Technician</label>
-            <select id="technicianSelect" class="form-select">
-              <option value="">Loading technicians...</option>
-            </select>
+            <label class="form-label fw-bold" id="selectTechLabel"></label>
+            <select id="technicianSelect" class="form-select"></select>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" onclick="assignFault()">
-            <i class="bi bi-check-lg"></i> Assign
-          </button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelBtn"></button>
+          <button type="button" class="btn btn-primary" onclick="assignFault()" id="assignBtn"></button>
         </div>
       </div>
     </div>
@@ -171,7 +162,6 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    // בדיקה שהמשתמש מחובר ושהוא מנהל
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user'));
 
@@ -180,32 +170,69 @@
     }
 
     document.getElementById('managerName').textContent = user.full_name;
-
-    // משתנה לשמירת כל התקלות
     let allFaults = [];
 
-    // טעינת כל התקלות מהשרת
+    // החלת תרגומים
+    function applyTranslations() {
+      const isHe = getLang() === 'he';
+      document.getElementById('nav-dashboard').textContent = t('dashboard');
+      document.getElementById('nav-faults').textContent = t('faults');
+      document.getElementById('nav-maintenance').textContent = t('maintenance');
+      document.getElementById('nav-energy').textContent = t('energy');
+      document.getElementById('nav-announcements').textContent = t('announcements');
+      document.getElementById('nav-reports').textContent = t('reports');
+      document.getElementById('nav-users').textContent = t('users');
+      document.getElementById('nav-logout').textContent = t('logout');
+      document.getElementById('pageTitle').textContent = isHe ? 'ניהול תקלות' : 'Manage Faults';
+      document.getElementById('pageSubtitle').textContent = isHe ? 'צפה ונהל את כל תקלות הבניין' : 'View and manage all building faults';
+      document.getElementById('allStatuses').textContent = isHe ? 'כל הסטטוסים' : 'All Statuses';
+      document.getElementById('statusOpen').textContent = t('open');
+      document.getElementById('statusInProgress').textContent = t('in_progress');
+      document.getElementById('statusWaiting').textContent = t('waiting_part');
+      document.getElementById('statusClosed').textContent = t('closed');
+      document.getElementById('allUrgencies').textContent = isHe ? 'כל הדחיפויות' : 'All Urgencies';
+      document.getElementById('urgencyLow').textContent = t('low');
+      document.getElementById('urgencyMedium').textContent = t('medium');
+      document.getElementById('urgencyHigh').textContent = t('high');
+      document.getElementById('resetBtn').innerHTML = `<i class="bi bi-arrow-counterclockwise"></i> ${t('reset')}`;
+      document.getElementById('searchInput').placeholder = isHe ? 'חיפוש תקלות...' : 'Search faults...';
+      document.getElementById('thTitle').textContent = t('title');
+      document.getElementById('thType').textContent = t('type');
+      document.getElementById('thReportedBy').textContent = t('reportedBy');
+      document.getElementById('thFloor').textContent = t('floor');
+      document.getElementById('thUrgency').textContent = t('urgency');
+      document.getElementById('thStatus').textContent = t('status');
+      document.getElementById('thAssigned').textContent = t('assignedTo');
+      document.getElementById('thDate').textContent = t('date');
+      document.getElementById('thActions').textContent = t('actions');
+      document.getElementById('loadingText').textContent = t('loading');
+      document.getElementById('assignModalTitle').textContent = isHe ? 'שייך תקלה לטכנאי' : 'Assign Fault';
+      document.getElementById('selectTechLabel').textContent = isHe ? 'בחר טכנאי' : 'Select Technician';
+      document.getElementById('cancelBtn').textContent = t('cancel');
+      document.getElementById('assignBtn').textContent = isHe ? 'שייך' : 'Assign';
+    }
+
+    // טעינת תקלות
     async function loadFaults() {
       try {
         const response = await fetch('http://localhost:3000/api/faults/all', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-
         const data = await response.json();
         allFaults = data.faults;
         renderFaults(allFaults);
-
       } catch (err) {
         console.error('Error loading faults:', err);
       }
     }
 
-    // הצגת התקלות בטבלה
+    // הצגת תקלות בטבלה
     function renderFaults(faults) {
+      const isHe = getLang() === 'he';
       const tbody = document.getElementById('faultsTable');
 
       if (faults.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" class="text-center py-4 text-muted">No faults found</td></tr>';
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-muted">${t('noFaults')}</td></tr>`;
         return;
       }
 
@@ -216,9 +243,9 @@
           <td>${fault.fault_type}</td>
           <td>${fault.reported_by_name || 'N/A'}</td>
           <td>${fault.floor || 'N/A'}</td>
-          <td><span class="badge-${fault.urgency}">${fault.urgency}</span></td>
-          <td><span class="badge-${fault.status.replace('_', '-')}">${fault.status.replace('_', ' ')}</span></td>
-          <td>${fault.assigned_to_name || 'Unassigned'}</td>
+          <td><span class="badge-${fault.urgency}">${t(fault.urgency)}</span></td>
+          <td><span class="badge-${fault.status.replace('_', '-')}">${t(fault.status)}</span></td>
+          <td>${fault.assigned_to_name || (isHe ? 'לא מוקצה' : 'Unassigned')}</td>
           <td>${new Date(fault.created_at).toLocaleDateString()}</td>
           <td>
             <button class="btn btn-sm btn-primary me-1" onclick="openAssignModal(${fault.id})">
@@ -232,7 +259,7 @@
       `).join('');
     }
 
-    // סינון תקלות לפי פילטרים
+    // סינון תקלות
     function filterFaults() {
       const status = document.getElementById('filterStatus').value;
       const urgency = document.getElementById('filterUrgency').value;
@@ -250,7 +277,6 @@
       renderFaults(filtered);
     }
 
-    // איפוס פילטרים
     function resetFilters() {
       document.getElementById('filterStatus').value = '';
       document.getElementById('filterUrgency').value = '';
@@ -258,23 +284,18 @@
       renderFaults(allFaults);
     }
 
-    // פתיחת מודל שיוך תקלה לטכנאי
     async function openAssignModal(faultId) {
       document.getElementById('assignFaultId').value = faultId;
 
-      // טעינת רשימת הטכנאים
       try {
         const response = await fetch('http://localhost:3000/api/auth/technicians', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-
         const data = await response.json();
         const select = document.getElementById('technicianSelect');
-
         select.innerHTML = data.technicians.map(t =>
           `<option value="${t.id}">${t.full_name}</option>`
         ).join('');
-
       } catch (err) {
         console.error('Error loading technicians:', err);
       }
@@ -282,7 +303,6 @@
       new bootstrap.Modal(document.getElementById('assignModal')).show();
     }
 
-    // שיוך תקלה לטכנאי
     async function assignFault() {
       const fault_id = document.getElementById('assignFaultId').value;
       const technician_id = document.getElementById('technicianSelect').value;
@@ -298,26 +318,23 @@
         });
 
         const data = await response.json();
-
         if (response.ok) {
-          alert('Fault assigned successfully!');
           bootstrap.Modal.getInstance(document.getElementById('assignModal')).hide();
           loadFaults();
         } else {
           alert(data.message);
         }
-
       } catch (err) {
-        alert('Error assigning fault. Please try again.');
+        alert('Error assigning fault.');
       }
     }
 
-    // עדכון סטטוס תקלה
     async function updateStatus(faultId) {
-      const status = prompt('Enter new status:\n- open\n- in_progress\n- waiting_part\n- closed');
+      const isHe = getLang() === 'he';
+      const status = prompt(isHe ? 'הזן סטטוס חדש:\n- open\n- in_progress\n- waiting_part\n- closed' : 'Enter new status:\n- open\n- in_progress\n- waiting_part\n- closed');
       if (!status) return;
 
-      const note = prompt('Add a note (optional):');
+      const note = prompt(isHe ? 'הוסף הערה (אופציונלי):' : 'Add a note (optional):');
 
       try {
         const response = await fetch('http://localhost:3000/api/faults/status', {
@@ -331,26 +348,25 @@
 
         const data = await response.json();
         if (response.ok) {
-          alert('Status updated successfully!');
           loadFaults();
         } else {
           alert(data.message);
         }
-
       } catch (err) {
-        alert('Error updating status. Please try again.');
+        alert('Error updating status.');
       }
     }
 
-    // פונקציית התנתקות
     function logout() {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = 'login.html';
     }
 
-    // טעינת הנתונים בעת פתיחת הדף
-    loadFaults();
+    document.addEventListener('DOMContentLoaded', () => {
+      applyTranslations();
+      loadFaults();
+    });
   </script>
 
 </body>

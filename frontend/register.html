@@ -3,194 +3,228 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BUILDIX - Register</title>
+  <title>BUILDIX - Manager Dashboard</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/translations.js"></script>
+  <script src="js/lang-switcher.js"></script>
 </head>
-<body class="bg-light">
+<body>
 
-  <!-- תפריט עליון -->
-  <nav class="navbar navbar-dark bg-primary">
-    <div class="container">
-      <a class="navbar-brand fw-bold" href="index.html">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="text-center py-4">
+      <h5 class="text-white fw-bold">
         <i class="bi bi-building"></i> BUILDIX
-      </a>
+      </h5>
+      <small class="text-secondary" id="managerName"></small>
     </div>
-  </nav>
+    <ul class="nav flex-column px-2">
+      <li class="nav-item">
+        <a class="nav-link active" href="dashboard-manager.html">
+          <i class="bi bi-speedometer2"></i> <span id="nav-dashboard"></span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="faults.html">
+          <i class="bi bi-exclamation-triangle"></i> <span id="nav-faults"></span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="maintenance.html">
+          <i class="bi bi-tools"></i> <span id="nav-maintenance"></span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="energy.html">
+          <i class="bi bi-lightning"></i> <span id="nav-energy"></span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="announcements.html">
+          <i class="bi bi-megaphone"></i> <span id="nav-announcements"></span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="reports.html">
+          <i class="bi bi-bar-chart"></i> <span id="nav-reports"></span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="users.html">
+          <i class="bi bi-people"></i> <span id="nav-users"></span>
+        </a>
+      </li>
+      <li class="nav-item mt-4">
+        <a class="nav-link text-danger" href="#" onclick="logout()">
+          <i class="bi bi-box-arrow-left"></i> <span id="nav-logout"></span>
+        </a>
+      </li>
+    </ul>
+  </div>
 
-  <!-- טופס הרשמה -->
-  <div class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-md-6">
-        <div class="card auth-card">
-          <div class="card-header text-center">
-            <h4 class="text-white fw-bold mb-0">
-              <i class="bi bi-person-plus"></i> Create Account
-            </h4>
-            <p class="text-white-50 mt-1 mb-0">Join BUILDIX today</p>
-          </div>
+  <!-- Main Content -->
+  <div class="main-content">
 
-          <div class="card-body p-4">
-            <div id="errorMsg" class="alert alert-danger d-none"></div>
-            <div id="successMsg" class="alert alert-success d-none"></div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h4 class="fw-bold mb-0" id="pageTitle"></h4>
+        <small class="text-muted"><span id="welcomeText"></span>, <span id="welcomeName"></span></small>
+      </div>
+      <div>
+        <span class="badge bg-primary">Manager</span>
+      </div>
+    </div>
 
-            <div class="mb-3">
-              <label class="form-label fw-bold">Full Name *</label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-person"></i></span>
-                <input type="text" id="full_name" class="form-control" placeholder="Enter your full name">
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label fw-bold">Email Address *</label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                <input type="email" id="email" class="form-control" placeholder="Enter your email">
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label fw-bold">Phone Number *</label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                <input type="tel" id="phone" class="form-control" placeholder="Enter your phone number">
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label fw-bold">Password *</label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                <input type="password" id="password" class="form-control" placeholder="Create a password">
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label fw-bold">Role *</label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
-                <select id="role" class="form-select" onchange="toggleFields()">
-                  <option value="">Select your role</option>
-                  <option value="tenant">Tenant / Resident</option>
-                  <option value="technician">Technician</option>
-                  <option value="manager">Building Manager</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- שדות נוספים לדייר בלבד -->
-            <div id="tenantFields" class="d-none">
-              <div class="mb-3">
-                <label class="form-label fw-bold">Floor</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-layers"></i></span>
-                  <input type="text" id="floor" class="form-control" placeholder="e.g. 3">
-                </div>
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label fw-bold">Unit Number</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-door-open"></i></span>
-                  <input type="text" id="unit_number" class="form-control" placeholder="e.g. 12">
-                </div>
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label fw-bold">Owner's Phone Number</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-telephone-fill"></i></span>
-                  <input type="tel" id="owner_phone" class="form-control" placeholder="Property owner's phone">
-                </div>
-              </div>
-            </div>
-
-            <div class="d-grid mt-4">
-              <button onclick="register()" class="btn btn-primary btn-lg">
-                <i class="bi bi-person-check"></i> Create Account
-              </button>
-            </div>
-
-            <div class="text-center mt-3">
-              <p class="text-muted">
-                Already have an account?
-                <a href="login.html" class="text-primary fw-bold">Login here</a>
-              </p>
-            </div>
-
-          </div>
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-3">
+        <div class="card stat-card bg-primary text-white">
+          <div class="stat-number" id="totalFaults">0</div>
+          <div class="stat-label text-white-50" id="statTotal"></div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card bg-warning text-white">
+          <div class="stat-number" id="openFaults">0</div>
+          <div class="stat-label text-white-50" id="statOpen"></div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card bg-info text-white">
+          <div class="stat-number" id="inProgressFaults">0</div>
+          <div class="stat-label text-white-50" id="statProgress"></div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card bg-success text-white">
+          <div class="stat-number" id="closedFaults">0</div>
+          <div class="stat-label text-white-50" id="statClosed"></div>
         </div>
       </div>
     </div>
+
+    <!-- Recent Faults Table -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h6 class="fw-bold mb-0">
+          <i class="bi bi-exclamation-triangle text-warning"></i>
+          <span id="recentFaultsTitle"></span>
+        </h6>
+        <a href="faults.html" class="btn btn-sm btn-primary" id="viewAllBtn"></a>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>#</th>
+                <th id="thTitle"></th>
+                <th id="thReportedBy"></th>
+                <th id="thUrgency"></th>
+                <th id="thStatus"></th>
+                <th id="thDate"></th>
+              </tr>
+            </thead>
+            <tbody id="faultsTable">
+              <tr>
+                <td colspan="6" class="text-center py-4 text-muted" id="loadingText"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    // הצגת שדות נוספים לפי תפקיד שנבחר
-    function toggleFields() {
-      const role = document.getElementById('role').value;
-      const tenantFields = document.getElementById('tenantFields');
-      if (role === 'tenant') {
-        tenantFields.classList.remove('d-none');
-      } else {
-        tenantFields.classList.add('d-none');
-      }
+    // בדיקה שהמשתמש מחובר ושהוא מנהל
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (!token || !user || user.role !== 'manager') {
+      window.location.href = 'login.html';
     }
 
-    // פונקציית הרשמה
-    async function register() {
-      const errorMsg = document.getElementById('errorMsg');
-      const successMsg = document.getElementById('successMsg');
+    // החלת תרגומים
+    function applyTranslations() {
+      document.getElementById('managerName').textContent = user.full_name;
+      document.getElementById('welcomeName').textContent = user.full_name;
+      document.getElementById('pageTitle').textContent = t('dashboard');
+      document.getElementById('welcomeText').textContent = t('welcome');
+      document.getElementById('nav-dashboard').textContent = t('dashboard');
+      document.getElementById('nav-faults').textContent = t('faults');
+      document.getElementById('nav-maintenance').textContent = t('maintenance');
+      document.getElementById('nav-energy').textContent = t('energy');
+      document.getElementById('nav-announcements').textContent = t('announcements');
+      document.getElementById('nav-reports').textContent = t('reports');
+      document.getElementById('nav-users').textContent = t('users');
+      document.getElementById('nav-logout').textContent = t('logout');
+      document.getElementById('statTotal').textContent = t('totalFaults');
+      document.getElementById('statOpen').textContent = t('openFaults');
+      document.getElementById('statProgress').textContent = t('inProgress');
+      document.getElementById('statClosed').textContent = t('closedFaults');
+      document.getElementById('recentFaultsTitle').textContent = t('recentFaults');
+      document.getElementById('viewAllBtn').textContent = t('viewAll');
+      document.getElementById('thTitle').textContent = t('title');
+      document.getElementById('thReportedBy').textContent = t('reportedBy');
+      document.getElementById('thUrgency').textContent = t('urgency');
+      document.getElementById('thStatus').textContent = t('status');
+      document.getElementById('thDate').textContent = t('date');
+      document.getElementById('loadingText').textContent = t('loading');
+    }
 
-      const full_name = document.getElementById('full_name').value;
-      const email = document.getElementById('email').value;
-      const phone = document.getElementById('phone').value;
-      const password = document.getElementById('password').value;
-      const role = document.getElementById('role').value;
-      const floor = document.getElementById('floor')?.value;
-      const unit_number = document.getElementById('unit_number')?.value;
-      const owner_phone = document.getElementById('owner_phone')?.value;
-
-      errorMsg.classList.add('d-none');
-      successMsg.classList.add('d-none');
-
-      if (!full_name || !email || !phone || !password || !role) {
-        errorMsg.textContent = 'Please fill in all required fields.';
-        errorMsg.classList.remove('d-none');
-        return;
-      }
-
+    // טעינת תקלות
+    async function loadFaults() {
       try {
-        const response = await fetch('http://localhost:3000/api/auth/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            full_name, email, phone, password, role,
-            floor, unit_number, owner_phone
-          })
+        const response = await fetch('http://localhost:3000/api/faults/all', {
+          headers: { 'Authorization': `Bearer ${token}` }
         });
 
         const data = await response.json();
+        const faults = data.faults;
 
-        if (response.ok) {
-          successMsg.textContent = 'Account created successfully! Please wait for manager approval.';
-          successMsg.classList.remove('d-none');
-          setTimeout(() => {
-            window.location.href = 'login.html';
-          }, 2000);
-        } else {
-          errorMsg.textContent = data.message;
-          errorMsg.classList.remove('d-none');
+        document.getElementById('totalFaults').textContent = faults.length;
+        document.getElementById('openFaults').textContent = faults.filter(f => f.status === 'open').length;
+        document.getElementById('inProgressFaults').textContent = faults.filter(f => f.status === 'in_progress').length;
+        document.getElementById('closedFaults').textContent = faults.filter(f => f.status === 'closed').length;
+
+        const tbody = document.getElementById('faultsTable');
+        if (faults.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">${t('noFaults')}</td></tr>`;
+          return;
         }
 
+        tbody.innerHTML = faults.slice(0, 5).map(fault => `
+          <tr>
+            <td>${fault.id}</td>
+            <td>${fault.title}</td>
+            <td>${fault.reported_by_name || 'N/A'}</td>
+            <td><span class="badge-${fault.urgency}">${t(fault.urgency)}</span></td>
+            <td><span class="badge-${fault.status.replace('_', '-')}">${t(fault.status)}</span></td>
+            <td>${new Date(fault.created_at).toLocaleDateString()}</td>
+          </tr>
+        `).join('');
+
       } catch (err) {
-        errorMsg.textContent = 'Connection error. Please try again.';
-        errorMsg.classList.remove('d-none');
+        console.error('Error loading faults:', err);
       }
     }
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'login.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      applyTranslations();
+      loadFaults();
+    });
   </script>
 
 </body>
