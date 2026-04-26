@@ -9,6 +9,8 @@ const db = require('./config/DB');
 const authRoutes = require('./routes/authRoutes');
 const faultRoutes = require('./routes/faultRoutes');
 const maintenanceRoutes = require('./routes/maintenanceRoutes');
+const energyRoutes = require('./routes/energyRoutes');
+const announcementRoutes = require('./routes/announcementRoutes');
 
 // טעינת משתני הסביבה
 dotenv.config();
@@ -27,6 +29,8 @@ app.use(express.static('C:\\buildix\\frontend'));
 app.use('/api/auth', authRoutes);
 app.use('/api/faults', faultRoutes);
 app.use('/api/maintenance', maintenanceRoutes);
+app.use('/api/energy', energyRoutes);
+app.use('/api/announcements', announcementRoutes);
 
 // נתיב בדיקה בסיסי
 app.get('/', (req, res) => {

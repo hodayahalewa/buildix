@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BUILDIX - Reports</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="text-center py-4">
+      <h5 class="text-white fw-bold">
+        <i class="bi bi-building"></i> BUILDIX
+      </h5>
+      <small class="text-secondary" id="managerName"></small>
+    </div>
+    <ul class="nav flex-column px-2">
+      <li class="nav-item">
+        <a class="nav-link" href="dashboard-manager.html">
+          <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="faults.html">
+          <i class="bi bi-exclamation-triangle"></i> Faults
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="maintenance.html">
+          <i class="bi bi-tools"></i> Maintenance
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="energy.html">
+          <i class="bi bi-lightning"></i> Energy
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="announcements.html">
+          <i class="bi bi-megaphone"></i> Announcements
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" href="reports.html">
+          <i class="bi bi-bar-chart"></i> Reports
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="users.html">
+          <i class="bi bi-people"></i> Users
+        </a>
+      </li>
+      <li class="nav-item mt-4">
+        <a class="nav-link text-danger" href="#" onclick="logout()">
+          <i class="bi bi-box-arrow-left"></i> Logout
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h4 class="fw-bold mb-0">Reports & Analytics</h4>
+        <small class="text-muted">Building performance overview</small>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-3">
+        <div class="card stat-card bg-primary text-white">
+          <div class="stat-number" id="totalFaults">0</div>
+          <div class="stat-label text-white-50">Total Faults</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card bg-warning text-white">
+          <div class="stat-number" id="openFaults">0</div>
+          <div class="stat-label text-white-50">Open Faults</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card bg-success text-white">
+          <div class="stat-number" id="closedFaults">0</div>
+          <div class="stat-label text-white-50">Closed Faults</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card bg-info text-white">
+          <div class="stat-number" id="avgResponse">-</div>
+          <div class="stat-label text-white-50">Avg Response (hrs)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white">
+            <h6 class="fw-bold mb-0">
+              <i class="bi bi-pie-chart text-primary"></i> Faults by Status
+            </h6>
+          </div>
+          <div class="card-body">
+            <canvas id="statusChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white">
+            <h6 class="fw-bold mb-0">
+              <i class="bi bi-bar-chart text-danger"></i> Faults by Urgency
+            </h6>
+          </div>
+          <div class="card-body">
+            <canvas id="urgencyChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white">
+            <h6 class="fw-bold mb-0">
+              <i class="bi bi-bar-chart text-success"></i> Faults by Type
+            </h6>
+          </div>
+          <div class="card-body">
+            <canvas id="typeChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white">
+            <h6 class="fw-bold mb-0">
+              <i class="bi bi-lightning text-warning"></i> Energy Consumption
+            </h6>
+          </div>
+          <div class="card-body">
+            <canvas id="energyChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // בדיקה שהמשתמש מחובר ושהוא מנהל
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (!token || !user || user.role !== 'manager') {
+      window.location.href = 'login.html';
+    }
+
+    document.getElementById('managerName').textContent = user.full_name;
+
+    // טעינת כל הנתונים לדוחות
+    async function loadReports() {
+      try {
+        // טעינת תקלות
+        const faultsRes = await fetch('http://localhost:3000/api/faults/all', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const faultsData = await faultsRes.json();
+        const faults = faultsData.faults;
+
+        // עדכון סטטיסטיקות
+        document.getElementById('totalFaults').textContent = faults.length;
+        document.getElementById('openFaults').textContent = faults.filter(f => f.status === 'open').length;
+        document.getElementById('closedFaults').textContent = faults.filter(f => f.status === 'closed').length;
+
+        // חישוב זמן תגובה ממוצע
+        const closedFaults = faults.filter(f => f.status === 'closed' && f.closed_at);
+        if (closedFaults.length > 0) {
+          const avgHours = closedFaults.reduce((sum, f) => {
+            const created = new Date(f.created_at);
+            const closed = new Date(f.closed_at);
+            return sum + (closed - created) / (1000 * 60 * 60);
+          }, 0) / closedFaults.length;
+          document.getElementById('avgResponse').textContent = Math.round(avgHours);
+        }
+
+        // גרף סטטוס
+        buildPieChart('statusChart', 
+          ['Open', 'In Progress', 'Waiting Part', 'Closed'],
+          [
+            faults.filter(f => f.status === 'open').length,
+            faults.filter(f => f.status === 'in_progress').length,
+            faults.filter(f => f.status === 'waiting_part').length,
+            faults.filter(f => f.status === 'closed').length
+          ],
+          ['#f59e0b', '#3b82f6', '#8b5cf6', '#10b981']
+        );
+
+        // גרף דחיפות
+        buildBarChart('urgencyChart',
+          ['Low', 'Medium', 'High'],
+          [
+            faults.filter(f => f.urgency === 'low').length,
+            faults.filter(f => f.urgency === 'medium').length,
+            faults.filter(f => f.urgency === 'high').length
+          ],
+          ['#10b981', '#f59e0b', '#ef4444']
+        );
+
+        // גרף סוג תקלה
+        const types = [...new Set(faults.map(f => f.fault_type))];
+        buildBarChart('typeChart',
+          types,
+          types.map(t => faults.filter(f => f.fault_type === t).length),
+          ['#3b82f6']
+        );
+
+        // טעינת אנרגיה
+        const energyRes = await fetch('http://localhost:3000/api/energy/all', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const energyData = await energyRes.json();
+        const electricity = energyData.readings
+          .filter(r => r.type === 'electricity')
+          .sort((a, b) => a.month.localeCompare(b.month));
+
+        buildLineChart('energyChart',
+          electricity.map(r => r.month),
+          electricity.map(r => r.reading),
+          'Electricity (kWh)',
+          '#f59e0b'
+        );
+
+      } catch (err) {
+        console.error('Error loading reports:', err);
+      }
+    }
+
+    // בניית גרף עוגה
+    function buildPieChart(id, labels, data, colors) {
+      new Chart(document.getElementById(id), {
+        type: 'doughnut',
+        data: {
+          labels,
+          datasets: [{ data, backgroundColor: colors }]
+        },
+        options: { responsive: true }
+      });
+    }
+
+    // בניית גרף עמודות
+    function buildBarChart(id, labels, data, colors) {
+      new Chart(document.getElementById(id), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            data,
+            backgroundColor: colors.length === 1 ? colors[0] : colors
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    // בניית גרף קו
+    function buildLineChart(id, labels, data, label, color) {
+      new Chart(document.getElementById(id), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label,
+            data,
+            borderColor: color,
+            backgroundColor: color + '20',
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    // פונקציית התנתקות
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'login.html';
+    }
+
+    loadReports();
+  </script>
+
+</body>
+</html>
