@@ -267,7 +267,25 @@
       window.location.href = 'login.html';
     }
 
-    document.addEventListener('DOMContentLoaded', applyTranslations);
+   document.addEventListener('DOMContentLoaded', () => {
+  applyTranslations();
+
+  // עדכון סרגל צד למנהל
+  if (user.role === 'manager') {
+    const sidebar = document.querySelector('.sidebar ul');
+    sidebar.innerHTML = `
+      <li class="nav-item"><a class="nav-link" href="dashboard-manager.html"><i class="bi bi-speedometer2"></i> <span>${t('dashboard')}</span></a></li>
+      <li class="nav-item"><a class="nav-link" href="faults.html"><i class="bi bi-exclamation-triangle"></i> <span>${t('faults')}</span></a></li>
+      <li class="nav-item"><a class="nav-link active" href="report-fault.html"><i class="bi bi-plus-circle"></i> <span>${t('reportFault')}</span></a></li>
+      <li class="nav-item"><a class="nav-link" href="maintenance.html"><i class="bi bi-tools"></i> <span>${t('maintenance')}</span></a></li>
+      <li class="nav-item"><a class="nav-link" href="energy.html"><i class="bi bi-lightning"></i> <span>${t('energy')}</span></a></li>
+      <li class="nav-item"><a class="nav-link" href="announcements.html"><i class="bi bi-megaphone"></i> <span>${t('announcements')}</span></a></li>
+      <li class="nav-item"><a class="nav-link" href="reports.html"><i class="bi bi-bar-chart"></i> <span>${t('reports')}</span></a></li>
+      <li class="nav-item"><a class="nav-link" href="users.html"><i class="bi bi-people"></i> <span>${t('users')}</span></a></li>
+      <li class="nav-item mt-4"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-left"></i> <span>${t('logout')}</span></a></li>
+    `;
+  }
+});
   </script>
 
 </body>
