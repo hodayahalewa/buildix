@@ -7,7 +7,8 @@ const {
   getMyFaults,
   getAssignedFaults,
   assignFault,
-  updateFaultStatus
+  updateFaultStatus,
+  getFaultUpdates
 } = require('../controllers/faultController');
 const { verifyToken, authorizeRoles } = require('../middleware/auth');
 
@@ -29,4 +30,6 @@ router.put('/assign', verifyToken, authorizeRoles('manager'), assignFault);
 // עדכון סטטוס תקלה - טכנאי ומנהל
 router.put('/status', verifyToken, authorizeRoles('technician', 'manager'), updateFaultStatus);
 
+// קבלת היסטוריית עדכונים של תקלה
+router.get('/updates/:id', verifyToken, authorizeRoles('manager'), getFaultUpdates);
 module.exports = router;

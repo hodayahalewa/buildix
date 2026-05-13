@@ -159,12 +159,24 @@ const updateFaultStatus = async (req, res) => {
   }
 };
 
-
-module.exports = {
-  reportFault,
-  getAllFaults,
-  getMyFaults,
-  getAssignedFaults,
-  assignFault,
-  updateFaultStatus
+// קבלת היסטוריית עדכונים של תקלה ספציפית
+const getFaultUpdates = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [updates] = await db.query(
+      `SELECT fu.*, u.full_name AS updated_by_name 
+       FROM fault_updates fu
+       LEFT JOIN users u ON fu.updated_by = u.id
+       WHERE fu.fault_id = ?
+       ORDER BY fu.created_at DESC`,
+      [id]
+    );
+    res.status(200).json({ updates });
+  } catch (err) {
+    console.error('Get fault updates error:', err.message);
+    res.status(500).json({ message: 'Server error. Please try again.' });
+  }
 };
+
+
+module.exports = { reportFault, getAllFaults, getMyFaults, getAssignedFaults, assignFault, updateFaultStatus, getFaultUpdates };

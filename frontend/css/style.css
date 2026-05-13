@@ -244,3 +244,29 @@ footer {
     font-size: 2rem;
   }
 }
+
+/* לוגו בסרגל הצד */
+.sidebar .navbar-brand img,
+.sidebar img[alt="BUILDIX"] {
+  height: 60px !important;
+  width: auto;
+}
+
+/* אזור הלוגו בסרגל הצד */
+.sidebar .text-center.py-4 {
+  padding: 20px !important;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  margin-bottom: 10px;
+}
+
+.sidebar .text-center.py-4 h5 {
+  font-size: 1.3rem !important;
+  margin-top: 8px !important;
+  letter-spacing: 1px;
+}
+
+/* לוגו ב-Navbar */
+.navbar img[alt="BUILDIX"] {
+  height: 45px !important;
+  width: auto;
+}

@@ -10,64 +10,29 @@
   <link rel="stylesheet" href="css/style.css">
   <script src="js/translations.js"></script>
   <script src="js/lang-switcher.js"></script>
+  <script src="js/alerts.js"></script>
 </head>
 <body>
 
-  <!-- Sidebar -->
   <div class="sidebar">
     <div class="text-center py-4">
-      <h5 class="text-white fw-bold">
-        <i class="bi bi-building"></i> BUILDIX
-      </h5>
+      <img src="logo.png" height="80" alt="BUILDIX" class="mb-2">
+      <h5 class="text-white fw-bold mb-0">BUILDIX</h5>
       <small class="text-secondary" id="managerName"></small>
     </div>
     <ul class="nav flex-column px-2">
-      <li class="nav-item">
-        <a class="nav-link" href="dashboard-manager.html">
-          <i class="bi bi-speedometer2"></i> <span id="nav-dashboard"></span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="faults.html">
-          <i class="bi bi-exclamation-triangle"></i> <span id="nav-faults"></span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="maintenance.html">
-          <i class="bi bi-tools"></i> <span id="nav-maintenance"></span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link active" href="energy.html">
-          <i class="bi bi-lightning"></i> <span id="nav-energy"></span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="announcements.html">
-          <i class="bi bi-megaphone"></i> <span id="nav-announcements"></span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="reports.html">
-          <i class="bi bi-bar-chart"></i> <span id="nav-reports"></span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="users.html">
-          <i class="bi bi-people"></i> <span id="nav-users"></span>
-        </a>
-      </li>
-      <li class="nav-item mt-4">
-        <a class="nav-link text-danger" href="#" onclick="logout()">
-          <i class="bi bi-box-arrow-left"></i> <span id="nav-logout"></span>
-        </a>
-      </li>
+      <li class="nav-item"><a class="nav-link" href="dashboard-manager.html"><i class="bi bi-speedometer2"></i> <span id="nav-dashboard"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="faults.html"><i class="bi bi-exclamation-triangle"></i> <span id="nav-faults"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="maintenance.html"><i class="bi bi-tools"></i> <span id="nav-maintenance"></span></a></li>
+      <li class="nav-item"><a class="nav-link active" href="energy.html"><i class="bi bi-lightning"></i> <span id="nav-energy"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="announcements.html"><i class="bi bi-megaphone"></i> <span id="nav-announcements"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="reports.html"><i class="bi bi-bar-chart"></i> <span id="nav-reports"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="users.html"><i class="bi bi-people"></i> <span id="nav-users"></span></a></li>
+      <li class="nav-item mt-4"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-left"></i> <span id="nav-logout"></span></a></li>
     </ul>
   </div>
 
-  <!-- Main Content -->
   <div class="main-content">
-
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
         <h4 class="fw-bold mb-0" id="pageTitle"></h4>
@@ -76,7 +41,7 @@
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addReadingModal" id="addBtn"></button>
     </div>
 
-    <!-- Stats Cards -->
+    <!-- כרטיסי מדידה אחרונה -->
     <div class="row g-4 mb-4">
       <div class="col-md-6">
         <div class="card stat-card bg-warning text-white">
@@ -102,7 +67,7 @@
       </div>
     </div>
 
-    <!-- Charts -->
+    <!-- גרפי צריכה -->
     <div class="row g-4 mb-4">
       <div class="col-md-6">
         <div class="card border-0 shadow-sm">
@@ -126,7 +91,7 @@
       </div>
     </div>
 
-    <!-- Readings Table -->
+    <!-- טבלת כל המדידות -->
     <div class="card border-0 shadow-sm">
       <div class="card-header bg-white">
         <h6 class="fw-bold mb-0" id="allReadingsTitle"></h6>
@@ -141,21 +106,19 @@
                 <th id="thReading"></th>
                 <th id="thMonth"></th>
                 <th id="thDate"></th>
+                <th id="thActions"></th>
               </tr>
             </thead>
             <tbody id="energyTable">
-              <tr>
-                <td colspan="5" class="text-center py-4 text-muted" id="loadingText"></td>
-              </tr>
+              <tr><td colspan="6" class="text-center py-4 text-muted" id="loadingText"></td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
-
   </div>
 
-  <!-- Add Reading Modal -->
+  <!-- מודל הוספת מדידה חדשה -->
   <div class="modal fade" id="addReadingModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -168,7 +131,7 @@
 
           <div class="mb-3">
             <label class="form-label fw-bold" id="typeLabel"></label>
-            <select id="type" class="form-select">
+            <select id="type" class="form-select" onchange="updateReadingLimits()">
               <option value="" id="selectType"></option>
               <option value="electricity" id="electricityOpt"></option>
               <option value="water" id="waterOpt"></option>
@@ -177,14 +140,14 @@
 
           <div class="mb-3">
             <label class="form-label fw-bold" id="readingLabel"></label>
-            <input type="number" id="reading" class="form-control">
+            <input type="number" id="reading" class="form-control" min="0" step="1">
+            <small class="text-muted mt-1" id="readingHint"></small>
           </div>
 
           <div class="mb-3">
             <label class="form-label fw-bold" id="monthLabel"></label>
-            <input type="month" id="month" class="form-control">
+            <input type="month" id="month" class="form-control" min="2020-01" max="2030-12">
           </div>
-
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelBtn"></button>
@@ -194,9 +157,45 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- מודל עריכת מדידה קיימת -->
+  <div class="modal fade" id="editReadingModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editModalTitle"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="editModalError" class="alert alert-danger d-none"></div>
+          <input type="hidden" id="editReadingId">
 
+          <div class="mb-3">
+            <label class="form-label fw-bold" id="editTypeLabel"></label>
+            <input type="text" id="editType" class="form-control" disabled>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold" id="editMonthLabel"></label>
+            <input type="text" id="editMonth" class="form-control" disabled>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold" id="editReadingLabel"></label>
+            <input type="number" id="editReading" class="form-control" min="0" step="1">
+            <small class="text-muted mt-1" id="editReadingHint"></small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="editCancelBtn"></button>
+          <button type="button" class="btn btn-primary" onclick="saveEdit()" id="editSaveBtn"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // בדיקה שהמשתמש מחובר ושהוא מנהל
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user'));
 
@@ -206,7 +205,30 @@
 
     document.getElementById('managerName').textContent = user.full_name;
 
-    // החלת תרגומים
+    // משתנים גלובליים לשמירת הגרפים - נדרש לעדכון בזמן אמת
+    let electricityChartInstance = null;
+    let waterChartInstance = null;
+
+    // עדכון טווח המדידה לפי סוג שנבחר - חשמל עד 99999, מים עד 9999
+    function updateReadingLimits() {
+      const type = document.getElementById('type').value;
+      const readingInput = document.getElementById('reading');
+      const hint = document.getElementById('readingHint');
+      const isHe = getLang() === 'he';
+
+      if (type === 'electricity') {
+        readingInput.max = 99999;
+        hint.textContent = isHe ? 'טווח: 0 - 99,999 קוט"ש' : 'Range: 0 - 99,999 kWh';
+      } else if (type === 'water') {
+        readingInput.max = 9999;
+        hint.textContent = isHe ? 'טווח: 0 - 9,999 מ"ק' : 'Range: 0 - 9,999 m³';
+      } else {
+        readingInput.max = 99999;
+        hint.textContent = '';
+      }
+    }
+
+    // החלת תרגומים על כל אלמנטי הדף
     function applyTranslations() {
       const isHe = getLang() === 'he';
       document.getElementById('nav-dashboard').textContent = t('dashboard');
@@ -229,6 +251,7 @@
       document.getElementById('thReading').textContent = isHe ? 'מדידה' : 'Reading';
       document.getElementById('thMonth').textContent = t('month');
       document.getElementById('thDate').textContent = t('date');
+      document.getElementById('thActions').textContent = t('actions');
       document.getElementById('loadingText').textContent = t('loading');
       document.getElementById('modalTitle').textContent = isHe ? 'הוסף מדידת אנרגיה' : 'Add Energy Reading';
       document.getElementById('typeLabel').textContent = isHe ? 'סוג *' : 'Type *';
@@ -240,49 +263,55 @@
       document.getElementById('monthLabel').textContent = t('month') + ' *';
       document.getElementById('cancelBtn').textContent = t('cancel');
       document.getElementById('addReadingBtn').innerHTML = `<i class="bi bi-check-lg"></i> ${t('addReading')}`;
+      document.getElementById('editModalTitle').textContent = isHe ? 'עריכת מדידה' : 'Edit Reading';
+      document.getElementById('editTypeLabel').textContent = isHe ? 'סוג' : 'Type';
+      document.getElementById('editMonthLabel').textContent = t('month');
+      document.getElementById('editReadingLabel').textContent = isHe ? 'מדידה חדשה *' : 'New Reading *';
+      document.getElementById('editCancelBtn').textContent = t('cancel');
+      document.getElementById('editSaveBtn').innerHTML = `<i class="bi bi-check-lg"></i> ${isHe ? 'שמור' : 'Save'}`;
     }
 
-    // טעינת מדידות אנרגיה
+    // טעינת מדידות אנרגיה מהשרת ועדכון הגרפים והטבלה בזמן אמת
     async function loadEnergy() {
       try {
         const response = await fetch('http://localhost:3000/api/energy/all', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-
         const data = await response.json();
         const readings = data.readings;
         const isHe = getLang() === 'he';
 
+        // הפרדה בין מדידות חשמל למים
         const electricity = readings.filter(r => r.type === 'electricity');
         const water = readings.filter(r => r.type === 'water');
 
-        if (electricity.length > 0) {
-          document.getElementById('lastElectricity').textContent = electricity[0].reading;
-        }
-        if (water.length > 0) {
-          document.getElementById('lastWater').textContent = water[0].reading;
-        }
+        // עדכון כרטיסי המדידה האחרונה
+        if (electricity.length > 0) document.getElementById('lastElectricity').textContent = electricity[0].reading;
+        if (water.length > 0) document.getElementById('lastWater').textContent = water[0].reading;
 
-        buildChart('electricityChart', electricity, isHe ? 'חשמל (קוט"ש)' : 'Electricity (kWh)', '#f59e0b');
-        buildChart('waterChart', water, isHe ? 'מים (מ"ק)' : 'Water (m³)', '#06b6d4');
+        // עדכון הגרפים בזמן אמת
+        buildChart('electricityChart', electricity, isHe ? 'חשמל (קוט"ש)' : 'Electricity (kWh)', '#f59e0b', 'electricityChartInstance');
+        buildChart('waterChart', water, isHe ? 'מים (מ"ק)' : 'Water (m³)', '#06b6d4', 'waterChartInstance');
 
+        // עדכון הטבלה
         const tbody = document.getElementById('energyTable');
         if (readings.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">${isHe ? 'לא נמצאו מדידות' : 'No readings found'}</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">${isHe ? 'לא נמצאו מדידות' : 'No readings found'}</td></tr>`;
           return;
         }
 
         tbody.innerHTML = readings.map(r => `
           <tr>
             <td>${r.id}</td>
-            <td>
-              <span class="badge ${r.type === 'electricity' ? 'bg-warning text-dark' : 'bg-info'}">
-                ${r.type === 'electricity' ? (isHe ? 'חשמל' : 'Electricity') : (isHe ? 'מים' : 'Water')}
-              </span>
-            </td>
+            <td><span class="badge ${r.type === 'electricity' ? 'bg-warning text-dark' : 'bg-info'}">${r.type === 'electricity' ? (isHe ? 'חשמל' : 'Electricity') : (isHe ? 'מים' : 'Water')}</span></td>
             <td>${r.reading}</td>
             <td>${r.month}</td>
             <td>${new Date(r.created_at).toLocaleDateString()}</td>
+            <td>
+              <button class="btn btn-sm btn-warning" onclick="openEditModal(${r.id}, '${r.type}', '${r.month}', ${r.reading})">
+                <i class="bi bi-pencil"></i> ${isHe ? 'ערוך' : 'Edit'}
+              </button>
+            </td>
           </tr>
         `).join('');
 
@@ -291,20 +320,25 @@
       }
     }
 
-    // בניית גרף
-    function buildChart(canvasId, data, label, color) {
+    // בניית גרף קו - הורס גרף קיים לפני בניית חדש למניעת כפילות
+    function buildChart(canvasId, data, label, color, instanceVar) {
       const ctx = document.getElementById(canvasId).getContext('2d');
-      const sorted = data.sort((a, b) => a.month.localeCompare(b.month));
-      const labels = sorted.map(r => r.month);
-      const values = sorted.map(r => r.reading);
 
-      new Chart(ctx, {
+      // הרס הגרף הקיים אם קיים
+      if (window[instanceVar]) {
+        window[instanceVar].destroy();
+      }
+
+      const sorted = [...data].sort((a, b) => a.month.localeCompare(b.month));
+
+      // שמירת הגרף החדש במשתנה גלובלי
+      window[instanceVar] = new Chart(ctx, {
         type: 'line',
         data: {
-          labels,
+          labels: sorted.map(r => r.month),
           datasets: [{
             label,
-            data: values,
+            data: sorted.map(r => r.reading),
             borderColor: color,
             backgroundColor: color + '20',
             tension: 0.4,
@@ -318,7 +352,7 @@
       });
     }
 
-    // הוספת מדידה
+    // הוספת מדידה חדשה - עם בדיקת כפילות
     async function addReading() {
       const isHe = getLang() === 'he';
       const type = document.getElementById('type').value;
@@ -328,8 +362,17 @@
 
       modalError.classList.add('d-none');
 
+      // בדיקת שדות חובה
       if (!type || !reading || !month) {
         modalError.textContent = isHe ? 'אנא מלא את כל השדות הנדרשים.' : 'Please fill in all required fields.';
+        modalError.classList.remove('d-none');
+        return;
+      }
+
+      // בדיקת טווח הגיוני לפי סוג
+      const maxVal = type === 'water' ? 9999 : 99999;
+      if (Number(reading) < 0 || Number(reading) > maxVal) {
+        modalError.textContent = isHe ? `ערך לא תקין. הטווח המותר: 0 - ${maxVal.toLocaleString()}` : `Invalid value. Allowed range: 0 - ${maxVal.toLocaleString()}`;
         modalError.classList.remove('d-none');
         return;
       }
@@ -337,17 +380,26 @@
       try {
         const response = await fetch('http://localhost:3000/api/energy/add', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({ type, reading, month })
         });
-
         const data = await response.json();
+
         if (response.ok) {
+          // הצלחה - סגירת המודל ועדכון מיידי
           bootstrap.Modal.getInstance(document.getElementById('addReadingModal')).hide();
           loadEnergy();
+        } else if (data.existing_id) {
+          // מדידה כבר קיימת - שאל אם לעדכן
+          const typeText = type === 'electricity' ? (isHe ? 'חשמל' : 'electricity') : (isHe ? 'מים' : 'water');
+          const confirmUpdate = confirm(
+            isHe
+              ? `כבר קיימת מדידה עבור ${typeText} בחודש ${month}.\nהאם ברצונך לעדכן אותה לערך ${reading}?`
+              : `A reading for ${typeText} in ${month} already exists.\nDo you want to update it to ${reading}?`
+          );
+          if (confirmUpdate) {
+            await saveUpdatedReading(data.existing_id, reading);
+          }
         } else {
           modalError.textContent = data.message;
           modalError.classList.remove('d-none');
@@ -358,17 +410,92 @@
       }
     }
 
+    // פתיחת מודל עריכת מדידה קיימת
+    function openEditModal(id, type, month, currentReading) {
+      const isHe = getLang() === 'he';
+      document.getElementById('editReadingId').value = id;
+      document.getElementById('editType').value = type === 'electricity' ? (isHe ? 'חשמל' : 'Electricity') : (isHe ? 'מים' : 'Water');
+      document.getElementById('editMonth').value = month;
+      document.getElementById('editReading').value = currentReading;
+      document.getElementById('editReading').max = type === 'water' ? 9999 : 99999;
+      document.getElementById('editReadingHint').textContent = type === 'water'
+        ? (isHe ? 'טווח: 0 - 9,999 מ"ק' : 'Range: 0 - 9,999 m³')
+        : (isHe ? 'טווח: 0 - 99,999 קוט"ש' : 'Range: 0 - 99,999 kWh');
+      document.getElementById('editModalError').classList.add('d-none');
+      new bootstrap.Modal(document.getElementById('editReadingModal')).show();
+    }
+
+    // שמירת עריכת מדידה קיימת
+    async function saveEdit() {
+      const isHe = getLang() === 'he';
+      const id = document.getElementById('editReadingId').value;
+      const reading = document.getElementById('editReading').value;
+      const editModalError = document.getElementById('editModalError');
+
+      editModalError.classList.add('d-none');
+
+      if (!reading) {
+        editModalError.textContent = isHe ? 'אנא הזן ערך מדידה.' : 'Please enter a reading value.';
+        editModalError.classList.remove('d-none');
+        return;
+      }
+
+      await saveUpdatedReading(id, reading);
+    }
+
+    // שליחת עדכון מדידה לשרת
+    async function saveUpdatedReading(id, reading) {
+      const isHe = getLang() === 'he';
+      try {
+        const response = await fetch('http://localhost:3000/api/energy/update', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ id, reading })
+        });
+        const data = await response.json();
+        if (response.ok) {
+          // סגירת כל המודלים ועדכון מיידי
+          const addModal = bootstrap.Modal.getInstance(document.getElementById('addReadingModal'));
+          const editModal = bootstrap.Modal.getInstance(document.getElementById('editReadingModal'));
+          if (addModal) addModal.hide();
+          if (editModal) editModal.hide();
+          loadEnergy();
+          refreshAlerts();
+        } else {
+          alert(data.message);
+        }
+      } catch (err) {
+        alert(isHe ? 'שגיאת חיבור.' : 'Connection error.');
+      }
+    }
+
+    // ניקוי הטופס כשסוגרים את מודל ההוספה
+    document.getElementById('addReadingModal').addEventListener('hidden.bs.modal', () => {
+      document.getElementById('type').value = '';
+      document.getElementById('reading').value = '';
+      document.getElementById('month').value = '';
+      document.getElementById('readingHint').textContent = '';
+      document.getElementById('modalError').classList.add('d-none');
+    });
+
+    // ניקוי הטופס כשסוגרים את מודל העריכה
+    document.getElementById('editReadingModal').addEventListener('hidden.bs.modal', () => {
+      document.getElementById('editReading').value = '';
+      document.getElementById('editModalError').classList.add('d-none');
+    });
+
+    // פונקציית התנתקות
     function logout() {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = 'login.html';
     }
 
+    // טעינת הדף - החלת תרגומים וטעינת נתונים
     document.addEventListener('DOMContentLoaded', () => {
       applyTranslations();
       loadEnergy();
     });
   </script>
-
 </body>
 </html>

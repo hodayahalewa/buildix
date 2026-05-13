@@ -11,18 +11,16 @@ const faultRoutes = require('./routes/faultRoutes');
 const maintenanceRoutes = require('./routes/maintenanceRoutes');
 const energyRoutes = require('./routes/energyRoutes');
 const announcementRoutes = require('./routes/announcementRoutes');
+const alertsRoutes = require('./routes/alertsRoutes');
 
-// טעינת משתני הסביבה
 dotenv.config();
 
-// יצירת אפליקציית Express
 const app = express();
 
-// הגדרת middleware
 app.use(cors());
 app.use(express.json());
 
-// הגשת קבצי Frontend סטטיים
+// הגשת קבצי Frontend
 app.use(express.static('C:\\buildix\\frontend'));
 
 // חיבור נתיבים
@@ -31,13 +29,12 @@ app.use('/api/faults', faultRoutes);
 app.use('/api/maintenance', maintenanceRoutes);
 app.use('/api/energy', energyRoutes);
 app.use('/api/announcements', announcementRoutes);
+app.use('/api/alerts', alertsRoutes);
 
-// נתיב בדיקה בסיסי
 app.get('/', (req, res) => {
   res.sendFile('C:\\buildix\\frontend\\index.html');
 });
 
-// הפעלת השרת
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

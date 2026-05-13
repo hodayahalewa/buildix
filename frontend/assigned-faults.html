@@ -12,41 +12,21 @@
 </head>
 <body>
 
-  <!-- Sidebar -->
   <div class="sidebar">
     <div class="text-center py-4">
-      <h5 class="text-white fw-bold">
-        <i class="bi bi-building"></i> BUILDIX
-      </h5>
+      <img src="logo.png" height="80" alt="BUILDIX" class="mb-2">
+      <h5 class="text-white fw-bold mb-0">BUILDIX</h5>
       <small class="text-secondary" id="techName"></small>
     </div>
     <ul class="nav flex-column px-2">
-      <li class="nav-item">
-        <a class="nav-link" href="dashboard-technician.html">
-          <i class="bi bi-speedometer2"></i> <span id="nav-dashboard"></span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link active" href="assigned-faults.html">
-          <i class="bi bi-exclamation-triangle"></i> <span id="nav-assignedFaults"></span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="announcements.html">
-          <i class="bi bi-megaphone"></i> <span id="nav-announcements"></span>
-        </a>
-      </li>
-      <li class="nav-item mt-4">
-        <a class="nav-link text-danger" href="#" onclick="logout()">
-          <i class="bi bi-box-arrow-left"></i> <span id="nav-logout"></span>
-        </a>
-      </li>
+      <li class="nav-item"><a class="nav-link" href="dashboard-technician.html"><i class="bi bi-speedometer2"></i> <span id="nav-dashboard"></span></a></li>
+      <li class="nav-item"><a class="nav-link active" href="assigned-faults.html"><i class="bi bi-exclamation-triangle"></i> <span id="nav-assignedFaults"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="announcements.html"><i class="bi bi-megaphone"></i> <span id="nav-announcements"></span></a></li>
+      <li class="nav-item mt-4"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-left"></i> <span id="nav-logout"></span></a></li>
     </ul>
   </div>
 
-  <!-- Main Content -->
   <div class="main-content">
-
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
         <h4 class="fw-bold mb-0" id="pageTitle"></h4>
@@ -54,7 +34,6 @@
       </div>
     </div>
 
-    <!-- Filters -->
     <div class="card border-0 shadow-sm mb-4">
       <div class="card-body">
         <div class="row g-3">
@@ -81,14 +60,11 @@
       </div>
     </div>
 
-    <!-- Faults List -->
     <div id="faultsList" class="row g-4">
       <div class="col-12 text-center py-4 text-muted" id="loadingText"></div>
     </div>
-
   </div>
 
-  <!-- Update Status Modal -->
   <div class="modal fade" id="updateModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -98,7 +74,6 @@
         </div>
         <div class="modal-body">
           <input type="hidden" id="updateFaultId">
-
           <div class="mb-3">
             <label class="form-label fw-bold" id="statusLabel"></label>
             <select id="newStatus" class="form-select">
@@ -107,7 +82,6 @@
               <option value="closed" id="statusClosedOpt"></option>
             </select>
           </div>
-
           <div class="mb-3">
             <label class="form-label fw-bold" id="noteLabel"></label>
             <textarea id="note" class="form-control" rows="3"></textarea>
@@ -122,9 +96,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
   <script>
-    // בדיקה שהמשתמש מחובר ושהוא טכנאי
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user'));
 
@@ -135,7 +107,6 @@
     document.getElementById('techName').textContent = user.full_name;
     let allFaults = [];
 
-    // החלת תרגומים
     function applyTranslations() {
       const isHe = getLang() === 'he';
       document.getElementById('nav-dashboard').textContent = t('dashboard');
@@ -164,27 +135,22 @@
       document.getElementById('updateBtn').textContent = isHe ? 'עדכן' : 'Update';
     }
 
-    // טעינת תקלות מוקצות
     async function loadAssignedFaults() {
       try {
         const response = await fetch('http://localhost:3000/api/faults/assigned', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-
         const data = await response.json();
         allFaults = data.faults;
         renderFaults(allFaults);
-
       } catch (err) {
         console.error('Error loading faults:', err);
       }
     }
 
-    // הצגת תקלות כקלפים
     function renderFaults(faults) {
       const isHe = getLang() === 'he';
       const list = document.getElementById('faultsList');
-
       if (faults.length === 0) {
         list.innerHTML = `
           <div class="col-12 text-center py-5">
@@ -193,13 +159,12 @@
           </div>`;
         return;
       }
-
       list.innerHTML = faults.map(fault => `
         <div class="col-md-6">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
               <h6 class="fw-bold mb-0">#${fault.id} - ${fault.title}</h6>
-              <span class="badge-${fault.status.replace('_', '-')}">${t(fault.status)}</span>
+              <span class="badge-${fault.status.replace('_','-')}">${t(fault.status)}</span>
             </div>
             <div class="card-body">
               <p class="text-muted small mb-2">${fault.description || (isHe ? 'אין תיאור' : 'No description')}</p>
@@ -223,30 +188,23 @@
       `).join('');
     }
 
-    // פתיחת מודל עדכון סטטוס
     function openUpdateModal(faultId) {
       document.getElementById('updateFaultId').value = faultId;
       document.getElementById('note').value = '';
       new bootstrap.Modal(document.getElementById('updateModal')).show();
     }
 
-    // עדכון סטטוס תקלה
     async function updateStatus() {
       const isHe = getLang() === 'he';
       const fault_id = document.getElementById('updateFaultId').value;
       const status = document.getElementById('newStatus').value;
       const note = document.getElementById('note').value;
-
       try {
         const response = await fetch('http://localhost:3000/api/faults/status', {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({ fault_id, status, note })
         });
-
         const data = await response.json();
         if (response.ok) {
           bootstrap.Modal.getInstance(document.getElementById('updateModal')).hide();
@@ -254,27 +212,22 @@
         } else {
           alert(data.message);
         }
-
       } catch (err) {
         alert(isHe ? 'שגיאה. אנא נסה שוב.' : 'Error. Please try again.');
       }
     }
 
-    // סינון תקלות
     function filterFaults() {
       const status = document.getElementById('filterStatus').value;
       const urgency = document.getElementById('filterUrgency').value;
-
       const filtered = allFaults.filter(fault => {
         const matchStatus = !status || fault.status === status;
         const matchUrgency = !urgency || fault.urgency === urgency;
         return matchStatus && matchUrgency;
       });
-
       renderFaults(filtered);
     }
 
-    // איפוס פילטרים
     function resetFilters() {
       document.getElementById('filterStatus').value = '';
       document.getElementById('filterUrgency').value = '';
@@ -292,6 +245,5 @@
       loadAssignedFaults();
     });
   </script>
-
 </body>
 </html>
