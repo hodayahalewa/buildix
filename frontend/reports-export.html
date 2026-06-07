@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BUILDIX - Export Reports</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/translations.js"></script>
+  <script src="js/lang-switcher.js"></script>
+  <script src="js/alerts.js"></script>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div class="text-center py-4">
+      <img src="logo.png" height="80" alt="BUILDIX" class="mb-2">
+      <h5 class="text-white fw-bold mb-0">BUILDIX</h5>
+      <small class="text-secondary" id="managerName"></small>
+    </div>
+    <ul class="nav flex-column px-2">
+      <li class="nav-item"><a class="nav-link" href="dashboard-manager.html"><i class="bi bi-speedometer2"></i> <span id="nav-dashboard"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="faults.html"><i class="bi bi-exclamation-triangle"></i> <span id="nav-faults"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="maintenance.html"><i class="bi bi-tools"></i> <span id="nav-maintenance"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="energy.html"><i class="bi bi-lightning"></i> <span id="nav-energy"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="announcements.html"><i class="bi bi-megaphone"></i> <span id="nav-announcements"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="invoices.html"><i class="bi bi-receipt"></i> <span id="nav-invoices"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="reports.html"><i class="bi bi-bar-chart"></i> <span id="nav-reports"></span></a></li>
+      <li class="nav-item"><a class="nav-link active" href="reports-export.html"><i class="bi bi-download"></i> <span id="nav-export"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="users.html"><i class="bi bi-people"></i> <span id="nav-users"></span></a></li>
+      <li class="nav-item mt-4"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-left"></i> <span id="nav-logout"></span></a></li>
+    </ul>
+  </div>
+
+  <div class="main-content">
+    <div class="mb-4">
+      <h4 class="fw-bold mb-0" id="pageTitle"></h4>
+      <small class="text-muted" id="pageSubtitle"></small>
+    </div>
+
+    <div class="row g-4">
+
+      <!-- דוח חשבוניות -->
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white">
+            <h6 class="fw-bold mb-0">
+              <i class="bi bi-receipt text-primary"></i>
+              <span id="invoicesReportTitle"></span>
+            </h6>
+          </div>
+          <div class="card-body">
+            <p class="text-muted small" id="invoicesReportDesc"></p>
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label small fw-bold" id="fromDateLabel"></label>
+                <input type="date" id="invFromDate" class="form-control form-control-sm">
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-bold" id="toDateLabel"></label>
+                <input type="date" id="invToDate" class="form-control form-control-sm">
+              </div>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-success flex-fill" onclick="downloadReport('invoices', 'excel')">
+                <i class="bi bi-file-earmark-excel"></i>
+                <span id="excelBtn1"></span>
+              </button>
+              <button class="btn btn-danger flex-fill" onclick="downloadReport('invoices', 'pdf')">
+                <i class="bi bi-file-earmark-pdf"></i>
+                <span id="pdfBtn1"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- דוח אנרגיה -->
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white">
+            <h6 class="fw-bold mb-0">
+              <i class="bi bi-lightning text-warning"></i>
+              <span id="energyReportTitle"></span>
+            </h6>
+          </div>
+          <div class="card-body">
+            <p class="text-muted small" id="energyReportDesc"></p>
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label small fw-bold" id="fromMonthLabel"></label>
+                <input type="month" id="energyFromMonth" class="form-control form-control-sm">
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-bold" id="toMonthLabel"></label>
+                <input type="month" id="energyToMonth" class="form-control form-control-sm">
+              </div>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-success flex-fill" onclick="downloadReport('energy', 'excel')">
+                <i class="bi bi-file-earmark-excel"></i>
+                <span id="excelBtn2"></span>
+              </button>
+              <button class="btn btn-danger flex-fill" onclick="downloadReport('energy', 'pdf')">
+                <i class="bi bi-file-earmark-pdf"></i>
+                <span id="pdfBtn2"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- דוח חודשי כולל -->
+      <div class="col-md-12">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white" style="background: linear-gradient(135deg, #1a3a6b, #2d5a9e) !important;">
+            <h6 class="fw-bold mb-0 text-white">
+              <i class="bi bi-calendar-month"></i>
+              <span id="monthlyReportTitle"></span>
+            </h6>
+          </div>
+          <div class="card-body">
+            <p class="text-muted small" id="monthlyReportDesc"></p>
+            <div class="row g-3 align-items-end">
+              <div class="col-md-4">
+                <label class="form-label fw-bold" id="selectMonthLabel"></label>
+                <input type="month" id="selectedMonth" class="form-control">
+              </div>
+              <div class="col-md-4">
+                <button class="btn btn-success w-100" onclick="downloadReport('monthly', 'excel')">
+                  <i class="bi bi-file-earmark-excel"></i>
+                  <span id="monthlyExcelBtn"></span>
+                </button>
+              </div>
+              <div class="col-md-4">
+                <div class="alert alert-info py-2 mb-0 small" id="monthlyInfo"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (!token || !user || user.role !== 'manager') {
+      window.location.href = 'login.html';
+    }
+
+    document.getElementById('managerName').textContent = user.full_name;
+
+    // הגדרת חודש נוכחי כברירת מחדל
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    document.getElementById('selectedMonth').value = currentMonth;
+
+    function applyTranslations() {
+      const isHe = getLang() === 'he';
+      document.getElementById('nav-dashboard').textContent = t('dashboard');
+      document.getElementById('nav-faults').textContent = t('faults');
+      document.getElementById('nav-maintenance').textContent = t('maintenance');
+      document.getElementById('nav-energy').textContent = t('energy');
+      document.getElementById('nav-announcements').textContent = t('announcements');
+      document.getElementById('nav-invoices').textContent = isHe ? 'חשבוניות' : 'Invoices';
+      document.getElementById('nav-reports').textContent = t('reports');
+      document.getElementById('nav-export').textContent = isHe ? 'ייצוא דוחות' : 'Export Reports';
+      document.getElementById('nav-users').textContent = t('users');
+      document.getElementById('nav-logout').textContent = t('logout');
+      document.getElementById('pageTitle').textContent = isHe ? 'ייצוא דוחות' : 'Export Reports';
+      document.getElementById('pageSubtitle').textContent = isHe
+        ? 'הורד דוחות מפורטים בפורמט Excel או PDF'
+        : 'Download detailed reports in Excel or PDF format';
+      document.getElementById('invoicesReportTitle').textContent = isHe ? 'דוח חשבוניות' : 'Invoices Report';
+      document.getElementById('invoicesReportDesc').textContent = isHe
+        ? 'דוח מפורט של כל החשבוניות, סכומים, טכנאים וסטטוסים'
+        : 'Detailed report of all invoices, amounts, technicians and statuses';
+      document.getElementById('fromDateLabel').textContent = isHe ? 'מתאריך' : 'From Date';
+      document.getElementById('toDateLabel').textContent = isHe ? 'עד תאריך' : 'To Date';
+      document.getElementById('excelBtn1').textContent = isHe ? 'Excel' : 'Excel';
+      document.getElementById('pdfBtn1').textContent = isHe ? 'PDF' : 'PDF';
+      document.getElementById('energyReportTitle').textContent = isHe ? 'דוח צריכת אנרגיה' : 'Energy Report';
+      document.getElementById('energyReportDesc').textContent = isHe
+        ? 'דוח צריכת חשמל ומים לפי חודשים'
+        : 'Electricity and water consumption report by months';
+      document.getElementById('fromMonthLabel').textContent = isHe ? 'מחודש' : 'From Month';
+      document.getElementById('toMonthLabel').textContent = isHe ? 'עד חודש' : 'To Month';
+      document.getElementById('excelBtn2').textContent = isHe ? 'Excel' : 'Excel';
+      document.getElementById('pdfBtn2').textContent = isHe ? 'PDF' : 'PDF';
+      document.getElementById('monthlyReportTitle').textContent = isHe ? '📊 דוח חודשי כולל' : '📊 Monthly Summary Report';
+      document.getElementById('monthlyReportDesc').textContent = isHe
+        ? 'דוח Excel עם שלושה גיליונות: סיכום חודשי, תקלות וחשבוניות — לחודש ספציפי'
+        : 'Excel report with three sheets: monthly summary, faults and invoices — for a specific month';
+      document.getElementById('selectMonthLabel').textContent = isHe ? 'בחר חודש' : 'Select Month';
+      document.getElementById('monthlyExcelBtn').textContent = isHe ? 'הורד דוח חודשי Excel' : 'Download Monthly Excel';
+      document.getElementById('monthlyInfo').textContent = isHe
+        ? 'ℹ️ הדוח כולל: סיכום כספי, רשימת תקלות ורשימת חשבוניות לאותו חודש'
+        : 'ℹ️ Report includes: financial summary, fault list and invoice list for the month';
+    }
+
+    // הורדת דוח
+    function downloadReport(type, format) {
+      const isHe = getLang() === 'he';
+      let url = `http://localhost:3000/api/reports/`;
+      const params = new URLSearchParams();
+
+      if (type === 'invoices') {
+        url += `invoices/${format}`;
+        const from = document.getElementById('invFromDate').value;
+        const to = document.getElementById('invToDate').value;
+        if (from) params.append('from_date', from);
+        if (to) params.append('to_date', to);
+
+      } else if (type === 'energy') {
+        url += `energy/${format}`;
+        const from = document.getElementById('energyFromMonth').value;
+        const to = document.getElementById('energyToMonth').value;
+        if (from) params.append('from_month', from);
+        if (to) params.append('to_month', to);
+
+      } else if (type === 'monthly') {
+        const month = document.getElementById('selectedMonth').value;
+        if (!month) {
+          alert(isHe ? 'אנא בחר חודש.' : 'Please select a month.');
+          return;
+        }
+        url += `monthly/excel`;
+        params.append('month', month);
+      }
+
+      const fullUrl = `${url}?${params.toString()}&token=${token}`;
+      window.open(fullUrl, '_blank');
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'login.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      applyTranslations();
+    });
+  </script>
+</body>
+</html>

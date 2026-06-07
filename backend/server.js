@@ -12,6 +12,8 @@ const maintenanceRoutes = require('./routes/maintenanceRoutes');
 const energyRoutes = require('./routes/energyRoutes');
 const announcementRoutes = require('./routes/announcementRoutes');
 const alertsRoutes = require('./routes/alertsRoutes');
+const invoiceRoutes = require('./routes/invoiceRoutes');
+const reportRoutes = require('./routes/reportRoutes');
 
 dotenv.config();
 
@@ -23,6 +25,9 @@ app.use(express.json());
 // הגשת קבצי Frontend
 app.use(express.static('C:\\buildix\\frontend'));
 
+// גישה לתיקיית קבצים מועלים
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // חיבור נתיבים
 app.use('/api/auth', authRoutes);
 app.use('/api/faults', faultRoutes);
@@ -30,6 +35,8 @@ app.use('/api/maintenance', maintenanceRoutes);
 app.use('/api/energy', energyRoutes);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/alerts', alertsRoutes);
+app.use('/api/invoices', invoiceRoutes);
+app.use('/api/reports', reportRoutes);
 
 app.get('/', (req, res) => {
   res.sendFile('C:\\buildix\\frontend\\index.html');

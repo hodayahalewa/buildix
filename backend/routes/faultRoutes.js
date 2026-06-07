@@ -31,5 +31,5 @@ router.put('/assign', verifyToken, authorizeRoles('manager'), assignFault);
 router.put('/status', verifyToken, authorizeRoles('technician', 'manager'), updateFaultStatus);
 
 // קבלת היסטוריית עדכונים של תקלה
-router.get('/updates/:id', verifyToken, authorizeRoles('manager'), getFaultUpdates);
+router.get('/updates/:id', verifyToken, authorizeRoles('manager', 'technician'), getFaultUpdates);
 module.exports = router;

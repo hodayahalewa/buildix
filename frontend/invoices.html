@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BUILDIX - Invoices</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/translations.js"></script>
+  <script src="js/lang-switcher.js"></script>
+  <script src="js/alerts.js"></script>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div class="text-center py-4">
+      <img src="logo.png" height="80" alt="BUILDIX" class="mb-2">
+      <h5 class="text-white fw-bold mb-0">BUILDIX</h5>
+      <small class="text-secondary" id="managerName"></small>
+    </div>
+    <ul class="nav flex-column px-2">
+      <li class="nav-item"><a class="nav-link" href="dashboard-manager.html"><i class="bi bi-speedometer2"></i> <span id="nav-dashboard"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="faults.html"><i class="bi bi-exclamation-triangle"></i> <span id="nav-faults"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="maintenance.html"><i class="bi bi-tools"></i> <span id="nav-maintenance"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="energy.html"><i class="bi bi-lightning"></i> <span id="nav-energy"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="announcements.html"><i class="bi bi-megaphone"></i> <span id="nav-announcements"></span></a></li>
+      <li class="nav-item"><a class="nav-link active" href="invoices.html"><i class="bi bi-receipt"></i> <span id="nav-invoices"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="reports.html"><i class="bi bi-bar-chart"></i> <span id="nav-reports"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="users.html"><i class="bi bi-people"></i> <span id="nav-users"></span></a></li>
+      <li class="nav-item mt-4"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-left"></i> <span id="nav-logout"></span></a></li>
+    </ul>
+  </div>
+
+  <div class="main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h4 class="fw-bold mb-0" id="pageTitle"></h4>
+        <small class="text-muted" id="pageSubtitle"></small>
+      </div>
+    </div>
+
+    <!-- כרטיסי סטטיסטיקות -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3">
+        <div class="card stat-card bg-warning text-white">
+          <div class="stat-number" id="pendingCount">0</div>
+          <div class="stat-label text-white-50" id="statPending"></div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card bg-success text-white">
+          <div class="stat-number" id="approvedCount">0</div>
+          <div class="stat-label text-white-50" id="statApproved"></div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card bg-danger text-white">
+          <div class="stat-number" id="rejectedCount">0</div>
+          <div class="stat-label text-white-50" id="statRejected"></div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card bg-primary text-white">
+          <div class="stat-number" id="totalAmount">0</div>
+          <div class="stat-label text-white-50" id="statTotal"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- פילטרים -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label small fw-bold" id="filterStatusLabel"></label>
+            <select id="filterStatus" class="form-select" onchange="filterInvoices()">
+              <option value="" id="allStatuses"></option>
+              <option value="pending" id="statusPending"></option>
+              <option value="approved" id="statusApproved"></option>
+              <option value="rejected" id="statusRejected"></option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-bold" id="filterTechLabel"></label>
+            <input type="text" id="filterTech" class="form-control" oninput="filterInvoices()">
+          </div>
+          <div class="col-md-4">
+            <button class="btn btn-outline-secondary w-100 mt-4" onclick="resetFilters()" id="resetBtn"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- טבלת חשבוניות -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h6 class="fw-bold mb-0" id="tableTitle"></h6>
+        <small class="text-muted" id="invoicesCount"></small>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>#</th>
+                <th id="thFault"></th>
+                <th id="thTech"></th>
+                <th id="thAmount"></th>
+                <th id="thDesc"></th>
+                <th id="thStatus"></th>
+                <th id="thDate"></th>
+                <th id="thActions"></th>
+              </tr>
+            </thead>
+            <tbody id="invoicesTable">
+              <tr><td colspan="8" class="text-center py-4 text-muted" id="loadingText"></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- מודל בדיקת חשבונית -->
+  <div class="modal fade" id="reviewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="reviewModalTitle"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="reviewError" class="alert alert-danger d-none"></div>
+          <input type="hidden" id="reviewInvoiceId">
+
+          <div class="row g-4">
+            <!-- צד שמאל - פרטי חשבונית -->
+            <div class="col-md-6">
+              <h6 class="fw-bold mb-3" id="invoiceDetailsTitle"></h6>
+              <table class="table table-sm">
+                <tr>
+                  <td class="text-muted" id="tdFaultLabel"></td>
+                  <td id="tdFaultValue" class="fw-bold"></td>
+                </tr>
+                <tr>
+                  <td class="text-muted" id="tdTechLabel"></td>
+                  <td id="tdTechValue"></td>
+                </tr>
+                <tr>
+                  <td class="text-muted" id="tdAmountLabel"></td>
+                  <td id="tdAmountValue" class="fw-bold text-success"></td>
+                </tr>
+                <tr>
+                  <td class="text-muted" id="tdDescLabel"></td>
+                  <td id="tdDescValue"></td>
+                </tr>
+                <tr>
+                  <td class="text-muted" id="tdDateLabel"></td>
+                  <td id="tdDateValue"></td>
+                </tr>
+              </table>
+
+              <!-- צפייה בקובץ -->
+              <div id="filePreview" class="mt-3 text-center">
+                <a id="fileLink" href="#" target="_blank" class="btn btn-outline-primary w-100">
+                  <i class="bi bi-file-earmark-pdf"></i>
+                  <span id="viewFileBtn"></span>
+                </a>
+              </div>
+            </div>
+
+            <!-- צד ימין - אישור/דחייה -->
+            <div class="col-md-6">
+              <h6 class="fw-bold mb-3" id="reviewActionTitle"></h6>
+
+              <div id="currentStatusBadge" class="mb-3"></div>
+
+              <div id="reviewActions">
+                <div class="mb-3">
+                  <label class="form-label fw-bold" id="managerNoteLabel"></label>
+                  <textarea id="managerNote" class="form-control" rows="4"></textarea>
+                </div>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-success flex-fill" onclick="reviewInvoice('approved')" id="approveBtn">
+                    <i class="bi bi-check-lg"></i>
+                    <span id="approveBtnText"></span>
+                  </button>
+                  <button class="btn btn-danger flex-fill" onclick="reviewInvoice('rejected')" id="rejectBtn">
+                    <i class="bi bi-x-lg"></i>
+                    <span id="rejectBtnText"></span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- אם כבר טופל -->
+              <div id="alreadyReviewed" class="d-none">
+                <div id="reviewResult" class="alert"></div>
+                <div id="managerNoteDisplay" class="mt-2 text-muted small"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="closeBtn"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (!token || !user || user.role !== 'manager') {
+      window.location.href = 'login.html';
+    }
+
+    document.getElementById('managerName').textContent = user.full_name;
+    let allInvoices = [];
+
+    // החלת תרגומים
+    function applyTranslations() {
+      const isHe = getLang() === 'he';
+      document.getElementById('nav-dashboard').textContent = t('dashboard');
+      document.getElementById('nav-faults').textContent = t('faults');
+      document.getElementById('nav-maintenance').textContent = t('maintenance');
+      document.getElementById('nav-energy').textContent = t('energy');
+      document.getElementById('nav-announcements').textContent = t('announcements');
+      document.getElementById('nav-invoices').textContent = isHe ? 'חשבוניות' : 'Invoices';
+      document.getElementById('nav-reports').textContent = t('reports');
+      document.getElementById('nav-users').textContent = t('users');
+      document.getElementById('nav-logout').textContent = t('logout');
+      document.getElementById('pageTitle').textContent = isHe ? 'ניהול חשבוניות' : 'Invoice Management';
+      document.getElementById('pageSubtitle').textContent = isHe ? 'בדוק ואשר חשבוניות מטכנאים' : 'Review and approve invoices from technicians';
+      document.getElementById('statPending').textContent = isHe ? 'ממתינות לאישור' : 'Pending Approval';
+      document.getElementById('statApproved').textContent = isHe ? 'אושרו' : 'Approved';
+      document.getElementById('statRejected').textContent = isHe ? 'נדחו' : 'Rejected';
+      document.getElementById('statTotal').textContent = isHe ? 'סה"כ עלות מאושרת (₪)' : 'Total Approved (₪)';
+      document.getElementById('filterStatusLabel').textContent = isHe ? 'סינון לפי סטטוס' : 'Filter by Status';
+      document.getElementById('allStatuses').textContent = isHe ? 'כל הסטטוסים' : 'All Statuses';
+      document.getElementById('statusPending').textContent = isHe ? '⏳ ממתין' : '⏳ Pending';
+      document.getElementById('statusApproved').textContent = isHe ? '✅ אושר' : '✅ Approved';
+      document.getElementById('statusRejected').textContent = isHe ? '❌ נדחה' : '❌ Rejected';
+      document.getElementById('filterTechLabel').textContent = isHe ? 'חיפוש לפי טכנאי' : 'Search by technician';
+      document.getElementById('filterTech').placeholder = isHe ? 'שם טכנאי...' : 'Technician name...';
+      document.getElementById('resetBtn').innerHTML = `<i class="bi bi-arrow-counterclockwise"></i> ${isHe ? 'איפוס' : 'Reset'}`;
+      document.getElementById('tableTitle').innerHTML = `<i class="bi bi-receipt text-primary"></i> ${isHe ? 'כל החשבוניות' : 'All Invoices'}`;
+      document.getElementById('thFault').textContent = isHe ? 'תקלה' : 'Fault';
+      document.getElementById('thTech').textContent = isHe ? 'טכנאי' : 'Technician';
+      document.getElementById('thAmount').textContent = isHe ? 'סכום' : 'Amount';
+      document.getElementById('thDesc').textContent = isHe ? 'תיאור' : 'Description';
+      document.getElementById('thStatus').textContent = isHe ? 'סטטוס' : 'Status';
+      document.getElementById('thDate').textContent = isHe ? 'תאריך' : 'Date';
+      document.getElementById('thActions').textContent = isHe ? 'פעולות' : 'Actions';
+      document.getElementById('loadingText').textContent = t('loading');
+      document.getElementById('reviewModalTitle').textContent = isHe ? 'בדיקת חשבונית' : 'Review Invoice';
+      document.getElementById('invoiceDetailsTitle').textContent = isHe ? '📄 פרטי החשבונית' : '📄 Invoice Details';
+      document.getElementById('tdFaultLabel').textContent = isHe ? 'תקלה:' : 'Fault:';
+      document.getElementById('tdTechLabel').textContent = isHe ? 'טכנאי:' : 'Technician:';
+      document.getElementById('tdAmountLabel').textContent = isHe ? 'סכום:' : 'Amount:';
+      document.getElementById('tdDescLabel').textContent = isHe ? 'תיאור:' : 'Description:';
+      document.getElementById('tdDateLabel').textContent = isHe ? 'תאריך:' : 'Date:';
+      document.getElementById('viewFileBtn').textContent = isHe ? 'פתח קובץ חשבונית' : 'Open Invoice File';
+      document.getElementById('reviewActionTitle').textContent = isHe ? '✅ אישור / ❌ דחייה' : '✅ Approve / ❌ Reject';
+      document.getElementById('managerNoteLabel').textContent = isHe ? 'הערה למנהל (אופציונלי)' : 'Manager Note (optional)';
+      document.getElementById('approveBtnText').textContent = isHe ? 'אשר חשבונית' : 'Approve';
+      document.getElementById('rejectBtnText').textContent = isHe ? 'דחה חשבונית' : 'Reject';
+      document.getElementById('closeBtn').textContent = isHe ? 'סגור' : 'Close';
+    }
+
+    // טעינת כל החשבוניות
+    async function loadInvoices() {
+      try {
+        const response = await fetch('http://localhost:3000/api/invoices/all', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        allInvoices = data.invoices;
+
+        // עדכון סטטיסטיקות
+        const pending = allInvoices.filter(i => i.status === 'pending').length;
+        const approved = allInvoices.filter(i => i.status === 'approved').length;
+        const rejected = allInvoices.filter(i => i.status === 'rejected').length;
+        const totalAmount = allInvoices
+          .filter(i => i.status === 'approved' && i.amount)
+          .reduce((sum, i) => sum + parseFloat(i.amount), 0);
+
+        document.getElementById('pendingCount').textContent = pending;
+        document.getElementById('approvedCount').textContent = approved;
+        document.getElementById('rejectedCount').textContent = rejected;
+        document.getElementById('totalAmount').textContent = `₪${totalAmount.toLocaleString()}`;
+
+        renderInvoices(allInvoices);
+
+      } catch (err) {
+        console.error('Error loading invoices:', err);
+      }
+    }
+
+    // הצגת חשבוניות בטבלה
+    function renderInvoices(invoices) {
+      const isHe = getLang() === 'he';
+      const tbody = document.getElementById('invoicesTable');
+
+      document.getElementById('invoicesCount').textContent = isHe
+        ? `${invoices.length} חשבוניות`
+        : `${invoices.length} invoices`;
+
+      if (invoices.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted">${isHe ? 'אין חשבוניות' : 'No invoices found'}</td></tr>`;
+        return;
+      }
+
+      const statusBadge = {
+        pending: `<span class="badge bg-warning text-dark">⏳ ${isHe ? 'ממתין' : 'Pending'}</span>`,
+        approved: `<span class="badge bg-success">✅ ${isHe ? 'אושר' : 'Approved'}</span>`,
+        rejected: `<span class="badge bg-danger">❌ ${isHe ? 'נדחה' : 'Rejected'}</span>`
+      };
+
+      tbody.innerHTML = invoices.map(inv => `
+        <tr class="${inv.status === 'pending' ? 'table-warning' : ''}">
+          <td>${inv.id}</td>
+          <td>
+            <strong>#${inv.fault_id}</strong>
+            <div class="small text-muted">${inv.fault_title || 'N/A'}</div>
+          </td>
+          <td>${inv.technician_name || 'N/A'}</td>
+          <td>${inv.amount ? `₪${parseFloat(inv.amount).toLocaleString()}` : '-'}</td>
+          <td class="small">${inv.description || '-'}</td>
+          <td>${statusBadge[inv.status] || inv.status}</td>
+          <td class="small">${new Date(inv.created_at).toLocaleDateString('he-IL')}</td>
+          <td>
+            <button class="btn btn-sm ${inv.status === 'pending' ? 'btn-primary' : 'btn-outline-secondary'}"
+              onclick="openReviewModal(${inv.id})">
+              <i class="bi bi-${inv.status === 'pending' ? 'eye' : 'eye'}"></i>
+              ${inv.status === 'pending'
+                ? (isHe ? 'בדוק' : 'Review')
+                : (isHe ? 'צפה' : 'View')}
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // פתיחת מודל בדיקת חשבונית
+    function openReviewModal(invoiceId) {
+      const isHe = getLang() === 'he';
+      const inv = allInvoices.find(i => i.id === invoiceId);
+      if (!inv) return;
+
+      document.getElementById('reviewInvoiceId').value = invoiceId;
+      document.getElementById('tdFaultValue').textContent = `#${inv.fault_id} - ${inv.fault_title || 'N/A'}`;
+      document.getElementById('tdTechValue').textContent = inv.technician_name || 'N/A';
+      document.getElementById('tdAmountValue').textContent = inv.amount ? `₪${parseFloat(inv.amount).toLocaleString()}` : (isHe ? 'לא צוין' : 'Not specified');
+      document.getElementById('tdDescValue').textContent = inv.description || (isHe ? 'אין תיאור' : 'No description');
+      document.getElementById('tdDateValue').textContent = new Date(inv.created_at).toLocaleDateString('he-IL');
+      document.getElementById('managerNote').value = '';
+      document.getElementById('reviewError').classList.add('d-none');
+
+      // קישור לקובץ
+      const fileUrl = `http://localhost:3000${inv.file_url}`;
+      document.getElementById('fileLink').href = fileUrl;
+
+      // הצגת סטטוס נוכחי
+      const statusColors = { pending: 'warning', approved: 'success', rejected: 'danger' };
+      const statusTexts = {
+        pending: isHe ? '⏳ ממתין לאישור' : '⏳ Pending',
+        approved: isHe ? '✅ אושר' : '✅ Approved',
+        rejected: isHe ? '❌ נדחה' : '❌ Rejected'
+      };
+      document.getElementById('currentStatusBadge').innerHTML =
+        `<span class="badge bg-${statusColors[inv.status]} fs-6">${statusTexts[inv.status]}</span>`;
+
+      // אם כבר טופל - הסתר כפתורי אישור/דחייה
+      if (inv.status !== 'pending') {
+        document.getElementById('reviewActions').classList.add('d-none');
+        document.getElementById('alreadyReviewed').classList.remove('d-none');
+        const resultEl = document.getElementById('reviewResult');
+        resultEl.className = `alert alert-${statusColors[inv.status]}`;
+        resultEl.textContent = statusTexts[inv.status];
+        document.getElementById('managerNoteDisplay').textContent =
+          inv.manager_note ? `${isHe ? 'הערת מנהל:' : 'Manager note:'} ${inv.manager_note}` : '';
+      } else {
+        document.getElementById('reviewActions').classList.remove('d-none');
+        document.getElementById('alreadyReviewed').classList.add('d-none');
+      }
+
+      new bootstrap.Modal(document.getElementById('reviewModal')).show();
+    }
+
+    // אישור או דחיית חשבונית
+    async function reviewInvoice(status) {
+      const isHe = getLang() === 'he';
+      const id = document.getElementById('reviewInvoiceId').value;
+      const manager_note = document.getElementById('managerNote').value;
+      const errorEl = document.getElementById('reviewError');
+      errorEl.classList.add('d-none');
+
+      const confirmMsg = status === 'approved'
+        ? (isHe ? 'האם אתה בטוח שברצונך לאשר חשבונית זו?' : 'Are you sure you want to approve this invoice?')
+        : (isHe ? 'האם אתה בטוח שברצונך לדחות חשבונית זו?' : 'Are you sure you want to reject this invoice?');
+
+      if (!confirm(confirmMsg)) return;
+
+      try {
+        const response = await fetch(`http://localhost:3000/api/invoices/review/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ status, manager_note })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          bootstrap.Modal.getInstance(document.getElementById('reviewModal')).hide();
+          alert(status === 'approved'
+            ? (isHe ? '✅ החשבונית אושרה! הטכנאי קיבל הודעה.' : '✅ Invoice approved! Technician notified.')
+            : (isHe ? '❌ החשבונית נדחתה. הטכנאי קיבל הודעה.' : '❌ Invoice rejected. Technician notified.'));
+          loadInvoices();
+          if (window.refreshAlerts) window.refreshAlerts();
+        } else {
+          errorEl.textContent = data.message;
+          errorEl.classList.remove('d-none');
+        }
+      } catch (err) {
+        errorEl.textContent = isHe ? 'שגיאת חיבור.' : 'Connection error.';
+        errorEl.classList.remove('d-none');
+      }
+    }
+
+    // סינון חשבוניות
+    function filterInvoices() {
+      const status = document.getElementById('filterStatus').value;
+      const tech = document.getElementById('filterTech').value.toLowerCase();
+
+      const filtered = allInvoices.filter(inv => {
+        const matchStatus = !status || inv.status === status;
+        const matchTech = !tech || (inv.technician_name && inv.technician_name.toLowerCase().includes(tech));
+        return matchStatus && matchTech;
+      });
+
+      renderInvoices(filtered);
+    }
+
+    // איפוס פילטרים
+    function resetFilters() {
+      document.getElementById('filterStatus').value = '';
+      document.getElementById('filterTech').value = '';
+      renderInvoices(allInvoices);
+    }
+
+    // התנתקות
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'login.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      applyTranslations();
+      loadInvoices();
+    });
+  </script>
+</body>
+</html>

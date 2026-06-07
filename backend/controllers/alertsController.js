@@ -12,24 +12,25 @@ const getAlerts = async (req, res) => {
     const weekStr = weekFromNow.toISOString().split('T')[0];
 
     // בדיקת משימות תחזוקה שצריך לבצע היום
-const [todayMaintenance] = await db.query(
-  `SELECT id, title, frequency, next_due, verification_type 
-   FROM maintenance 
-   WHERE next_due = ? AND status = 'pending'`,
-  [todayStr]
-);
-todayMaintenance.forEach(task => {
-  alerts.push({
-    type: 'maintenance_today',
-    priority: 'high',
-    title: task.title,
-    frequency: task.frequency,
-    date: task.next_due,
-    verification_type: task.verification_type || 'manual',
-    link: 'maintenance.html',
-    id: task.id
-  });
-});
+    const [todayMaintenance] = await db.query(
+      `SELECT id, title, frequency, next_due, verification_type 
+       FROM maintenance 
+       WHERE next_due = ? AND status = 'pending'`,
+      [todayStr]
+    );
+    todayMaintenance.forEach(task => {
+      alerts.push({
+        type: 'maintenance_today',
+        priority: 'high',
+        title: task.title,
+        frequency: task.frequency,
+        date: task.next_due,
+        verification_type: task.verification_type || 'manual',
+        link: 'maintenance.html',
+        id: task.id
+      });
+    });
+
     // בדיקת משימות תחזוקה שצריך לבצע השבוע
     const [weekMaintenance] = await db.query(
       `SELECT id, title, frequency, next_due 
@@ -76,8 +77,20 @@ todayMaintenance.forEach(task => {
       });
     }
 
+    // בדיקת חשבוניות ממתינות לאישור
+    const [pendingInvoices] = await db.query(
+      `SELECT COUNT(*) as count FROM invoices WHERE status = 'pending'`
+    );
+    if (pendingInvoices[0].count > 0) {
+      alerts.push({
+        type: 'pending_invoices',
+        priority: 'high',
+        count: pendingInvoices[0].count,
+        link: 'invoices.html'
+      });
+    }
+
     // בדיקת מדידות אנרגיה חסרות לחודש הנוכחי
-    // בודק שאכן הוזנה מדידה בפועל לחודש הנוכחי
     const currentMonth = todayStr.substring(0, 7);
     const [energyReadings] = await db.query(
       'SELECT type FROM energy WHERE month = ?',
@@ -114,47 +127,64 @@ todayMaintenance.forEach(task => {
 };
 
 // אישור ביצוע מדידת אנרגיה מתוך ההתראה
-// בודק שאכן הוזנה מדידה בפועל לחודש הנוכחי
 const confirmMaintenanceDone = async (req, res) => {
   try {
-    const { task_id, alert_type, energy_type } = req.body;
+    const { task_id, alert_type, energy_type, verification_type } = req.body;
     const todayStr = new Date().toISOString().split('T')[0];
     const currentMonth = todayStr.substring(0, 7);
 
-    // אם מדובר בהתראת מדידת אנרגיה - בדוק שהוזנה מדידה בפועל
     if (alert_type === 'missing_energy') {
       const [readings] = await db.query(
         'SELECT id FROM energy WHERE type = ? AND month = ?',
         [energy_type, currentMonth]
       );
-
       if (readings.length === 0) {
         return res.status(400).json({
           message: `No ${energy_type} reading found for ${currentMonth}. Please add the reading first.`,
           redirect: 'energy.html'
         });
       }
-
       return res.status(200).json({
         message: `${energy_type} reading confirmed for ${currentMonth}!`
       });
     }
 
-    // אם מדובר בהתראת תחזוקה - בדוק שהמשימה קיימת ועדיין ממתינה
+    // בדיקת מדידת אנרגיה לפי סוג בדיקה
+    if (verification_type === 'energy_electricity') {
+      const [readings] = await db.query(
+        'SELECT id FROM energy WHERE type = ? AND month = ?',
+        ['electricity', currentMonth]
+      );
+      if (readings.length === 0) {
+        return res.status(400).json({
+          message: `No electricity reading found for ${currentMonth}. Please add first.`,
+          redirect: 'energy.html'
+        });
+      }
+    } else if (verification_type === 'energy_water') {
+      const [readings] = await db.query(
+        'SELECT id FROM energy WHERE type = ? AND month = ?',
+        ['water', currentMonth]
+      );
+      if (readings.length === 0) {
+        return res.status(400).json({
+          message: `No water reading found for ${currentMonth}. Please add first.`,
+          redirect: 'energy.html'
+        });
+      }
+    }
+
+    // עדכון משימת תחזוקה כבוצעה
     const [tasks] = await db.query(
       'SELECT * FROM maintenance WHERE id = ? AND status = ?',
       [task_id, 'pending']
     );
 
     if (tasks.length === 0) {
-      return res.status(404).json({
-        message: 'Task not found or already completed.'
-      });
+      return res.status(404).json({ message: 'Task not found or already completed.' });
     }
 
     const task = tasks[0];
-
-    // בדיקה שתאריך היעד הוא היום או בעבר
     if (task.next_due > todayStr) {
       return res.status(400).json({
         message: `This task is scheduled for ${task.next_due}. Cannot confirm before due date.`,
@@ -162,16 +192,12 @@ const confirmMaintenanceDone = async (req, res) => {
       });
     }
 
-    // עדכון המשימה כבוצעה
     await db.query(
       `UPDATE maintenance SET status = 'done', last_done = ?, reminder_sent = 0 WHERE id = ?`,
       [todayStr, task_id]
     );
 
-    res.status(200).json({
-      message: 'Task confirmed as done!',
-      confirmed_date: todayStr
-    });
+    res.status(200).json({ message: 'Task confirmed as done!', confirmed_date: todayStr });
 
   } catch (err) {
     console.error('Confirm maintenance error:', err.message);

@@ -10,11 +10,20 @@
   <script src="js/translations.js"></script>
   <script src="js/lang-switcher.js"></script>
   <script src="js/alerts.js"></script>
+  <style>
+    .announcement-urgent { border-right: 5px solid #ef4444 !important; background: #fff5f5; }
+    .announcement-high   { border-right: 5px solid #f59e0b !important; background: #fffbeb; }
+    .announcement-medium { border-right: 5px solid #3b82f6 !important; background: #eff6ff; }
+    .announcement-low    { border-right: 5px solid #10b981 !important; background: #f0fdf4; }
+    .priority-badge-urgent { background: #ef4444 !important; color: white !important; }
+    .priority-badge-high   { background: #f59e0b !important; color: white !important; }
+    .priority-badge-medium { background: #3b82f6 !important; color: white !important; }
+    .priority-badge-low    { background: #10b981 !important; color: white !important; }
+  </style>
 </head>
 <body>
 
-  <!-- Sidebar -->
-<div class="sidebar">
+  <div class="sidebar">
     <div class="text-center py-4">
       <img src="logo.png" height="80" alt="BUILDIX" class="mb-2">
       <h5 class="text-white fw-bold mb-0">BUILDIX</h5>
@@ -23,25 +32,68 @@
     <ul class="nav flex-column px-2" id="sidebarNav"></ul>
   </div>
 
-  <!-- Main Content -->
   <div class="main-content">
-
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
         <h4 class="fw-bold mb-0" id="pageTitle"></h4>
         <small class="text-muted" id="pageSubtitle"></small>
       </div>
-      <button id="addBtn" class="btn btn-primary d-none" data-bs-toggle="modal" data-bs-target="#addAnnouncementModal" id="addAnnouncementBtn"></button>
+      <button id="addBtn" class="btn btn-primary d-none" data-bs-toggle="modal" data-bs-target="#addAnnouncementModal"></button>
     </div>
 
-    <!-- Announcements List -->
+    <!-- שורת חיפוש וסינון -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <div class="row g-3 align-items-end">
+          <!-- חיפוש לפי כותרת -->
+          <div class="col-md-4">
+            <label class="form-label small fw-bold" id="searchLabel"></label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
+              <input type="text" id="searchInput" class="form-control" oninput="filterAnnouncements()">
+            </div>
+          </div>
+          <!-- סינון לפי רמת דחיפות -->
+          <div class="col-md-2">
+            <label class="form-label small fw-bold" id="filterPriorityLabel"></label>
+            <select id="filterPriority" class="form-select" onchange="filterAnnouncements()">
+              <option value="" id="allPriorities"></option>
+              <option value="urgent" id="filterUrgent"></option>
+              <option value="high" id="filterHigh"></option>
+              <option value="medium" id="filterMedium"></option>
+              <option value="low" id="filterLow"></option>
+            </select>
+          </div>
+          <!-- סינון לפי תאריך מ -->
+          <div class="col-md-2">
+            <label class="form-label small fw-bold" id="filterDateFromLabel"></label>
+            <input type="date" id="filterDateFrom" class="form-control" onchange="filterAnnouncements()">
+          </div>
+          <!-- סינון לפי תאריך עד -->
+          <div class="col-md-2">
+            <label class="form-label small fw-bold" id="filterDateToLabel"></label>
+            <input type="date" id="filterDateTo" class="form-control" onchange="filterAnnouncements()">
+          </div>
+          <!-- כפתור איפוס -->
+          <div class="col-md-2">
+            <button class="btn btn-outline-secondary w-100" onclick="resetFilters()" id="resetBtn"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- מונה הודעות -->
+    <div class="mb-3">
+      <small class="text-muted" id="announcementsCount"></small>
+    </div>
+
+    <!-- רשימת הודעות -->
     <div id="announcementsList" class="row g-4">
       <div class="col-12 text-center py-4 text-muted" id="loadingText"></div>
     </div>
-
   </div>
 
-  <!-- Add Announcement Modal -->
+  <!-- מודל הוספת הודעה -->
   <div class="modal fade" id="addAnnouncementModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -51,22 +103,36 @@
         </div>
         <div class="modal-body">
           <div id="modalError" class="alert alert-danger d-none"></div>
-
           <div class="mb-3">
             <label class="form-label fw-bold" id="titleLabel"></label>
             <input type="text" id="title" class="form-control">
           </div>
-
           <div class="mb-3">
             <label class="form-label fw-bold" id="contentLabel"></label>
             <textarea id="content" class="form-control" rows="4"></textarea>
           </div>
-
           <div class="mb-3">
-            <label class="form-label fw-bold" id="expiresLabel"></label>
-            <input type="date" id="expires_at" class="form-control">
+            <label class="form-label fw-bold" id="priorityLabel"></label>
+            <select id="priority" class="form-select">
+              <option value="low" id="priorityLow"></option>
+              <option value="medium" id="priorityMedium" selected></option>
+              <option value="high" id="priorityHigh"></option>
+              <option value="urgent" id="priorityUrgent"></option>
+            </select>
           </div>
-
+          <!-- תאריך התחלה ותאריך סיום -->
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold" id="startsLabel"></label>
+              <input type="date" id="starts_at" class="form-control">
+              <small class="text-muted" id="startsHint"></small>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold" id="expiresLabel"></label>
+              <input type="date" id="expires_at" class="form-control">
+              <small class="text-muted" id="expiresHint"></small>
+            </div>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelBtn"></button>
@@ -76,8 +142,54 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- מודל עריכת הודעה -->
+  <div class="modal fade" id="editAnnouncementModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editModalTitle"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="editModalError" class="alert alert-danger d-none"></div>
+          <input type="hidden" id="editId">
+          <div class="mb-3">
+            <label class="form-label fw-bold" id="editTitleLabel"></label>
+            <input type="text" id="editTitle" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold" id="editContentLabel"></label>
+            <textarea id="editContent" class="form-control" rows="4"></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold" id="editPriorityLabel"></label>
+            <select id="editPriority" class="form-select">
+              <option value="low" id="editPriorityLow"></option>
+              <option value="medium" id="editPriorityMedium"></option>
+              <option value="high" id="editPriorityHigh"></option>
+              <option value="urgent" id="editPriorityUrgent"></option>
+            </select>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold" id="editStartsLabel"></label>
+              <input type="date" id="editStarts" class="form-control">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold" id="editExpiresLabel"></label>
+              <input type="date" id="editExpires" class="form-control">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="editCancelBtn"></button>
+          <button type="button" class="btn btn-primary" onclick="saveEdit()" id="editSaveBtn"></button>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user'));
@@ -88,26 +200,69 @@
 
     document.getElementById('userName').textContent = user.full_name;
 
-    // החלת תרגומים
+    // משתנה גלובלי לשמירת כל ההודעות
+    let allAnnouncements = [];
+
+    // תרגום רמת דחיפות לשפה הנוכחית
+    function getPriorityText(priority, isHe) {
+      const map = {
+        urgent: isHe ? '🔴 דחוף מאוד' : '🔴 Urgent',
+        high:   isHe ? '🟠 גבוה' : '🟠 High',
+        medium: isHe ? '🔵 בינוני' : '🔵 Medium',
+        low:    isHe ? '🟢 נמוך' : '🟢 Low'
+      };
+      return map[priority] || priority;
+    }
+
+    // החלת תרגומים על כל אלמנטי הדף
     function applyTranslations() {
       const isHe = getLang() === 'he';
       document.getElementById('pageTitle').textContent = t('announcements');
       document.getElementById('pageSubtitle').textContent = isHe ? 'הודעות ועדכוני הבניין' : 'Building announcements and updates';
       document.getElementById('addBtn').innerHTML = `<i class="bi bi-plus-circle"></i> ${t('addAnnouncement')}`;
       document.getElementById('loadingText').textContent = t('loading');
+      document.getElementById('searchLabel').textContent = isHe ? 'חיפוש לפי כותרת' : 'Search by title';
+      document.getElementById('searchInput').placeholder = isHe ? 'הקלד כותרת...' : 'Type title...';
+      document.getElementById('filterPriorityLabel').textContent = isHe ? 'דחיפות' : 'Priority';
+      document.getElementById('allPriorities').textContent = isHe ? 'כל הדחיפויות' : 'All Priorities';
+      document.getElementById('filterUrgent').textContent = isHe ? '🔴 דחוף מאוד' : '🔴 Urgent';
+      document.getElementById('filterHigh').textContent = isHe ? '🟠 גבוה' : '🟠 High';
+      document.getElementById('filterMedium').textContent = isHe ? '🔵 בינוני' : '🔵 Medium';
+      document.getElementById('filterLow').textContent = isHe ? '🟢 נמוך' : '🟢 Low';
+      document.getElementById('filterDateFromLabel').textContent = isHe ? 'מתאריך' : 'From Date';
+      document.getElementById('filterDateToLabel').textContent = isHe ? 'עד תאריך' : 'To Date';
+      document.getElementById('resetBtn').innerHTML = `<i class="bi bi-arrow-counterclockwise"></i> ${isHe ? 'איפוס' : 'Reset'}`;
       document.getElementById('modalTitle').textContent = t('addAnnouncement');
       document.getElementById('titleLabel').textContent = t('title') + ' *';
       document.getElementById('contentLabel').textContent = isHe ? 'תוכן *' : 'Content *';
+      document.getElementById('priorityLabel').textContent = isHe ? 'רמת דחיפות' : 'Priority';
+      document.getElementById('priorityLow').textContent = isHe ? '🟢 נמוך' : '🟢 Low';
+      document.getElementById('priorityMedium').textContent = isHe ? '🔵 בינוני' : '🔵 Medium';
+      document.getElementById('priorityHigh').textContent = isHe ? '🟠 גבוה' : '🟠 High';
+      document.getElementById('priorityUrgent').textContent = isHe ? '🔴 דחוף מאוד' : '🔴 Urgent';
+      document.getElementById('startsLabel').textContent = isHe ? 'תאריך התחלה' : 'Start Date';
+      document.getElementById('startsHint').textContent = isHe ? 'השאר ריק להצגה מיידית' : 'Leave empty to show immediately';
       document.getElementById('expiresLabel').textContent = t('expiresOn');
+      document.getElementById('expiresHint').textContent = isHe ? 'השאר ריק לתוקף ללא הגבלה' : 'Leave empty for no expiry';
       document.getElementById('cancelBtn').textContent = t('cancel');
       document.getElementById('postBtn').textContent = t('post');
+      document.getElementById('editModalTitle').textContent = isHe ? 'עריכת הודעה' : 'Edit Announcement';
+      document.getElementById('editTitleLabel').textContent = t('title') + ' *';
+      document.getElementById('editContentLabel').textContent = isHe ? 'תוכן *' : 'Content *';
+      document.getElementById('editPriorityLabel').textContent = isHe ? 'רמת דחיפות' : 'Priority';
+      document.getElementById('editPriorityLow').textContent = isHe ? '🟢 נמוך' : '🟢 Low';
+      document.getElementById('editPriorityMedium').textContent = isHe ? '🔵 בינוני' : '🔵 Medium';
+      document.getElementById('editPriorityHigh').textContent = isHe ? '🟠 גבוה' : '🟠 High';
+      document.getElementById('editPriorityUrgent').textContent = isHe ? '🔴 דחוף מאוד' : '🔴 Urgent';
+      document.getElementById('editStartsLabel').textContent = isHe ? 'תאריך התחלה' : 'Start Date';
+      document.getElementById('editExpiresLabel').textContent = t('expiresOn');
+      document.getElementById('editCancelBtn').textContent = t('cancel');
+      document.getElementById('editSaveBtn').innerHTML = `<i class="bi bi-check-lg"></i> ${isHe ? 'שמור' : 'Save'}`;
 
-      // הצגת כפתור הוספה למנהל בלבד
       if (user.role === 'manager') {
         document.getElementById('addBtn').classList.remove('d-none');
       }
 
-      // בניית תפריט צד לפי תפקיד
       const sidebarNav = document.getElementById('sidebarNav');
       if (user.role === 'manager') {
         sidebarNav.innerHTML = `
@@ -118,76 +273,128 @@
           <li class="nav-item"><a class="nav-link active" href="announcements.html"><i class="bi bi-megaphone"></i> ${t('announcements')}</a></li>
           <li class="nav-item"><a class="nav-link" href="reports.html"><i class="bi bi-bar-chart"></i> ${t('reports')}</a></li>
           <li class="nav-item"><a class="nav-link" href="users.html"><i class="bi bi-people"></i> ${t('users')}</a></li>
-          <li class="nav-item mt-4"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-left"></i> ${t('logout')}</a></li>
-        `;
+          <li class="nav-item mt-4"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-left"></i> ${t('logout')}</a></li>`;
       } else if (user.role === 'tenant') {
         sidebarNav.innerHTML = `
           <li class="nav-item"><a class="nav-link" href="dashboard-tenant.html"><i class="bi bi-speedometer2"></i> ${t('dashboard')}</a></li>
           <li class="nav-item"><a class="nav-link" href="report-fault.html"><i class="bi bi-plus-circle"></i> ${t('reportFault')}</a></li>
           <li class="nav-item"><a class="nav-link" href="my-faults.html"><i class="bi bi-exclamation-triangle"></i> ${t('myFaults')}</a></li>
           <li class="nav-item"><a class="nav-link active" href="announcements.html"><i class="bi bi-megaphone"></i> ${t('announcements')}</a></li>
-          <li class="nav-item mt-4"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-left"></i> ${t('logout')}</a></li>
-        `;
+          <li class="nav-item mt-4"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-left"></i> ${t('logout')}</a></li>`;
       } else {
         sidebarNav.innerHTML = `
           <li class="nav-item"><a class="nav-link" href="dashboard-technician.html"><i class="bi bi-speedometer2"></i> ${t('dashboard')}</a></li>
           <li class="nav-item"><a class="nav-link" href="assigned-faults.html"><i class="bi bi-exclamation-triangle"></i> ${t('assignedFaults')}</a></li>
           <li class="nav-item"><a class="nav-link active" href="announcements.html"><i class="bi bi-megaphone"></i> ${t('announcements')}</a></li>
-          <li class="nav-item mt-4"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-left"></i> ${t('logout')}</a></li>
-        `;
+          <li class="nav-item mt-4"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-left"></i> ${t('logout')}</a></li>`;
       }
     }
 
-    // טעינת מודעות
+    // טעינת הודעות מהשרת
     async function loadAnnouncements() {
       try {
         const response = await fetch('http://localhost:3000/api/announcements/all', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-
         const data = await response.json();
-        const announcements = data.announcements;
-        const list = document.getElementById('announcementsList');
-
-        if (announcements.length === 0) {
-          list.innerHTML = `<div class="col-12 text-center py-4 text-muted">${t('noAnnouncements')}</div>`;
-          return;
-        }
-
-        list.innerHTML = announcements.map(a => `
-          <div class="col-md-6">
-            <div class="card border-0 shadow-sm h-100">
-              <div class="card-header bg-primary text-white d-flex justify-content-between">
-                <h6 class="mb-0 fw-bold">${a.title}</h6>
-                ${user.role === 'manager' ? `
-                  <button class="btn btn-sm btn-danger" onclick="deleteAnnouncement(${a.id})">
-                    <i class="bi bi-trash"></i>
-                  </button>
-                ` : ''}
-              </div>
-              <div class="card-body">
-                <p class="text-muted">${a.content}</p>
-                <small class="text-muted">
-                  <i class="bi bi-person"></i> ${a.created_by_name || 'Manager'}
-                  &nbsp;|&nbsp;
-                  <i class="bi bi-calendar"></i> ${new Date(a.created_at).toLocaleDateString()}
-                  ${a.expires_at ? `&nbsp;|&nbsp;<i class="bi bi-clock"></i> ${t('expiresOn')}: ${new Date(a.expires_at).toLocaleDateString()}` : ''}
-                </small>
-              </div>
-            </div>
-          </div>
-        `).join('');
-
+        allAnnouncements = data.announcements;
+        renderAnnouncements(allAnnouncements);
       } catch (err) {
         console.error('Error loading announcements:', err);
       }
     }
 
-    // הוספת מודעה
+    // הצגת הודעות ממוינות לפי רמת דחיפות
+    function renderAnnouncements(announcements) {
+      const isHe = getLang() === 'he';
+      const list = document.getElementById('announcementsList');
+
+      document.getElementById('announcementsCount').textContent = isHe
+        ? `מציג ${announcements.length} הודעות`
+        : `Showing ${announcements.length} announcements`;
+
+      if (announcements.length === 0) {
+        list.innerHTML = `
+          <div class="col-12 text-center py-5">
+            <i class="bi bi-megaphone text-muted fs-1"></i>
+            <p class="mt-3 text-muted">${isHe ? 'אין הודעות פעילות' : 'No active announcements'}</p>
+          </div>`;
+        return;
+      }
+
+      list.innerHTML = announcements.map(a => `
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100 announcement-${a.priority || 'medium'}">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+              <h6 class="mb-0 fw-bold">${a.title}</h6>
+              <div class="d-flex gap-2 align-items-center flex-wrap">
+                <span class="badge priority-badge-${a.priority || 'medium'} rounded-pill px-2" style="font-size:0.75rem;">
+                  ${getPriorityText(a.priority || 'medium', isHe)}
+                </span>
+                ${user.role === 'manager' ? `
+                  <button class="btn btn-sm btn-warning"
+                    onclick="openEditModal(${a.id}, \`${a.title.replace(/`/g,'\\`')}\`, \`${a.content.replace(/`/g,'\\`')}\`, '${a.priority || 'medium'}', '${a.starts_at ? a.starts_at.split('T')[0] : ''}', '${a.expires_at ? a.expires_at.split('T')[0] : ''}')"
+                    title="${isHe ? 'ערוך' : 'Edit'}">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteAnnouncement(${a.id})" title="${isHe ? 'מחק' : 'Delete'}">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+            <div class="card-body">
+              <p class="text-muted mb-2">${a.content}</p>
+              <small class="text-muted">
+                <i class="bi bi-person"></i> ${a.created_by_name || 'Manager'}
+                &nbsp;|&nbsp;
+                <i class="bi bi-calendar"></i> ${new Date(a.created_at).toLocaleDateString()}
+                ${a.starts_at ? `&nbsp;|&nbsp;<i class="bi bi-play-circle text-success"></i> ${isHe ? 'מתאריך' : 'From'}: ${new Date(a.starts_at).toLocaleDateString()}` : ''}
+                ${a.expires_at ? `&nbsp;|&nbsp;<i class="bi bi-clock text-danger"></i> ${isHe ? 'עד תאריך' : 'Until'}: ${new Date(a.expires_at).toLocaleDateString()}` : ''}
+              </small>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // סינון הודעות לפי חיפוש, דחיפות ותאריכים
+    function filterAnnouncements() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const priority = document.getElementById('filterPriority').value;
+      const dateFrom = document.getElementById('filterDateFrom').value;
+      const dateTo = document.getElementById('filterDateTo').value;
+
+      const filtered = allAnnouncements.filter(a => {
+        const matchSearch = !search ||
+          a.title.toLowerCase().includes(search) ||
+          a.content.toLowerCase().includes(search);
+        const matchPriority = !priority || a.priority === priority;
+        const createdDate = new Date(a.created_at).toISOString().split('T')[0];
+        const matchFrom = !dateFrom || createdDate >= dateFrom;
+        const matchTo = !dateTo || createdDate <= dateTo;
+        return matchSearch && matchPriority && matchFrom && matchTo;
+      });
+
+      renderAnnouncements(filtered);
+    }
+
+    // איפוס פילטרים
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('filterPriority').value = '';
+      document.getElementById('filterDateFrom').value = '';
+      document.getElementById('filterDateTo').value = '';
+      renderAnnouncements(allAnnouncements);
+    }
+
+    // הוספת הודעה חדשה עם תאריך התחלה וסיום
     async function addAnnouncement() {
       const isHe = getLang() === 'he';
       const title = document.getElementById('title').value;
       const content = document.getElementById('content').value;
+      const priority = document.getElementById('priority').value;
+      const starts_at = document.getElementById('starts_at').value;
       const expires_at = document.getElementById('expires_at').value;
       const modalError = document.getElementById('modalError');
 
@@ -199,16 +406,19 @@
         return;
       }
 
+      // בדיקה שתאריך סיום אחרי תאריך התחלה
+      if (starts_at && expires_at && expires_at < starts_at) {
+        modalError.textContent = isHe ? 'תאריך הסיום חייב להיות אחרי תאריך ההתחלה.' : 'End date must be after start date.';
+        modalError.classList.remove('d-none');
+        return;
+      }
+
       try {
         const response = await fetch('http://localhost:3000/api/announcements/add', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ title, content, expires_at })
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ title, content, priority, starts_at, expires_at })
         });
-
         const data = await response.json();
         if (response.ok) {
           bootstrap.Modal.getInstance(document.getElementById('addAnnouncementModal')).hide();
@@ -223,25 +433,80 @@
       }
     }
 
-    // מחיקת מודעה
+    // פתיחת מודל עריכה עם נתונים קיימים
+    function openEditModal(id, title, content, priority, starts_at, expires_at) {
+      document.getElementById('editId').value = id;
+      document.getElementById('editTitle').value = title;
+      document.getElementById('editContent').value = content;
+      document.getElementById('editPriority').value = priority;
+      document.getElementById('editStarts').value = starts_at;
+      document.getElementById('editExpires').value = expires_at;
+      document.getElementById('editModalError').classList.add('d-none');
+      new bootstrap.Modal(document.getElementById('editAnnouncementModal')).show();
+    }
+
+    // שמירת עריכת הודעה
+    async function saveEdit() {
+      const isHe = getLang() === 'he';
+      const id = document.getElementById('editId').value;
+      const title = document.getElementById('editTitle').value;
+      const content = document.getElementById('editContent').value;
+      const priority = document.getElementById('editPriority').value;
+      const starts_at = document.getElementById('editStarts').value;
+      const expires_at = document.getElementById('editExpires').value;
+      const editModalError = document.getElementById('editModalError');
+
+      editModalError.classList.add('d-none');
+
+      if (!title || !content) {
+        editModalError.textContent = isHe ? 'אנא מלא את כל השדות הנדרשים.' : 'Please fill in all required fields.';
+        editModalError.classList.remove('d-none');
+        return;
+      }
+
+      if (starts_at && expires_at && expires_at < starts_at) {
+        editModalError.textContent = isHe ? 'תאריך הסיום חייב להיות אחרי תאריך ההתחלה.' : 'End date must be after start date.';
+        editModalError.classList.remove('d-none');
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:3000/api/announcements/update/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ title, content, priority, starts_at, expires_at })
+        });
+        const data = await response.json();
+        if (response.ok) {
+          bootstrap.Modal.getInstance(document.getElementById('editAnnouncementModal')).hide();
+          loadAnnouncements();
+        } else {
+          editModalError.textContent = data.message;
+          editModalError.classList.remove('d-none');
+        }
+      } catch (err) {
+        editModalError.textContent = isHe ? 'שגיאת חיבור.' : 'Connection error.';
+        editModalError.classList.remove('d-none');
+      }
+    }
+
+    // מחיקת הודעה
     async function deleteAnnouncement(id) {
       const isHe = getLang() === 'he';
-      if (!confirm(isHe ? 'האם אתה בטוח שברצונך למחוק מודעה זו?' : 'Are you sure you want to delete this announcement?')) return;
+      if (!confirm(isHe ? '⚠️ האם אתה בטוח שברצונך למחוק הודעה זו?' : '⚠️ Are you sure you want to delete this announcement?')) return;
 
       try {
         const response = await fetch(`http://localhost:3000/api/announcements/delete/${id}`, {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }
         });
-
-        if (response.ok) {
-          loadAnnouncements();
-        }
+        if (response.ok) { loadAnnouncements(); }
       } catch (err) {
-        alert(isHe ? 'שגיאה במחיקת המודעה.' : 'Error deleting announcement.');
+        alert(isHe ? 'שגיאה במחיקת ההודעה.' : 'Error deleting announcement.');
       }
     }
 
+    // פונקציית התנתקות
     function logout() {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
@@ -253,6 +518,5 @@
       loadAnnouncements();
     });
   </script>
-
 </body>
 </html>

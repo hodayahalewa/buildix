@@ -39,13 +39,50 @@
       </div>
     </div>
 
+    <!-- שורת סינון -->
     <div class="card border-0 shadow-sm mb-4">
-      <div class="card-header bg-white">
-        <h6 class="fw-bold mb-0">
-          <i class="bi bi-clock text-warning"></i>
-          <span id="pendingTitle"></span>
-          <span id="pendingCount" class="badge bg-warning text-dark ms-2">0</span>
-        </h6>
+      <div class="card-body">
+        <div class="row g-3 align-items-end">
+          <!-- חיפוש -->
+          <div class="col-md-4">
+            <label class="form-label small fw-bold" id="searchLabel"></label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
+              <input type="text" id="searchInput" class="form-control" oninput="filterUsers()">
+            </div>
+          </div>
+          <!-- סינון לפי תפקיד -->
+          <div class="col-md-3">
+            <label class="form-label small fw-bold" id="filterRoleLabel"></label>
+            <select id="filterRole" class="form-select" onchange="filterUsers()">
+              <option value="" id="allRoles"></option>
+              <option value="tenant" id="roleTenant"></option>
+              <option value="technician" id="roleTechnician"></option>
+              <option value="manager" id="roleManager"></option>
+            </select>
+          </div>
+          <!-- סינון לפי סטטוס אישור -->
+          <div class="col-md-3">
+            <label class="form-label small fw-bold" id="filterStatusLabel"></label>
+            <select id="filterStatus" class="form-select" onchange="filterUsers()">
+              <option value="" id="allStatuses"></option>
+              <option value="approved" id="statusApproved"></option>
+              <option value="pending" id="statusPending"></option>
+            </select>
+          </div>
+          <!-- כפתור איפוס -->
+          <div class="col-md-2">
+            <button class="btn btn-outline-secondary w-100" onclick="resetFilters()" id="resetBtn"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- טבלת משתמשים -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h6 class="fw-bold mb-0" id="usersTitle"></h6>
+        <small class="text-muted" id="usersCount"></small>
       </div>
       <div class="card-body p-0">
         <div class="table-responsive">
@@ -59,12 +96,13 @@
                 <th id="thRole"></th>
                 <th id="thFloor"></th>
                 <th id="thUnit"></th>
+                <th id="thStatus"></th>
                 <th id="thDate"></th>
                 <th id="thActions"></th>
               </tr>
             </thead>
-            <tbody id="pendingTable">
-              <tr><td colspan="9" class="text-center py-4 text-muted" id="loadingText"></td></tr>
+            <tbody id="usersTable">
+              <tr><td colspan="10" class="text-center py-4 text-muted" id="loadingText"></td></tr>
             </tbody>
           </table>
         </div>
@@ -72,8 +110,42 @@
     </div>
   </div>
 
+  <!-- מודל שליחת הודעה למשתמש -->
+  <div class="modal fade" id="messageModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="messageModalTitle"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="messageError" class="alert alert-danger d-none"></div>
+          <div id="messageSuccess" class="alert alert-success d-none"></div>
+          <input type="hidden" id="messageUserId">
+          <div class="mb-3">
+            <label class="form-label fw-bold" id="messageToLabel"></label>
+            <input type="text" id="messageTo" class="form-control" disabled>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold" id="messageSubjectLabel"></label>
+            <input type="text" id="messageSubject" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold" id="messageBodyLabel"></label>
+            <textarea id="messageBody" class="form-control" rows="5"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="messageCancelBtn"></button>
+          <button type="button" class="btn btn-primary" onclick="sendMessage()" id="messageSendBtn"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // בדיקה שהמשתמש מחובר ושהוא מנהל
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user'));
 
@@ -83,6 +155,10 @@
 
     document.getElementById('managerName').textContent = user.full_name;
 
+    // משתנה גלובלי לשמירת כל המשתמשים
+    let allUsers = [];
+
+    // החלת תרגומים
     function applyTranslations() {
       const isHe = getLang() === 'he';
       document.getElementById('nav-dashboard').textContent = t('dashboard');
@@ -94,63 +170,170 @@
       document.getElementById('nav-users').textContent = t('users');
       document.getElementById('nav-logout').textContent = t('logout');
       document.getElementById('pageTitle').textContent = isHe ? 'ניהול משתמשים' : 'Manage Users';
-      document.getElementById('pageSubtitle').textContent = isHe ? 'אשר או דחה משתמשים חדשים' : 'Approve or reject new user registrations';
-      document.getElementById('pendingTitle').textContent = t('pendingApprovals');
+      document.getElementById('pageSubtitle').textContent = isHe ? 'נהל את כל משתמשי המערכת' : 'Manage all system users';
+      document.getElementById('searchLabel').textContent = isHe ? 'חיפוש' : 'Search';
+      document.getElementById('searchInput').placeholder = isHe ? 'שם, מייל או טלפון...' : 'Name, email or phone...';
+      document.getElementById('filterRoleLabel').textContent = isHe ? 'תפקיד' : 'Role';
+      document.getElementById('allRoles').textContent = isHe ? 'כל התפקידים' : 'All Roles';
+      document.getElementById('roleTenant').textContent = isHe ? 'דייר' : 'Tenant';
+      document.getElementById('roleTechnician').textContent = isHe ? 'טכנאי' : 'Technician';
+      document.getElementById('roleManager').textContent = isHe ? 'מנהל' : 'Manager';
+      document.getElementById('filterStatusLabel').textContent = isHe ? 'סטטוס אישור' : 'Approval Status';
+      document.getElementById('allStatuses').textContent = isHe ? 'כולם' : 'All';
+      document.getElementById('statusApproved').textContent = isHe ? '✅ מאושר' : '✅ Approved';
+      document.getElementById('statusPending').textContent = isHe ? '⏳ ממתין' : '⏳ Pending';
+      document.getElementById('resetBtn').innerHTML = `<i class="bi bi-arrow-counterclockwise"></i> ${isHe ? 'איפוס' : 'Reset'}`;
+      document.getElementById('usersTitle').innerHTML = `<i class="bi bi-people text-primary"></i> ${isHe ? 'כל המשתמשים' : 'All Users'}`;
       document.getElementById('thName').textContent = t('fullName');
       document.getElementById('thEmail').textContent = t('emailAddress');
       document.getElementById('thPhone').textContent = t('phoneNumber');
       document.getElementById('thRole').textContent = t('role');
       document.getElementById('thFloor').textContent = t('floor');
       document.getElementById('thUnit').textContent = t('unitNumber');
+      document.getElementById('thStatus').textContent = isHe ? 'סטטוס' : 'Status';
       document.getElementById('thDate').textContent = t('date');
       document.getElementById('thActions').textContent = t('actions');
       document.getElementById('loadingText').textContent = t('loading');
+      document.getElementById('messageModalTitle').textContent = isHe ? 'שליחת הודעה למשתמש' : 'Send Message to User';
+      document.getElementById('messageToLabel').textContent = isHe ? 'אל' : 'To';
+      document.getElementById('messageSubjectLabel').textContent = isHe ? 'נושא *' : 'Subject *';
+      document.getElementById('messageBodyLabel').textContent = isHe ? 'תוכן ההודעה *' : 'Message *';
+      document.getElementById('messageCancelBtn').textContent = t('cancel');
+      document.getElementById('messageSendBtn').innerHTML = `<i class="bi bi-send"></i> ${isHe ? 'שלח' : 'Send'}`;
     }
 
-    async function loadPendingUsers() {
+    // טעינת כל המשתמשים מהשרת
+    async function loadUsers() {
       try {
-        const response = await fetch('http://localhost:3000/api/auth/pending', {
+        const response = await fetch('http://localhost:3000/api/auth/all-users', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
-        const users = data.users;
-        document.getElementById('pendingCount').textContent = users.length;
 
-        const tbody = document.getElementById('pendingTable');
-        if (users.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-muted">${getLang() === 'he' ? 'אין משתמשים ממתינים' : 'No pending users'}</td></tr>`;
-          return;
-        }
+        // מיון: ממתינים לאישור ראשון, אחר כך מאושרים
+        allUsers = data.users.sort((a, b) => {
+          if (a.is_approved === b.is_approved) {
+            return new Date(b.created_at) - new Date(a.created_at);
+          }
+          return a.is_approved - b.is_approved;
+        });
 
-        tbody.innerHTML = users.map(u => `
-          <tr>
-            <td>${u.id}</td>
-            <td>${u.full_name}</td>
-            <td>${u.email}</td>
-            <td>${u.phone || 'N/A'}</td>
-            <td><span class="badge bg-secondary">${t(u.role)}</span></td>
-            <td>${u.floor || 'N/A'}</td>
-            <td>${u.unit_number || 'N/A'}</td>
-            <td>${new Date(u.created_at).toLocaleDateString()}</td>
-            <td>
-              <button class="btn btn-sm btn-success me-1" onclick="approveUser(${u.id}, true)">
-                <i class="bi bi-check-lg"></i> ${t('approve')}
-              </button>
-              <button class="btn btn-sm btn-danger" onclick="approveUser(${u.id}, false)">
-                <i class="bi bi-x-lg"></i> ${t('reject')}
-              </button>
-            </td>
-          </tr>
-        `).join('');
+        renderUsers(allUsers);
       } catch (err) {
-        console.error('Error loading pending users:', err);
+        console.error('Error loading users:', err);
       }
     }
 
+    // הצגת משתמשים בטבלה
+    function renderUsers(users) {
+      const isHe = getLang() === 'he';
+      const tbody = document.getElementById('usersTable');
+
+      document.getElementById('usersCount').textContent = isHe
+        ? `${users.length} משתמשים`
+        : `${users.length} users`;
+
+      if (users.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-muted">${isHe ? 'לא נמצאו משתמשים' : 'No users found'}</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = users.map(u => `
+        <tr class="${!u.is_approved ? 'table-warning' : ''}">
+          <td>${u.id}</td>
+          <td class="fw-bold">${u.full_name}</td>
+          <td>${u.email}</td>
+          <td>${u.phone || 'N/A'}</td>
+          <td><span class="badge bg-secondary">${translateRole(u.role, isHe)}</span></td>
+          <td>${u.floor || 'N/A'}</td>
+          <td>${u.unit_number || 'N/A'}</td>
+          <td>
+            ${u.is_approved
+              ? `<span class="badge bg-success">✅ ${isHe ? 'מאושר' : 'Approved'}</span>`
+              : `<span class="badge bg-warning text-dark">⏳ ${isHe ? 'ממתין' : 'Pending'}</span>`
+            }
+          </td>
+          <td>${new Date(u.created_at).toLocaleDateString()}</td>
+          <td>
+            <div class="d-flex gap-1">
+              ${!u.is_approved ? `
+                <!-- כפתור אישור -->
+                <button class="btn btn-sm btn-success" onclick="approveUser(${u.id}, true)"
+                  title="${isHe ? 'אשר' : 'Approve'}">
+                  <i class="bi bi-check-lg"></i>
+                </button>
+                <!-- כפתור דחייה -->
+                <button class="btn btn-sm btn-danger" onclick="approveUser(${u.id}, false)"
+                  title="${isHe ? 'דחה' : 'Reject'}">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              ` : `
+                <!-- כפתור ביטול אישור -->
+                <button class="btn btn-sm btn-outline-warning" onclick="approveUser(${u.id}, false)"
+                  title="${isHe ? 'בטל אישור' : 'Revoke'}">
+                  <i class="bi bi-slash-circle"></i>
+                </button>
+              `}
+              <!-- כפתור שליחת הודעה -->
+              <button class="btn btn-sm btn-info text-white" onclick="openMessageModal(${u.id}, '${u.full_name}', '${u.email}')"
+                title="${isHe ? 'שלח הודעה' : 'Send message'}">
+                <i class="bi bi-envelope"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // תרגום תפקיד
+    function translateRole(role, isHe) {
+      const map = {
+        tenant: isHe ? 'דייר' : 'Tenant',
+        technician: isHe ? 'טכנאי' : 'Technician',
+        manager: isHe ? 'מנהל' : 'Manager'
+      };
+      return map[role] || role;
+    }
+
+    // סינון משתמשים
+    function filterUsers() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const role = document.getElementById('filterRole').value;
+      const status = document.getElementById('filterStatus').value;
+
+      const filtered = allUsers.filter(u => {
+        const matchSearch = !search ||
+          u.full_name.toLowerCase().includes(search) ||
+          u.email.toLowerCase().includes(search) ||
+          (u.phone && u.phone.includes(search));
+        const matchRole = !role || u.role === role;
+        const matchStatus = !status ||
+          (status === 'approved' && u.is_approved) ||
+          (status === 'pending' && !u.is_approved);
+        return matchSearch && matchRole && matchStatus;
+      });
+
+      renderUsers(filtered);
+    }
+
+    // איפוס פילטרים
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('filterRole').value = '';
+      document.getElementById('filterStatus').value = '';
+      renderUsers(allUsers);
+    }
+
+    // אישור או דחיית משתמש
     async function approveUser(userId, approved) {
       const isHe = getLang() === 'he';
-      const action = approved ? (isHe ? 'לאשר' : 'approve') : (isHe ? 'לדחות' : 'reject');
-      if (!confirm(isHe ? `האם אתה בטוח שברצונך ${action} משתמש זה?` : `Are you sure you want to ${action} this user?`)) return;
+      const action = approved
+        ? (isHe ? 'לאשר' : 'approve')
+        : (isHe ? 'לדחות/לבטל אישור' : 'reject/revoke');
+
+      if (!confirm(isHe
+        ? `האם אתה בטוח שברצונך ${action} משתמש זה?`
+        : `Are you sure you want to ${action} this user?`)) return;
 
       try {
         const response = await fetch('http://localhost:3000/api/auth/approve', {
@@ -160,7 +343,19 @@
         });
         const data = await response.json();
         if (response.ok) {
-          loadPendingUsers();
+          // עדכון מיידי ללא היעלמות המשתמש
+          const userIndex = allUsers.findIndex(u => u.id === userId);
+          if (userIndex !== -1) {
+            allUsers[userIndex].is_approved = approved ? 1 : 0;
+            // מיון מחדש - ממתינים ראשון
+            allUsers.sort((a, b) => {
+              if (a.is_approved === b.is_approved) {
+                return new Date(b.created_at) - new Date(a.created_at);
+              }
+              return a.is_approved - b.is_approved;
+            });
+          }
+          filterUsers();
           refreshAlerts();
         } else {
           alert(data.message);
@@ -170,6 +365,60 @@
       }
     }
 
+    // פתיחת מודל שליחת הודעה
+    function openMessageModal(userId, userName, userEmail) {
+      const isHe = getLang() === 'he';
+      document.getElementById('messageUserId').value = userId;
+      document.getElementById('messageTo').value = `${userName} (${userEmail})`;
+      document.getElementById('messageSubject').value = '';
+      document.getElementById('messageBody').value = '';
+      document.getElementById('messageError').classList.add('d-none');
+      document.getElementById('messageSuccess').classList.add('d-none');
+      new bootstrap.Modal(document.getElementById('messageModal')).show();
+    }
+
+    // שליחת הודעה למשתמש
+    async function sendMessage() {
+      const isHe = getLang() === 'he';
+      const userId = document.getElementById('messageUserId').value;
+      const subject = document.getElementById('messageSubject').value;
+      const body = document.getElementById('messageBody').value;
+      const messageError = document.getElementById('messageError');
+      const messageSuccess = document.getElementById('messageSuccess');
+
+      messageError.classList.add('d-none');
+      messageSuccess.classList.add('d-none');
+
+      if (!subject || !body) {
+        messageError.textContent = isHe ? 'אנא מלא נושא ותוכן הודעה.' : 'Please fill in subject and message.';
+        messageError.classList.remove('d-none');
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:3000/api/auth/send-message', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ user_id: userId, subject, body })
+        });
+        const data = await response.json();
+        if (response.ok) {
+          messageSuccess.textContent = isHe ? '✅ ההודעה נשלחה בהצלחה!' : '✅ Message sent successfully!';
+          messageSuccess.classList.remove('d-none');
+          setTimeout(() => {
+            bootstrap.Modal.getInstance(document.getElementById('messageModal')).hide();
+          }, 1500);
+        } else {
+          messageError.textContent = data.message;
+          messageError.classList.remove('d-none');
+        }
+      } catch (err) {
+        messageError.textContent = isHe ? 'שגיאת חיבור.' : 'Connection error.';
+        messageError.classList.remove('d-none');
+      }
+    }
+
+    // פונקציית התנתקות
     function logout() {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
@@ -178,7 +427,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       applyTranslations();
-      loadPendingUsers();
+      loadUsers();
     });
   </script>
 </body>

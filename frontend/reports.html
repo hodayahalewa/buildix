@@ -11,6 +11,31 @@
   <script src="js/translations.js"></script>
   <script src="js/lang-switcher.js"></script>
   <script src="js/alerts.js"></script>
+  <style>
+    .chart-slide { display: none; animation: fadeIn 0.5s ease; }
+    .chart-slide.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .carousel-btn {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: #1a3a6b; color: white; border: none; border-radius: 50%;
+      width: 32px; height: 32px; display: flex; align-items: center;
+      justify-content: center; cursor: pointer; z-index: 10;
+      transition: background 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .carousel-btn:hover { background: #c9a227; }
+    .carousel-btn-prev { left: 8px; }
+    .carousel-btn-next { right: 8px; }
+    .carousel-dots { display: flex; justify-content: center; gap: 8px; margin-top: 8px; }
+    .carousel-dot { width: 8px; height: 8px; border-radius: 50%; background: #dee2e6; cursor: pointer; transition: background 0.2s; }
+    .carousel-dot.active { background: #1a3a6b; }
+    .chart-title-bar { background: #1a3a6b; color: white; padding: 7px 50px; text-align: center; font-weight: 600; font-size: 0.88rem; }
+    .chart-progress { height: 3px; background: #dee2e6; overflow: hidden; }
+    .chart-progress-bar { height: 100%; background: #c9a227; width: 0%; }
+    .export-card { border-left: 4px solid #1a3a6b; }
+  </style>
 </head>
 <body>
 
@@ -26,6 +51,7 @@
       <li class="nav-item"><a class="nav-link" href="maintenance.html"><i class="bi bi-tools"></i> <span id="nav-maintenance"></span></a></li>
       <li class="nav-item"><a class="nav-link" href="energy.html"><i class="bi bi-lightning"></i> <span id="nav-energy"></span></a></li>
       <li class="nav-item"><a class="nav-link" href="announcements.html"><i class="bi bi-megaphone"></i> <span id="nav-announcements"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="invoices.html"><i class="bi bi-receipt"></i> <span id="nav-invoices"></span></a></li>
       <li class="nav-item"><a class="nav-link active" href="reports.html"><i class="bi bi-bar-chart"></i> <span id="nav-reports"></span></a></li>
       <li class="nav-item"><a class="nav-link" href="users.html"><i class="bi bi-people"></i> <span id="nav-users"></span></a></li>
       <li class="nav-item mt-4"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-left"></i> <span id="nav-logout"></span></a></li>
@@ -40,7 +66,8 @@
       </div>
     </div>
 
-    <div class="row g-4 mb-4">
+    <!-- כרטיסי סטטיסטיקות שורה 1 -->
+    <div class="row g-3 mb-3">
       <div class="col-md-3">
         <div class="card stat-card bg-primary text-white">
           <div class="stat-number" id="totalFaults">0</div>
@@ -49,8 +76,8 @@
       </div>
       <div class="col-md-3">
         <div class="card stat-card bg-warning text-white">
-          <div class="stat-number" id="openFaults">0</div>
-          <div class="stat-label text-white-50" id="statOpen"></div>
+          <div class="stat-number" id="activeFaults">0</div>
+          <div class="stat-label text-white-50" id="statActive"></div>
         </div>
       </div>
       <div class="col-md-3">
@@ -67,51 +94,157 @@
       </div>
     </div>
 
-    <div class="row g-4 mb-4">
-      <div class="col-md-6">
-        <div class="card border-0 shadow-sm">
-          <div class="card-header bg-white">
-            <h6 class="fw-bold mb-0" id="statusChartTitle"></h6>
-          </div>
-          <div class="card-body">
-            <canvas id="statusChart"></canvas>
-          </div>
+    <!-- כרטיסי סטטיסטיקות שורה 2 -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3">
+        <div class="card stat-card bg-danger text-white">
+          <div class="stat-number" id="openFaults">0</div>
+          <div class="stat-label text-white-50" id="statOpen"></div>
         </div>
       </div>
-      <div class="col-md-6">
-        <div class="card border-0 shadow-sm">
-          <div class="card-header bg-white">
-            <h6 class="fw-bold mb-0" id="urgencyChartTitle"></h6>
-          </div>
-          <div class="card-body">
-            <canvas id="urgencyChart"></canvas>
-          </div>
+      <div class="col-md-3">
+        <div class="card stat-card text-white" style="background:#6366f1;">
+          <div class="stat-number" id="inProgressFaults">0</div>
+          <div class="stat-label text-white-50" id="statInProgress"></div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card text-white" style="background:#8b5cf6;">
+          <div class="stat-number" id="waitingFaults">0</div>
+          <div class="stat-label text-white-50" id="statWaiting"></div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card text-white" style="background:#0891b2;">
+          <div class="stat-number" id="fastestResponse">-</div>
+          <div class="stat-label text-white-50" id="statFastest"></div>
         </div>
       </div>
     </div>
 
-    <div class="row g-4 mb-4">
-      <div class="col-md-6">
-        <div class="card border-0 shadow-sm">
-          <div class="card-header bg-white">
-            <h6 class="fw-bold mb-0" id="typeChartTitle"></h6>
+    <!-- קרוסלת גרפים -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="chart-title-bar" id="currentChartTitle"></div>
+      <div class="chart-progress">
+        <div class="chart-progress-bar" id="progressBar"></div>
+      </div>
+      <div class="card-body position-relative px-5 py-3">
+        <button class="carousel-btn carousel-btn-prev" onclick="changeChart(-1)">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <button class="carousel-btn carousel-btn-next" onclick="changeChart(1)">
+          <i class="bi bi-chevron-right"></i>
+        </button>
+        <div style="max-width:380px; height:280px; margin:0 auto; position:relative;">
+          <div class="chart-slide active" id="slide-0" style="height:280px; position:relative;">
+            <canvas id="statusChart"></canvas>
           </div>
-          <div class="card-body">
+          <div class="chart-slide" id="slide-1" style="height:280px; position:relative;">
+            <canvas id="urgencyChart"></canvas>
+          </div>
+          <div class="chart-slide" id="slide-2" style="height:280px; position:relative;">
             <canvas id="typeChart"></canvas>
           </div>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="card border-0 shadow-sm">
-          <div class="card-header bg-white">
-            <h6 class="fw-bold mb-0" id="energyChartTitle"></h6>
-          </div>
-          <div class="card-body">
+          <div class="chart-slide" id="slide-3" style="height:280px; position:relative;">
             <canvas id="energyChart"></canvas>
           </div>
         </div>
+        <div class="carousel-dots">
+          <div class="carousel-dot active" onclick="goToChart(0)"></div>
+          <div class="carousel-dot" onclick="goToChart(1)"></div>
+          <div class="carousel-dot" onclick="goToChart(2)"></div>
+          <div class="carousel-dot" onclick="goToChart(3)"></div>
+        </div>
       </div>
     </div>
+
+    <!-- ייצוא דוחות -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header text-white" style="background:#1a3a6b;">
+        <h6 class="fw-bold mb-0">
+          <i class="bi bi-download"></i>
+          <span id="exportTitle"></span>
+        </h6>
+      </div>
+      <div class="card-body">
+        <div class="row g-4">
+
+          <!-- דוח חודשי כולל -->
+          <div class="col-md-4">
+            <div class="card h-100 export-card border-0 shadow-sm">
+              <div class="card-body">
+                <h6 class="fw-bold mb-1"><i class="bi bi-calendar-month text-primary"></i> <span id="monthlyTitle"></span></h6>
+                <p class="text-muted small mb-3" id="monthlyDesc"></p>
+                <label class="form-label small fw-bold" id="selectMonthLabel"></label>
+                <input type="month" id="exportMonth" class="form-control form-control-sm mb-3">
+                <button class="btn btn-success w-100" onclick="exportMonthly()">
+                  <i class="bi bi-file-earmark-excel"></i>
+                  <span id="monthlyBtn"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- דוח חשבוניות -->
+          <div class="col-md-4">
+            <div class="card h-100 export-card border-0 shadow-sm">
+              <div class="card-body">
+                <h6 class="fw-bold mb-1"><i class="bi bi-receipt text-warning"></i> <span id="invoicesTitle"></span></h6>
+                <p class="text-muted small mb-3" id="invoicesDesc"></p>
+                <div class="row g-2 mb-3">
+                  <div class="col-6">
+                    <label class="form-label small fw-bold" id="fromDateLabel"></label>
+                    <input type="date" id="invFrom" class="form-control form-control-sm">
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label small fw-bold" id="toDateLabel"></label>
+                    <input type="date" id="invTo" class="form-control form-control-sm">
+                  </div>
+                </div>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-success flex-fill btn-sm" onclick="exportInvoices('excel')">
+                    <i class="bi bi-file-earmark-excel"></i> Excel
+                  </button>
+                  <button class="btn btn-danger flex-fill btn-sm" onclick="exportInvoices('pdf')">
+                    <i class="bi bi-file-earmark-pdf"></i> PDF
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- דוח אנרגיה -->
+          <div class="col-md-4">
+            <div class="card h-100 export-card border-0 shadow-sm">
+              <div class="card-body">
+                <h6 class="fw-bold mb-1"><i class="bi bi-lightning text-warning"></i> <span id="energyTitle"></span></h6>
+                <p class="text-muted small mb-3" id="energyDesc"></p>
+                <div class="row g-2 mb-3">
+                  <div class="col-6">
+                    <label class="form-label small fw-bold" id="fromMonthLabel"></label>
+                    <input type="month" id="energyFrom" class="form-control form-control-sm">
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label small fw-bold" id="toMonthLabel"></label>
+                    <input type="month" id="energyTo" class="form-control form-control-sm">
+                  </div>
+                </div>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-success flex-fill btn-sm" onclick="exportEnergy('excel')">
+                    <i class="bi bi-file-earmark-excel"></i> Excel
+                  </button>
+                  <button class="btn btn-danger flex-fill btn-sm" onclick="exportEnergy('pdf')">
+                    <i class="bi bi-file-earmark-pdf"></i> PDF
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -125,6 +258,17 @@
 
     document.getElementById('managerName').textContent = user.full_name;
 
+    let currentChart = 0;
+    const totalCharts = 4;
+    let autoPlayInterval = null;
+    let chartTitles = [];
+    const AUTOPLAY_DURATION = 10000;
+
+    // הגדרת חודש נוכחי
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+
+    // החלת תרגומים
     function applyTranslations() {
       const isHe = getLang() === 'he';
       document.getElementById('nav-dashboard').textContent = t('dashboard');
@@ -132,21 +276,47 @@
       document.getElementById('nav-maintenance').textContent = t('maintenance');
       document.getElementById('nav-energy').textContent = t('energy');
       document.getElementById('nav-announcements').textContent = t('announcements');
+      document.getElementById('nav-invoices').textContent = isHe ? 'חשבוניות' : 'Invoices';
       document.getElementById('nav-reports').textContent = t('reports');
       document.getElementById('nav-users').textContent = t('users');
       document.getElementById('nav-logout').textContent = t('logout');
-      document.getElementById('pageTitle').textContent = t('reportsTitle');
+      document.getElementById('pageTitle').textContent = isHe ? 'דוחות וניתוח נתונים' : 'Reports & Analytics';
       document.getElementById('pageSubtitle').textContent = isHe ? 'סקירת ביצועי הבניין' : 'Building performance overview';
-      document.getElementById('statTotal').textContent = t('totalFaults');
-      document.getElementById('statOpen').textContent = t('openFaults');
-      document.getElementById('statClosed').textContent = t('closedFaults');
-      document.getElementById('statAvg').textContent = t('avgResponse');
-      document.getElementById('statusChartTitle').innerHTML = `<i class="bi bi-pie-chart text-primary"></i> ${t('faultsByStatus')}`;
-      document.getElementById('urgencyChartTitle').innerHTML = `<i class="bi bi-bar-chart text-danger"></i> ${t('faultsByUrgency')}`;
-      document.getElementById('typeChartTitle').innerHTML = `<i class="bi bi-bar-chart text-success"></i> ${t('faultsByType')}`;
-      document.getElementById('energyChartTitle').innerHTML = `<i class="bi bi-lightning text-warning"></i> ${t('energyConsumption')}`;
+      document.getElementById('statTotal').textContent = isHe ? 'סה"כ תקלות' : 'Total Faults';
+      document.getElementById('statActive').textContent = isHe ? 'תקלות פעילות' : 'Active Faults';
+      document.getElementById('statClosed').textContent = isHe ? 'תקלות סגורות' : 'Closed Faults';
+      document.getElementById('statAvg').textContent = isHe ? 'זמן טיפול ממוצע (שעות)' : 'Avg Response (hours)';
+      document.getElementById('statOpen').textContent = isHe ? 'תקלות פתוחות' : 'Open Faults';
+      document.getElementById('statInProgress').textContent = isHe ? 'בטיפול' : 'In Progress';
+      document.getElementById('statWaiting').textContent = isHe ? 'ממתין לחלק' : 'Waiting Part';
+      document.getElementById('statFastest').textContent = isHe ? 'טיפול מהיר ביותר (שעות)' : 'Fastest Response (hours)';
+      document.getElementById('exportTitle').textContent = isHe ? '📥 ייצוא דוחות' : '📥 Export Reports';
+      document.getElementById('monthlyTitle').textContent = isHe ? 'דוח חודשי כולל' : 'Monthly Summary';
+      document.getElementById('monthlyDesc').textContent = isHe ? 'סיכום תקלות, חשבוניות ואנרגיה לחודש ספציפי' : 'Summary of faults, invoices and energy for a specific month';
+      document.getElementById('selectMonthLabel').textContent = isHe ? 'בחר חודש' : 'Select Month';
+      document.getElementById('monthlyBtn').textContent = isHe ? 'הורד Excel' : 'Download Excel';
+      document.getElementById('invoicesTitle').textContent = isHe ? 'דוח חשבוניות' : 'Invoices Report';
+      document.getElementById('invoicesDesc').textContent = isHe ? 'כל החשבוניות, סכומים וטכנאים' : 'All invoices, amounts and technicians';
+      document.getElementById('fromDateLabel').textContent = isHe ? 'מתאריך' : 'From';
+      document.getElementById('toDateLabel').textContent = isHe ? 'עד תאריך' : 'To';
+      document.getElementById('energyTitle').textContent = isHe ? 'דוח אנרגיה' : 'Energy Report';
+      document.getElementById('energyDesc').textContent = isHe ? 'צריכת חשמל ומים לפי חודשים' : 'Electricity and water by months';
+      document.getElementById('fromMonthLabel').textContent = isHe ? 'מחודש' : 'From';
+      document.getElementById('toMonthLabel').textContent = isHe ? 'עד חודש' : 'To';
+
+      // הגדרת חודש נוכחי
+      document.getElementById('exportMonth').value = currentMonth;
+
+      chartTitles = [
+        `🍩 ${isHe ? 'תקלות לפי סטטוס' : 'Faults by Status'}`,
+        `📊 ${isHe ? 'תקלות לפי דחיפות' : 'Faults by Urgency'}`,
+        `📈 ${isHe ? 'תקלות לפי סוג' : 'Faults by Type'}`,
+        `⚡ ${isHe ? 'צריכת אנרגיה' : 'Energy Consumption'}`
+      ];
+      document.getElementById('currentChartTitle').textContent = chartTitles[0];
     }
 
+    // טעינת נתונים
     async function loadReports() {
       const isHe = getLang() === 'he';
       try {
@@ -156,33 +326,39 @@
         const faultsData = await faultsRes.json();
         const faults = faultsData.faults;
 
-        document.getElementById('totalFaults').textContent = faults.length;
-        document.getElementById('openFaults').textContent = faults.filter(f => f.status === 'open').length;
-        document.getElementById('closedFaults').textContent = faults.filter(f => f.status === 'closed').length;
+        const openCount = faults.filter(f => f.status === 'open').length;
+        const inProgressCount = faults.filter(f => f.status === 'in_progress').length;
+        const waitingCount = faults.filter(f => f.status === 'waiting_part').length;
+        const closedCount = faults.filter(f => f.status === 'closed').length;
+        const activeCount = openCount + inProgressCount + waitingCount;
 
-        const closedFaults = faults.filter(f => f.status === 'closed' && f.closed_at);
-        if (closedFaults.length > 0) {
-          const avgHours = closedFaults.reduce((sum, f) => {
-            const created = new Date(f.created_at);
-            const closed = new Date(f.closed_at);
-            return sum + (closed - created) / (1000 * 60 * 60);
-          }, 0) / closedFaults.length;
-          document.getElementById('avgResponse').textContent = Math.round(avgHours);
+        document.getElementById('totalFaults').textContent = faults.length;
+        document.getElementById('activeFaults').textContent = activeCount;
+        document.getElementById('closedFaults').textContent = closedCount;
+        document.getElementById('openFaults').textContent = openCount;
+        document.getElementById('inProgressFaults').textContent = inProgressCount;
+        document.getElementById('waitingFaults').textContent = waitingCount;
+
+        const closedWithTime = faults.filter(f => f.status === 'closed' && f.closed_at && f.created_at);
+        if (closedWithTime.length > 0) {
+          const hours = closedWithTime.map(f =>
+            (new Date(f.closed_at) - new Date(f.created_at)) / (1000 * 60 * 60)
+          );
+          document.getElementById('avgResponse').textContent = Math.round(hours.reduce((a, b) => a + b, 0) / hours.length);
+          document.getElementById('fastestResponse').textContent = Math.round(Math.min(...hours));
+        } else {
+          document.getElementById('avgResponse').textContent = isHe ? 'אין נתונים' : 'No data';
+          document.getElementById('fastestResponse').textContent = isHe ? 'אין נתונים' : 'No data';
         }
 
         buildPieChart('statusChart',
-          [t('open'), t('in_progress'), t('waiting_part'), t('closed')],
-          [
-            faults.filter(f => f.status === 'open').length,
-            faults.filter(f => f.status === 'in_progress').length,
-            faults.filter(f => f.status === 'waiting_part').length,
-            faults.filter(f => f.status === 'closed').length
-          ],
+          [isHe ? 'פתוח' : 'Open', isHe ? 'בטיפול' : 'In Progress', isHe ? 'ממתין' : 'Waiting', isHe ? 'סגור' : 'Closed'],
+          [openCount, inProgressCount, waitingCount, closedCount],
           ['#f59e0b', '#3b82f6', '#8b5cf6', '#10b981']
         );
 
         buildBarChart('urgencyChart',
-          [t('low'), t('medium'), t('high')],
+          [isHe ? 'נמוך' : 'Low', isHe ? 'בינוני' : 'Medium', isHe ? 'גבוה' : 'High'],
           [
             faults.filter(f => f.urgency === 'low').length,
             faults.filter(f => f.urgency === 'medium').length,
@@ -191,10 +367,10 @@
           ['#10b981', '#f59e0b', '#ef4444']
         );
 
-        const types = [...new Set(faults.map(f => f.fault_type))];
+        const types = [...new Set(faults.map(f => f.fault_type).filter(Boolean))];
         buildBarChart('typeChart',
-          types,
-          types.map(type => faults.filter(f => f.fault_type === type).length),
+          types.length > 0 ? types : [isHe ? 'אין נתונים' : 'No data'],
+          types.length > 0 ? types.map(type => faults.filter(f => f.fault_type === type).length) : [0],
           ['#3b82f6']
         );
 
@@ -207,22 +383,121 @@
           .sort((a, b) => a.month.localeCompare(b.month));
 
         buildLineChart('energyChart',
-          electricity.map(r => r.month),
-          electricity.map(r => r.reading),
+          electricity.length > 0 ? electricity.map(r => r.month) : [isHe ? 'אין נתונים' : 'No data'],
+          electricity.length > 0 ? electricity.map(r => r.reading) : [0],
           isHe ? 'חשמל (קוט"ש)' : 'Electricity (kWh)',
           '#f59e0b'
         );
+
+        startAutoPlay();
 
       } catch (err) {
         console.error('Error loading reports:', err);
       }
     }
 
+    // ייצוא דוח חודשי
+    function exportMonthly() {
+      const isHe = getLang() === 'he';
+      const month = document.getElementById('exportMonth').value;
+      if (!month) {
+        alert(isHe ? 'אנא בחר חודש.' : 'Please select a month.');
+        return;
+      }
+      downloadFile(`http://localhost:3000/api/reports/monthly/excel?month=${month}&token=${token}`);
+    }
+
+    // ייצוא דוח חשבוניות
+    function exportInvoices(format) {
+      const from = document.getElementById('invFrom').value;
+      const to = document.getElementById('invTo').value;
+      let url = `http://localhost:3000/api/reports/invoices/${format}?token=${token}`;
+      if (from) url += `&from_date=${from}`;
+      if (to) url += `&to_date=${to}`;
+      downloadFile(url);
+    }
+
+    // ייצוא דוח אנרגיה
+    function exportEnergy(format) {
+      const from = document.getElementById('energyFrom').value;
+      const to = document.getElementById('energyTo').value;
+      let url = `http://localhost:3000/api/reports/energy/${format}?token=${token}`;
+      if (from) url += `&from_month=${from}`;
+      if (to) url += `&to_month=${to}`;
+      downloadFile(url);
+    }
+
+    // הורדת קובץ למחשב
+    function downloadFile(url) {
+      const a = document.createElement('a');
+      a.href = url;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => document.body.removeChild(a), 100);
+    }
+
+    // ניהול קרוסלה
+    function changeChart(direction) {
+      currentChart = (currentChart + direction + totalCharts) % totalCharts;
+      updateCarousel();
+      resetAutoPlay();
+    }
+
+    function goToChart(index) {
+      currentChart = index;
+      updateCarousel();
+      resetAutoPlay();
+    }
+
+    function updateCarousel() {
+      document.querySelectorAll('.chart-slide').forEach((slide, i) => {
+        slide.classList.toggle('active', i === currentChart);
+      });
+      document.querySelectorAll('.carousel-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentChart);
+      });
+      document.getElementById('currentChartTitle').textContent = chartTitles[currentChart];
+    }
+
+    function startAutoPlay() {
+      stopAutoPlay();
+      const progressBar = document.getElementById('progressBar');
+      progressBar.style.transition = 'none';
+      progressBar.style.width = '0%';
+      setTimeout(() => {
+        progressBar.style.transition = `width ${AUTOPLAY_DURATION}ms linear`;
+        progressBar.style.width = '100%';
+      }, 50);
+      autoPlayInterval = setInterval(() => {
+        currentChart = (currentChart + 1) % totalCharts;
+        updateCarousel();
+        progressBar.style.transition = 'none';
+        progressBar.style.width = '0%';
+        setTimeout(() => {
+          progressBar.style.transition = `width ${AUTOPLAY_DURATION}ms linear`;
+          progressBar.style.width = '100%';
+        }, 50);
+      }, AUTOPLAY_DURATION);
+    }
+
+    function stopAutoPlay() {
+      if (autoPlayInterval) clearInterval(autoPlayInterval);
+    }
+
+    function resetAutoPlay() {
+      stopAutoPlay();
+      startAutoPlay();
+    }
+
     function buildPieChart(id, labels, data, colors) {
       new Chart(document.getElementById(id), {
         type: 'doughnut',
         data: { labels, datasets: [{ data, backgroundColor: colors }] },
-        options: { responsive: true }
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }
+        }
       });
     }
 
@@ -230,7 +505,11 @@
       new Chart(document.getElementById(id), {
         type: 'bar',
         data: { labels, datasets: [{ data, backgroundColor: colors.length === 1 ? colors[0] : colors }] },
-        options: { responsive: true, plugins: { legend: { display: false } } }
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } } } }
+        }
       });
     }
 
@@ -238,7 +517,10 @@
       new Chart(document.getElementById(id), {
         type: 'line',
         data: { labels, datasets: [{ label, data, borderColor: color, backgroundColor: color + '20', tension: 0.4, fill: true }] },
-        options: { responsive: true, plugins: { legend: { display: false } } }
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } }
+        }
       });
     }
 

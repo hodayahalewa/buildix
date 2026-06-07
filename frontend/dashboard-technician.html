@@ -9,55 +9,41 @@
   <link rel="stylesheet" href="css/style.css">
   <script src="js/translations.js"></script>
   <script src="js/lang-switcher.js"></script>
+  <script src="js/alerts.js"></script>
+  <style>
+    .timeline { position: relative; padding: 0; list-style: none; }
+    .timeline-item { display: flex; gap: 12px; margin-bottom: 12px; }
+    .timeline-dot { width: 10px; height: 10px; border-radius: 50%; background: #1a3a6b; margin-top: 5px; flex-shrink: 0; }
+    .timeline-content { background: #f9fafb; border-radius: 8px; padding: 8px 12px; flex: 1; font-size: 0.82rem; }
+    .timeline-meta { font-size: 0.72rem; color: #9ca3af; margin-top: 3px; }
+  </style>
 </head>
 <body>
 
-  <!-- Sidebar -->
   <div class="sidebar">
     <div class="text-center py-4">
-      <h5 class="text-white fw-bold">
-        <img src="logo.png" height="40" class="me-2" alt="BUILDIX"> BUILDIX
-      </h5>
+      <img src="logo.png" height="80" alt="BUILDIX" class="mb-2">
+      <h5 class="text-white fw-bold mb-0">BUILDIX</h5>
       <small class="text-secondary" id="techName"></small>
     </div>
     <ul class="nav flex-column px-2">
-      <li class="nav-item">
-        <a class="nav-link active" href="dashboard-technician.html">
-          <i class="bi bi-speedometer2"></i> <span id="nav-dashboard"></span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="assigned-faults.html">
-          <i class="bi bi-exclamation-triangle"></i> <span id="nav-assignedFaults"></span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="announcements.html">
-          <i class="bi bi-megaphone"></i> <span id="nav-announcements"></span>
-        </a>
-      </li>
-      <li class="nav-item mt-4">
-        <a class="nav-link text-danger" href="#" onclick="logout()">
-          <i class="bi bi-box-arrow-left"></i> <span id="nav-logout"></span>
-        </a>
-      </li>
+      <li class="nav-item"><a class="nav-link active" href="dashboard-technician.html"><i class="bi bi-speedometer2"></i> <span id="nav-dashboard"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="assigned-faults.html"><i class="bi bi-exclamation-triangle"></i> <span id="nav-assignedFaults"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="announcements.html"><i class="bi bi-megaphone"></i> <span id="nav-announcements"></span></a></li>
+      <li class="nav-item mt-4"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-left"></i> <span id="nav-logout"></span></a></li>
     </ul>
   </div>
 
-  <!-- Main Content -->
   <div class="main-content">
-
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
         <h4 class="fw-bold mb-0" id="pageTitle"></h4>
         <small class="text-muted"><span id="welcomeText"></span>, <span id="welcomeName"></span></small>
       </div>
-      <div>
-        <span class="badge bg-warning text-dark">Technician</span>
-      </div>
+      <span class="badge bg-warning text-dark">Technician</span>
     </div>
 
-    <!-- Stats Cards -->
+    <!-- כרטיסי סטטיסטיקות -->
     <div class="row g-4 mb-4">
       <div class="col-md-4">
         <div class="card stat-card bg-primary text-white">
@@ -79,7 +65,7 @@
       </div>
     </div>
 
-    <!-- Assigned Faults Table -->
+    <!-- טבלת תקלות מוקצות -->
     <div class="card border-0 shadow-sm">
       <div class="card-header bg-white d-flex justify-content-between align-items-center">
         <h6 class="fw-bold mb-0">
@@ -103,21 +89,90 @@
               </tr>
             </thead>
             <tbody id="faultsTable">
-              <tr>
-                <td colspan="7" class="text-center py-4 text-muted" id="loadingText"></td>
-              </tr>
+              <tr><td colspan="7" class="text-center py-4 text-muted" id="loadingText"></td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
+  </div>
 
+  <!-- מודל עדכון סטטוס + היסטוריה -->
+  <div class="modal fade" id="updateModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitle"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="updateError" class="alert alert-danger d-none"></div>
+          <input type="hidden" id="updateFaultId">
+
+          <div class="row g-3">
+            <!-- צד שמאל - עדכון -->
+            <div class="col-md-6">
+              <h6 class="fw-bold mb-3" id="updateSectionTitle"></h6>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold" id="statusLabel"></label>
+                <select id="newStatus" class="form-select" onchange="onStatusChange()">
+                  <option value="in_progress" id="statusInProgressOpt"></option>
+                  <option value="waiting_part" id="statusWaitingOpt"></option>
+                  <option value="closed" id="statusClosedOpt"></option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold" id="noteLabel"></label>
+                <textarea id="note" class="form-control" rows="3"></textarea>
+              </div>
+
+              <!-- קטע חשבונית -->
+              <div id="invoiceSection" class="d-none">
+                <hr>
+                <div class="alert alert-warning py-2">
+                  <i class="bi bi-exclamation-triangle"></i>
+                  <span id="invoiceWarning"></span>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold" id="invoiceLabel"></label>
+                  <input type="file" id="invoiceFile" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                  <small class="text-muted" id="invoiceHint"></small>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold" id="amountLabel"></label>
+                  <div class="input-group">
+                    <span class="input-group-text">₪</span>
+                    <input type="number" id="invoiceAmount" class="form-control" min="0" step="0.01">
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold" id="invoiceDescLabel"></label>
+                  <input type="text" id="invoiceDesc" class="form-control">
+                </div>
+              </div>
+            </div>
+
+            <!-- צד ימין - היסטוריה -->
+            <div class="col-md-6">
+              <h6 class="fw-bold mb-3" id="historySectionTitle"></h6>
+              <div id="historyList" style="max-height:380px; overflow-y:auto;">
+                <div class="text-center text-muted py-3" id="historyLoading"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelBtn"></button>
+          <button type="button" class="btn btn-primary" onclick="submitUpdate()" id="updateBtn"></button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
   <script>
-    // בדיקה שהמשתמש מחובר ושהוא טכנאי
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user'));
 
@@ -127,6 +182,7 @@
 
     // החלת תרגומים
     function applyTranslations() {
+      const isHe = getLang() === 'he';
       document.getElementById('techName').textContent = user.full_name;
       document.getElementById('welcomeName').textContent = user.full_name;
       document.getElementById('pageTitle').textContent = t('dashboard');
@@ -147,6 +203,22 @@
       document.getElementById('thStatus').textContent = t('status');
       document.getElementById('thActions').textContent = t('actions');
       document.getElementById('loadingText').textContent = t('loading');
+      document.getElementById('modalTitle').textContent = isHe ? 'עדכון תקלה' : 'Update Fault';
+      document.getElementById('updateSectionTitle').textContent = isHe ? '✏️ עדכון סטטוס' : '✏️ Update Status';
+      document.getElementById('historySectionTitle').textContent = isHe ? '📋 היסטוריית עדכונים' : '📋 Update History';
+      document.getElementById('statusLabel').textContent = isHe ? 'סטטוס חדש' : 'New Status';
+      document.getElementById('statusInProgressOpt').textContent = t('in_progress');
+      document.getElementById('statusWaitingOpt').textContent = t('waiting_part');
+      document.getElementById('statusClosedOpt').textContent = t('closed');
+      document.getElementById('noteLabel').textContent = isHe ? 'הערה' : 'Note';
+      document.getElementById('cancelBtn').textContent = t('cancel');
+      document.getElementById('updateBtn').textContent = isHe ? 'עדכן' : 'Update';
+      document.getElementById('invoiceWarning').textContent = isHe ? '⚠️ לסגירת תקלה חובה להעלות חשבונית!' : '⚠️ Invoice required to close fault!';
+      document.getElementById('invoiceLabel').textContent = isHe ? 'חשבונית (PDF/תמונה) *' : 'Invoice (PDF/Image) *';
+      document.getElementById('invoiceHint').textContent = isHe ? 'PDF, JPG, PNG עד 5MB' : 'PDF, JPG, PNG up to 5MB';
+      document.getElementById('amountLabel').textContent = isHe ? 'סכום החשבונית' : 'Invoice Amount';
+      document.getElementById('invoiceDescLabel').textContent = isHe ? 'תיאור העבודה' : 'Work Description';
+      document.getElementById('historyLoading').textContent = t('loading');
     }
 
     // טעינת תקלות מוקצות
@@ -155,7 +227,6 @@
         const response = await fetch('http://localhost:3000/api/faults/assigned', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-
         const data = await response.json();
         const faults = data.faults;
 
@@ -164,6 +235,8 @@
         document.getElementById('completed').textContent = faults.filter(f => f.status === 'closed').length;
 
         const tbody = document.getElementById('faultsTable');
+        const isHe = getLang() === 'he';
+
         if (faults.length === 0) {
           tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">${t('noFaults')}</td></tr>`;
           return;
@@ -178,9 +251,15 @@
             <td><span class="badge-${fault.urgency}">${t(fault.urgency)}</span></td>
             <td><span class="badge-${fault.status.replace('_', '-')}">${t(fault.status)}</span></td>
             <td>
-              <button class="btn btn-sm btn-primary" onclick="updateStatus(${fault.id})">
-                <i class="bi bi-pencil"></i> ${t('edit')}
-              </button>
+              ${fault.status !== 'closed' ? `
+                <button class="btn btn-sm btn-primary" onclick="openUpdateModal(${fault.id}, '${fault.status}')">
+                  <i class="bi bi-pencil"></i> ${t('edit')}
+                </button>
+              ` : `
+                <button class="btn btn-sm btn-outline-secondary" onclick="openUpdateModal(${fault.id}, '${fault.status}')">
+                  <i class="bi bi-clock-history"></i> ${isHe ? 'היסטוריה' : 'History'}
+                </button>
+              `}
             </td>
           </tr>
         `).join('');
@@ -190,32 +269,188 @@
       }
     }
 
-    // עדכון סטטוס תקלה
-    async function updateStatus(faultId) {
-      const status = prompt(getLang() === 'he' ? 'הזן סטטוס חדש:\n- in_progress\n- waiting_part\n- closed' : 'Enter new status:\n- in_progress\n- waiting_part\n- closed');
-      if (!status) return;
+    // פתיחת מודל עדכון
+    async function openUpdateModal(faultId, currentStatus) {
+      const isHe = getLang() === 'he';
+      document.getElementById('updateFaultId').value = faultId;
+      document.getElementById('note').value = '';
+      document.getElementById('invoiceFile').value = '';
+      document.getElementById('invoiceAmount').value = '';
+      document.getElementById('invoiceDesc').value = '';
+      document.getElementById('invoiceSection').classList.add('d-none');
+      document.getElementById('updateError').classList.add('d-none');
+      document.getElementById('newStatus').value = currentStatus === 'closed' ? 'in_progress' : currentStatus;
+      document.getElementById('updateBtn').textContent = isHe ? 'עדכן' : 'Update';
 
-      const note = prompt(getLang() === 'he' ? 'הוסף הערה (אופציונלי):' : 'Add a note (optional):');
+      if (currentStatus === 'closed') {
+        document.getElementById('updateBtn').classList.add('d-none');
+        document.getElementById('newStatus').disabled = true;
+        document.getElementById('note').disabled = true;
+      } else {
+        document.getElementById('updateBtn').classList.remove('d-none');
+        document.getElementById('newStatus').disabled = false;
+        document.getElementById('note').disabled = false;
+      }
+
+      new bootstrap.Modal(document.getElementById('updateModal')).show();
+      await loadFaultHistory(faultId);
+    }
+
+    // טעינת היסטוריית עדכונים
+    async function loadFaultHistory(faultId) {
+      const isHe = getLang() === 'he';
+      const historyList = document.getElementById('historyList');
+      historyList.innerHTML = `<div class="text-center text-muted py-3"><i class="bi bi-hourglass-split"></i></div>`;
 
       try {
-        const response = await fetch('http://localhost:3000/api/faults/status', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ fault_id: faultId, status, note })
+        const response = await fetch(`http://localhost:3000/api/faults/updates/${faultId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
         });
-
         const data = await response.json();
-        if (response.ok) {
-          alert(getLang() === 'he' ? 'הסטטוס עודכן בהצלחה!' : 'Status updated successfully!');
-          loadAssignedFaults();
-        } else {
-          alert(data.message);
+        const updates = data.updates;
+
+        if (updates.length === 0) {
+          historyList.innerHTML = `
+            <div class="text-center text-muted py-3">
+              <i class="bi bi-inbox fs-3"></i>
+              <p class="mt-2 small">${isHe ? 'אין עדכונים עדיין' : 'No updates yet'}</p>
+            </div>`;
+          return;
         }
+
+        const statusColors = {
+          open: '#f59e0b',
+          in_progress: '#3b82f6',
+          waiting_part: '#8b5cf6',
+          closed: '#10b981'
+        };
+
+        historyList.innerHTML = `<ul class="timeline">` +
+          updates.map(u => `
+            <li class="timeline-item">
+              <div class="timeline-dot" style="background:${statusColors[u.status] || '#1a3a6b'};"></div>
+              <div class="timeline-content">
+                <div class="d-flex justify-content-between align-items-center">
+                  <strong style="color:${statusColors[u.status] || '#1a3a6b'}; font-size:0.8rem;">
+                    ${t(u.status)}
+                  </strong>
+                  <span class="badge bg-light text-dark" style="font-size:0.7rem;">
+                    ${u.updated_by_name || 'N/A'}
+                  </span>
+                </div>
+                ${u.note ? `<div class="mt-1" style="color:#374151;">${u.note}</div>` : ''}
+                <div class="timeline-meta">
+                  <i class="bi bi-calendar3"></i>
+                  ${new Date(u.created_at).toLocaleDateString('he-IL')}
+                  ${new Date(u.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}
+                </div>
+              </div>
+            </li>
+          `).join('') +
+          `</ul>`;
+
       } catch (err) {
-        alert(getLang() === 'he' ? 'שגיאה. אנא נסה שוב.' : 'Error. Please try again.');
+        historyList.innerHTML = `<div class="text-center text-danger py-3">${isHe ? 'שגיאה בטעינה' : 'Loading error'}</div>`;
+      }
+    }
+
+    // שינוי סטטוס - הצג/הסתר חשבונית
+    function onStatusChange() {
+      const status = document.getElementById('newStatus').value;
+      const invoiceSection = document.getElementById('invoiceSection');
+      const isHe = getLang() === 'he';
+
+      if (status === 'closed') {
+        invoiceSection.classList.remove('d-none');
+        document.getElementById('updateBtn').textContent = isHe
+          ? '🔒 סגור תקלה ושלח חשבונית'
+          : '🔒 Close & Send Invoice';
+      } else {
+        invoiceSection.classList.add('d-none');
+        document.getElementById('updateBtn').textContent = isHe ? 'עדכן' : 'Update';
+      }
+    }
+
+    // שליחת עדכון
+    async function submitUpdate() {
+      const isHe = getLang() === 'he';
+      const fault_id = document.getElementById('updateFaultId').value;
+      const status = document.getElementById('newStatus').value;
+      const note = document.getElementById('note').value;
+      const errorEl = document.getElementById('updateError');
+      errorEl.classList.add('d-none');
+
+      if (status === 'closed') {
+        const invoiceFile = document.getElementById('invoiceFile').files[0];
+        if (!invoiceFile) {
+          errorEl.textContent = isHe ? '⚠️ חובה להעלות חשבונית לפני סגירת תקלה!' : '⚠️ Invoice required to close fault!';
+          errorEl.classList.remove('d-none');
+          return;
+        }
+
+        try {
+          // עדכון סטטוס
+          const statusRes = await fetch('http://localhost:3000/api/faults/status', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ fault_id, status, note })
+          });
+          if (!statusRes.ok) {
+            const d = await statusRes.json();
+            errorEl.textContent = d.message;
+            errorEl.classList.remove('d-none');
+            return;
+          }
+
+          // העלאת חשבונית
+          const formData = new FormData();
+          formData.append('invoice', invoiceFile);
+          formData.append('fault_id', fault_id);
+          formData.append('amount', document.getElementById('invoiceAmount').value || '');
+          formData.append('description', document.getElementById('invoiceDesc').value || '');
+
+          const invoiceRes = await fetch('http://localhost:3000/api/invoices/upload', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+          });
+
+          const invoiceData = await invoiceRes.json();
+          if (!invoiceRes.ok) {
+            errorEl.textContent = invoiceData.message;
+            errorEl.classList.remove('d-none');
+            return;
+          }
+
+          bootstrap.Modal.getInstance(document.getElementById('updateModal')).hide();
+          alert(isHe ? '✅ התקלה נסגרה והחשבונית נשלחה למנהל!' : '✅ Fault closed and invoice sent!');
+          loadAssignedFaults();
+          if (window.refreshAlerts) window.refreshAlerts();
+
+        } catch (err) {
+          errorEl.textContent = isHe ? 'שגיאת חיבור.' : 'Connection error.';
+          errorEl.classList.remove('d-none');
+        }
+
+      } else {
+        try {
+          const response = await fetch('http://localhost:3000/api/faults/status', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ fault_id, status, note })
+          });
+          const data = await response.json();
+          if (response.ok) {
+            bootstrap.Modal.getInstance(document.getElementById('updateModal')).hide();
+            loadAssignedFaults();
+          } else {
+            errorEl.textContent = data.message;
+            errorEl.classList.remove('d-none');
+          }
+        } catch (err) {
+          errorEl.textContent = isHe ? 'שגיאת חיבור.' : 'Connection error.';
+          errorEl.classList.remove('d-none');
+        }
       }
     }
 
@@ -230,6 +465,5 @@
       loadAssignedFaults();
     });
   </script>
-
 </body>
 </html>
