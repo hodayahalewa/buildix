@@ -9,49 +9,75 @@
   <link rel="stylesheet" href="css/style.css">
   <script src="js/translations.js"></script>
   <script src="js/lang-switcher.js"></script>
+  <script src="js/alerts.js"></script>
+  <style>
+    .image-preview-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .image-preview-item {
+      position: relative;
+      width: 90px;
+      height: 90px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 2px solid #dee2e6;
+    }
+    .image-preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .image-preview-item .remove-btn {
+      position: absolute;
+      top: 3px;
+      right: 3px;
+      background: rgba(239,68,68,0.9);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+    }
+    .add-image-btn {
+      width: 90px;
+      height: 90px;
+      border: 2px dashed #1a3a6b;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #1a3a6b;
+      font-size: 0.7rem;
+      background: #f8faff;
+      transition: background 0.2s;
+    }
+    .add-image-btn:hover { background: #eff6ff; }
+    .add-image-btn i { font-size: 1.4rem; margin-bottom: 3px; }
+  </style>
 </head>
 <body>
 
-  <!-- Sidebar -->
   <div class="sidebar">
     <div class="text-center py-4">
-      <h5 class="text-white fw-bold">
-        <img src="logo.png" height="40" class="me-2" alt="BUILDIX"> BUILDIX
-      </h5>
+      <img src="logo.png" height="80" alt="BUILDIX" class="mb-2">
+      <h5 class="text-white fw-bold mb-0">BUILDIX</h5>
       <small class="text-secondary" id="userName"></small>
     </div>
-    <ul class="nav flex-column px-2">
-      <li class="nav-item">
-        <a class="nav-link" href="dashboard-tenant.html">
-          <i class="bi bi-speedometer2"></i> <span id="nav-dashboard"></span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link active" href="report-fault.html">
-          <i class="bi bi-plus-circle"></i> <span id="nav-reportFault"></span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="my-faults.html">
-          <i class="bi bi-exclamation-triangle"></i> <span id="nav-myFaults"></span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="announcements.html">
-          <i class="bi bi-megaphone"></i> <span id="nav-announcements"></span>
-        </a>
-      </li>
-      <li class="nav-item mt-4">
-        <a class="nav-link text-danger" href="#" onclick="logout()">
-          <i class="bi bi-box-arrow-left"></i> <span id="nav-logout"></span>
-        </a>
-      </li>
-    </ul>
+    <ul class="nav flex-column px-2" id="sidebarNav"></ul>
   </div>
 
-  <!-- Main Content -->
   <div class="main-content">
-
     <div class="mb-4">
       <h4 class="fw-bold mb-0" id="pageTitle"></h4>
       <small class="text-muted" id="pageSubtitle"></small>
@@ -65,11 +91,13 @@
             <div id="errorMsg" class="alert alert-danger d-none"></div>
             <div id="successMsg" class="alert alert-success d-none"></div>
 
+            <!-- כותרת -->
             <div class="mb-3">
               <label class="form-label fw-bold" id="titleLabel"></label>
               <input type="text" id="title" class="form-control">
             </div>
 
+            <!-- סוג תקלה -->
             <div class="mb-3">
               <label class="form-label fw-bold" id="typeLabel"></label>
               <select id="fault_type" class="form-select">
@@ -85,22 +113,25 @@
               </select>
             </div>
 
+            <!-- תיאור -->
             <div class="mb-3">
               <label class="form-label fw-bold" id="descLabel"></label>
               <textarea id="description" class="form-control" rows="4"></textarea>
             </div>
 
+            <!-- קומה ויחידה -->
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label class="form-label fw-bold" id="floorLabel"></label>
-                <input type="text" id="floor" class="form-control" placeholder="e.g. 3">
+                <input type="text" id="floor" class="form-control">
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label fw-bold" id="unitLabel"></label>
-                <input type="text" id="unit_number" class="form-control" placeholder="e.g. 12">
+                <input type="text" id="unit_number" class="form-control">
               </div>
             </div>
 
+            <!-- דחיפות -->
             <div class="mb-3">
               <label class="form-label fw-bold" id="urgencyLabel"></label>
               <div class="d-flex gap-3">
@@ -119,6 +150,38 @@
               </div>
             </div>
 
+            <!-- העלאת תמונות -->
+            <div class="mb-4">
+              <label class="form-label fw-bold" id="photosLabel"></label>
+              <small class="text-muted d-block mb-2" id="photosHint"></small>
+
+              <!-- תצוגת תמונות + כפתור הוספה -->
+              <div class="image-preview-container" id="imagePreviewContainer">
+                <!-- כפתור הוספת תמונה -->
+                <div class="add-image-btn" id="addImageBtn" onclick="triggerImageInput()">
+                  <i class="bi bi-plus-circle"></i>
+                  <span id="addPhotoText"></span>
+                </div>
+              </div>
+
+              <!-- input נסתר לבחירת קבצים מהגלריה -->
+              <input type="file" id="imageInput" accept="image/*" multiple style="display:none" onchange="handleImageSelect(event)">
+
+              <!-- input נסתר לצילום ממצלמה -->
+              <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleImageSelect(event)">
+
+              <!-- כפתורי מקור תמונה - מוצגים מתחת -->
+              <div class="d-flex gap-2 mt-2" id="imageSourceBtns" style="display:none !important;">
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('imageInput').click()">
+                  <i class="bi bi-images"></i> <span id="galleryBtn"></span>
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="cameraBtn" onclick="document.getElementById('cameraInput').click()">
+                  <i class="bi bi-camera"></i> <span id="cameraBtnText"></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- כפתור שליחה -->
             <div class="d-grid mt-4">
               <button onclick="reportFault()" class="btn btn-primary btn-lg" id="submitBtn"></button>
             </div>
@@ -127,7 +190,7 @@
         </div>
       </div>
 
-      <!-- Tips Card -->
+      <!-- טיפים -->
       <div class="col-md-4">
         <div class="card border-0 shadow-sm bg-light">
           <div class="card-body p-4">
@@ -138,14 +201,11 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
   <script>
-    // בדיקה שהמשתמש מחובר
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user'));
 
@@ -153,15 +213,14 @@
       window.location.href = 'login.html';
     }
 
+    // מערך לשמירת הקבצים שנבחרו
+    let selectedImages = [];
+    const MAX_IMAGES = 3;
+
     // החלת תרגומים
     function applyTranslations() {
       const isHe = getLang() === 'he';
       document.getElementById('userName').textContent = user.full_name;
-      document.getElementById('nav-dashboard').textContent = t('dashboard');
-      document.getElementById('nav-reportFault').textContent = t('reportFault');
-      document.getElementById('nav-myFaults').textContent = t('myFaults');
-      document.getElementById('nav-announcements').textContent = t('announcements');
-      document.getElementById('nav-logout').textContent = t('logout');
       document.getElementById('pageTitle').textContent = t('reportFault');
       document.getElementById('pageSubtitle').textContent = isHe ? 'מלא את הפרטים הבאים לדיווח תקלה' : 'Fill in the details below to report a fault';
       document.getElementById('titleLabel').textContent = t('title') + ' *';
@@ -173,6 +232,11 @@
       document.getElementById('lowLabel').textContent = t('low');
       document.getElementById('mediumLabel').textContent = t('medium');
       document.getElementById('highLabel').textContent = t('high');
+      document.getElementById('photosLabel').textContent = isHe ? 'תמונות (עד 3)' : 'Photos (up to 3)';
+      document.getElementById('photosHint').textContent = isHe ? 'ניתן לצלם ישירות או לבחור מהגלריה' : 'Take a photo or choose from gallery';
+      document.getElementById('addPhotoText').textContent = isHe ? 'הוסף' : 'Add';
+      document.getElementById('galleryBtn').textContent = isHe ? 'גלריה' : 'Gallery';
+      document.getElementById('cameraBtnText').textContent = isHe ? 'מצלמה' : 'Camera';
       document.getElementById('submitBtn').innerHTML = `<i class="bi bi-send"></i> ${isHe ? 'שלח דיווח תקלה' : 'Submit Fault Report'}`;
       document.getElementById('tipsTitle').textContent = isHe ? 'טיפים' : 'Tips';
 
@@ -187,25 +251,155 @@
       document.getElementById('structural').textContent = isHe ? 'מבני' : 'Structural';
       document.getElementById('other').textContent = isHe ? 'אחר' : 'Other';
 
-      // טיפים
       document.getElementById('tipsList').innerHTML = isHe ? `
         <li class="mb-2"><i class="bi bi-check-circle text-success"></i> היה ספציפי לגבי מיקום התקלה</li>
         <li class="mb-2"><i class="bi bi-check-circle text-success"></i> תאר את התקלה בבירור</li>
         <li class="mb-2"><i class="bi bi-check-circle text-success"></i> בחר את רמת הדחיפות הנכונה</li>
         <li class="mb-2"><i class="bi bi-check-circle text-success"></i> דחיפות גבוהה = סכנה מיידית</li>
+        <li class="mb-2"><i class="bi bi-camera text-primary"></i> צרף תמונה לתיאור טוב יותר</li>
       ` : `
         <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Be specific about the fault location</li>
         <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Describe the fault clearly</li>
         <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Select the correct urgency level</li>
         <li class="mb-2"><i class="bi bi-check-circle text-success"></i> High urgency = immediate danger</li>
+        <li class="mb-2"><i class="bi bi-camera text-primary"></i> Attach a photo for better description</li>
       `;
 
-      // placeholders
       document.getElementById('title').placeholder = isHe ? 'לדוגמה: נזילת מים בשירותים' : 'e.g. Water leak in bathroom';
       document.getElementById('description').placeholder = isHe ? 'תאר את התקלה בפירוט...' : 'Describe the fault in detail...';
+      document.getElementById('floor').placeholder = isHe ? 'לדוגמה: 3' : 'e.g. 3';
+      document.getElementById('unit_number').placeholder = isHe ? 'לדוגמה: 12' : 'e.g. 12';
+
+      // בניית תפריט צד
+      buildSidebar(isHe);
     }
 
-    // פונקציית דיווח תקלה
+    // בניית תפריט צד לפי תפקיד
+    function buildSidebar(isHe) {
+      const nav = document.getElementById('sidebarNav');
+      if (user.role === 'manager') {
+        nav.innerHTML = `
+          <li class="nav-item"><a class="nav-link" href="dashboard-manager.html"><i class="bi bi-speedometer2"></i> ${t('dashboard')}</a></li>
+          <li class="nav-item"><a class="nav-link" href="faults.html"><i class="bi bi-exclamation-triangle"></i> ${t('faults')}</a></li>
+          <li class="nav-item"><a class="nav-link active" href="report-fault.html"><i class="bi bi-plus-circle"></i> ${t('reportFault')}</a></li>
+          <li class="nav-item"><a class="nav-link" href="maintenance.html"><i class="bi bi-tools"></i> ${t('maintenance')}</a></li>
+          <li class="nav-item"><a class="nav-link" href="energy.html"><i class="bi bi-lightning"></i> ${t('energy')}</a></li>
+          <li class="nav-item"><a class="nav-link" href="announcements.html"><i class="bi bi-megaphone"></i> ${t('announcements')}</a></li>
+          <li class="nav-item"><a class="nav-link" href="invoices.html"><i class="bi bi-receipt"></i> ${isHe ? 'חשבוניות' : 'Invoices'}</a></li>
+          <li class="nav-item"><a class="nav-link" href="reports.html"><i class="bi bi-bar-chart"></i> ${t('reports')}</a></li>
+          <li class="nav-item"><a class="nav-link" href="users.html"><i class="bi bi-people"></i> ${t('users')}</a></li>
+          <li class="nav-item mt-4"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-left"></i> ${t('logout')}</a></li>
+        `;
+      } else {
+        nav.innerHTML = `
+          <li class="nav-item"><a class="nav-link" href="dashboard-tenant.html"><i class="bi bi-speedometer2"></i> ${t('dashboard')}</a></li>
+          <li class="nav-item"><a class="nav-link active" href="report-fault.html"><i class="bi bi-plus-circle"></i> ${t('reportFault')}</a></li>
+          <li class="nav-item"><a class="nav-link" href="my-faults.html"><i class="bi bi-exclamation-triangle"></i> ${t('myFaults')}</a></li>
+          <li class="nav-item"><a class="nav-link" href="announcements.html"><i class="bi bi-megaphone"></i> ${t('announcements')}</a></li>
+          <li class="nav-item mt-4"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-left"></i> ${t('logout')}</a></li>
+        `;
+      }
+    }
+
+    // פתיחת input תמונה - גלריה או מצלמה לפי מכשיר
+    function triggerImageInput() {
+      const isHe = getLang() === 'he';
+      if (selectedImages.length >= MAX_IMAGES) {
+        alert(isHe ? `ניתן להעלות עד ${MAX_IMAGES} תמונות בלבד.` : `You can upload up to ${MAX_IMAGES} photos only.`);
+        return;
+      }
+
+      // הצגת אפשרויות
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (isMobile) {
+        // במובייל - שאל גלריה או מצלמה
+        const choice = confirm(isHe ? 'לצלם עם המצלמה?\nלחץ אישור למצלמה, ביטול לגלריה' : 'Take a photo?\nOK for camera, Cancel for gallery');
+        if (choice) {
+          document.getElementById('cameraInput').click();
+        } else {
+          document.getElementById('imageInput').click();
+        }
+      } else {
+        // בדסקטופ - פתח גלריה
+        document.getElementById('imageInput').click();
+      }
+    }
+
+    // טיפול בבחירת תמונות
+    function handleImageSelect(event) {
+      const isHe = getLang() === 'he';
+      const files = Array.from(event.target.files);
+
+      files.forEach(file => {
+        if (selectedImages.length >= MAX_IMAGES) {
+          alert(isHe ? `ניתן להעלות עד ${MAX_IMAGES} תמונות בלבד.` : `Max ${MAX_IMAGES} photos allowed.`);
+          return;
+        }
+
+        // בדיקת סוג קובץ
+        if (!file.type.startsWith('image/')) {
+          alert(isHe ? 'ניתן להעלות תמונות בלבד.' : 'Only image files allowed.');
+          return;
+        }
+
+        // בדיקת גודל - מקסימום 5MB
+        if (file.size > 5 * 1024 * 1024) {
+          alert(isHe ? 'גודל התמונה לא יכול לעלות על 5MB.' : 'Image size cannot exceed 5MB.');
+          return;
+        }
+
+        selectedImages.push(file);
+        renderImagePreviews();
+      });
+
+      // איפוס input
+      event.target.value = '';
+    }
+
+    // הצגת תצוגות מקדימות של תמונות
+    function renderImagePreviews() {
+      const isHe = getLang() === 'he';
+      const container = document.getElementById('imagePreviewContainer');
+      container.innerHTML = '';
+
+      // תמונות קיימות
+      selectedImages.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const item = document.createElement('div');
+          item.className = 'image-preview-item';
+          item.innerHTML = `
+            <img src="${e.target.result}" alt="תמונה ${index + 1}">
+            <button class="remove-btn" onclick="removeImage(${index})" title="${isHe ? 'מחק' : 'Remove'}">
+              <i class="bi bi-x"></i>
+            </button>
+          `;
+          container.insertBefore(item, container.querySelector('.add-image-btn') || null);
+        };
+        reader.readAsDataURL(file);
+      });
+
+      // כפתור הוספה - מוצג רק אם פחות מ-3 תמונות
+      if (selectedImages.length < MAX_IMAGES) {
+        const addBtn = document.createElement('div');
+        addBtn.className = 'add-image-btn';
+        addBtn.id = 'addImageBtn';
+        addBtn.onclick = triggerImageInput;
+        addBtn.innerHTML = `
+          <i class="bi bi-plus-circle"></i>
+          <span>${isHe ? 'הוסף' : 'Add'}</span>
+        `;
+        container.appendChild(addBtn);
+      }
+    }
+
+    // מחיקת תמונה
+    function removeImage(index) {
+      selectedImages.splice(index, 1);
+      renderImagePreviews();
+    }
+
+    // שליחת דיווח תקלה עם תמונות
     async function reportFault() {
       const isHe = getLang() === 'he';
       const errorMsg = document.getElementById('errorMsg');
@@ -228,6 +422,7 @@
       }
 
       try {
+        // שלב 1 - דיווח תקלה
         const response = await fetch('http://localhost:3000/api/faults/report', {
           method: 'POST',
           headers: {
@@ -239,21 +434,46 @@
 
         const data = await response.json();
 
-        if (response.ok) {
-          successMsg.textContent = isHe ? `התקלה דווחה בהצלחה! מספר תקלה: #${data.fault_id}` : `Fault reported successfully! Fault ID: #${data.fault_id}`;
-          successMsg.classList.remove('d-none');
-
-          document.getElementById('title').value = '';
-          document.getElementById('fault_type').value = '';
-          document.getElementById('description').value = '';
-          document.getElementById('floor').value = '';
-          document.getElementById('unit_number').value = '';
-
-          setTimeout(() => { window.location.href = 'dashboard-tenant.html'; }, 2000);
-        } else {
+        if (!response.ok) {
           errorMsg.textContent = data.message;
           errorMsg.classList.remove('d-none');
+          return;
         }
+
+        const fault_id = data.fault_id;
+
+        // שלב 2 - העלאת תמונות אם יש
+        if (selectedImages.length > 0) {
+          const formData = new FormData();
+          formData.append('fault_id', fault_id);
+          selectedImages.forEach((file, i) => {
+            formData.append('images', file);
+          });
+
+          await fetch('http://localhost:3000/api/faults/upload-images', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+          });
+        }
+
+        successMsg.textContent = isHe
+          ? `✅ התקלה דווחה בהצלחה! מספר תקלה: #${fault_id}`
+          : `✅ Fault reported successfully! Fault ID: #${fault_id}`;
+        successMsg.classList.remove('d-none');
+
+        // איפוס טופס
+        document.getElementById('title').value = '';
+        document.getElementById('fault_type').value = '';
+        document.getElementById('description').value = '';
+        document.getElementById('floor').value = '';
+        document.getElementById('unit_number').value = '';
+        selectedImages = [];
+        renderImagePreviews();
+
+        setTimeout(() => {
+          window.location.href = user.role === 'manager' ? 'dashboard-manager.html' : 'dashboard-tenant.html';
+        }, 2000);
 
       } catch (err) {
         errorMsg.textContent = isHe ? 'שגיאת חיבור. אנא נסה שוב.' : 'Connection error. Please try again.';
@@ -267,26 +487,10 @@
       window.location.href = 'login.html';
     }
 
-   document.addEventListener('DOMContentLoaded', () => {
-  applyTranslations();
-
-  // עדכון סרגל צד למנהל
-  if (user.role === 'manager') {
-    const sidebar = document.querySelector('.sidebar ul');
-    sidebar.innerHTML = `
-      <li class="nav-item"><a class="nav-link" href="dashboard-manager.html"><i class="bi bi-speedometer2"></i> <span>${t('dashboard')}</span></a></li>
-      <li class="nav-item"><a class="nav-link" href="faults.html"><i class="bi bi-exclamation-triangle"></i> <span>${t('faults')}</span></a></li>
-      <li class="nav-item"><a class="nav-link active" href="report-fault.html"><i class="bi bi-plus-circle"></i> <span>${t('reportFault')}</span></a></li>
-      <li class="nav-item"><a class="nav-link" href="maintenance.html"><i class="bi bi-tools"></i> <span>${t('maintenance')}</span></a></li>
-      <li class="nav-item"><a class="nav-link" href="energy.html"><i class="bi bi-lightning"></i> <span>${t('energy')}</span></a></li>
-      <li class="nav-item"><a class="nav-link" href="announcements.html"><i class="bi bi-megaphone"></i> <span>${t('announcements')}</span></a></li>
-      <li class="nav-item"><a class="nav-link" href="reports.html"><i class="bi bi-bar-chart"></i> <span>${t('reports')}</span></a></li>
-      <li class="nav-item"><a class="nav-link" href="users.html"><i class="bi bi-people"></i> <span>${t('users')}</span></a></li>
-      <li class="nav-item mt-4"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-left"></i> <span>${t('logout')}</span></a></li>
-    `;
-  }
-});
+    document.addEventListener('DOMContentLoaded', () => {
+      applyTranslations();
+      renderImagePreviews();
+    });
   </script>
-
 </body>
 </html>

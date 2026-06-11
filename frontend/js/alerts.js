@@ -18,8 +18,8 @@ async function initAlerts() {
   bell.id = 'alertBell';
   bell.style.cssText = `
     position: fixed;
-    top: 15px;
-    ${isHe ? 'left' : 'right'}: 130px;
+    top: 20px;
+    ${isHe ? 'left: 308px' : 'right: 68px'};
     z-index: 9998;
     cursor: pointer;
   `;
@@ -33,7 +33,7 @@ async function initAlerts() {
     <div id="alertPanel" style="
       display:none;
       position:absolute;
-      ${isHe ? 'left' : 'right'}:0;
+      left:0;
       top:50px;
       width:340px;
       background:white;
@@ -58,10 +58,16 @@ async function initAlerts() {
 async function initMessageBell(token, user, isHe) {
   const msgBell = document.createElement('div');
   msgBell.id = 'messageBell';
-  msgBell.style.cssText = `
-    position: fixed;
-    top: 15px;
-    ${isHe ? 'left' : 'right'}: ${user.role === 'manager' ? '180px' : '130px'};
+
+  // מנהל - אחרי כפתור שפה + פעמון התראות
+  // טכנאי/דייר - אחרי כפתור שפה בלבד
+const pos = isHe
+  ? (user.role === 'manager' ? 'left: 356px' : 'left: 308px')
+  : (user.role === 'manager' ? 'right: 116px' : 'right: 68px');
+msgBell.style.cssText = `
+  position: fixed;
+  top: 20px;
+  ${pos};
     z-index: 9998;
     cursor: pointer;
   `;
@@ -75,7 +81,7 @@ async function initMessageBell(token, user, isHe) {
     <div id="messagePanel" style="
       display:none;
       position:absolute;
-      ${isHe ? 'left' : 'right'}:0;
+      left:0;
       top:50px;
       width:380px;
       background:white;
@@ -107,7 +113,7 @@ function toggleMessagePanel() {
   if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
 }
 
-// טעינת הודעות מהשרת
+// טעינת הודעות מהשרת - מציג רק הודעות שלא נקראו
 async function loadMessages() {
   const token = localStorage.getItem('token');
   const isHe = getLang() === 'he';
@@ -147,7 +153,7 @@ async function loadMessages() {
       list.innerHTML = `
         <div style="padding:20px; text-align:center; color:#6b7280;">
           <i class="bi bi-envelope text-muted fs-3"></i>
-          <p class="mt-2 mb-0">${isHe ? 'אין הודעות' : 'No messages'}</p>
+          <p class="mt-2 mb-0">${isHe ? 'אין הודעות חדשות' : 'No new messages'}</p>
         </div>`;
       return;
     }
@@ -328,7 +334,7 @@ async function loadAlerts() {
   }
 }
 
-// רינדור התראה בודדת
+// רינדור התראה בודדת לפי סוגה
 function renderAlert(alert, isHe) {
   const priorityColor = alert.priority === 'high' ? '#fee2e2' : '#fef3c7';
   const priorityBorder = alert.priority === 'high' ? '#ef4444' : '#f59e0b';
@@ -382,6 +388,11 @@ function renderAlert(alert, isHe) {
       badge = isHe ? 'דחוף' : 'Urgent';
       title = isHe ? `${alert.count} תקלות לא מוקצות לטכנאי` : `${alert.count} faults unassigned`;
       subtitle = isHe ? 'לחץ לשיוך טכנאים' : 'Click to assign technicians';
+      break;
+    case 'pending_invoices':
+      badge = isHe ? 'דחוף' : 'Urgent';
+      title = isHe ? `${alert.count} חשבוניות ממתינות לאישור` : `${alert.count} invoices pending approval`;
+      subtitle = isHe ? 'לחץ לבדיקת החשבוניות' : 'Click to review invoices';
       break;
     case 'missing_energy': {
       badge = isHe ? 'חודשי' : 'Monthly';

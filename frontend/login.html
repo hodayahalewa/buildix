@@ -46,7 +46,7 @@
                 <span class="input-group-text">
                   <i class="bi bi-envelope"></i>
                 </span>
-               <input type="email" id="email" class="form-control">
+                <input type="email" id="email" class="form-control">
               </div>
             </div>
 
@@ -58,17 +58,29 @@
                   <i class="bi bi-lock"></i>
                 </span>
                 <input type="password" id="password" class="form-control">
+                <!-- כפתור הצגת/הסתרת סיסמה -->
+                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()" id="togglePwdBtn">
+                  <i class="bi bi-eye" id="togglePwdIcon"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- זכור אותי -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="rememberMe">
+                <label class="form-check-label text-muted" for="rememberMe" id="rememberMeLabel"></label>
               </div>
             </div>
 
             <!-- כפתור התחברות -->
-            <div class="d-grid mt-4">
+            <div class="d-grid">
               <button onclick="login()" class="btn btn-primary btn-lg" id="loginBtn"></button>
             </div>
 
             <!-- קישור להרשמה -->
             <div class="text-center mt-3">
-              <p class="text-muted">
+              <p class="text-muted mb-0">
                 <span id="noAccount"></span>
                 <a href="register.html" class="text-primary fw-bold" id="registerLink"></a>
               </p>
@@ -85,6 +97,7 @@
   <script>
     // החלת תרגומים על הדף
     function applyTranslations() {
+      const isHe = getLang() === 'he';
       document.getElementById('loginTitle').textContent = t('loginBtn');
       document.getElementById('loginSubtitle').textContent = t('welcomeBack');
       document.getElementById('emailLabel').textContent = t('emailAddress');
@@ -92,24 +105,47 @@
       document.getElementById('loginBtn').innerHTML = `<i class="bi bi-box-arrow-in-right"></i> ${t('loginBtn')}`;
       document.getElementById('noAccount').textContent = t('noAccount');
       document.getElementById('registerLink').textContent = t('registerHere');
-
-      // placeholder
+      document.getElementById('rememberMeLabel').textContent = isHe ? 'זכור אותי' : 'Remember me';
       document.getElementById('email').placeholder = t('emailAddress');
       document.getElementById('password').placeholder = t('password');
+    }
+
+    // הצגת/הסתרת סיסמה
+    function togglePassword() {
+      const pwd = document.getElementById('password');
+      const icon = document.getElementById('togglePwdIcon');
+      if (pwd.type === 'password') {
+        pwd.type = 'text';
+        icon.className = 'bi bi-eye-slash';
+      } else {
+        pwd.type = 'password';
+        icon.className = 'bi bi-eye';
+      }
+    }
+
+    // טעינת פרטים שמורים מ-localStorage
+    function loadSavedCredentials() {
+      const saved = localStorage.getItem('rememberedEmail');
+      if (saved) {
+        document.getElementById('email').value = saved;
+        document.getElementById('rememberMe').checked = true;
+      }
     }
 
     // פונקציית התחברות
     async function login() {
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
+      const rememberMe = document.getElementById('rememberMe').checked;
       const errorMsg = document.getElementById('errorMsg');
       const successMsg = document.getElementById('successMsg');
+      const isHe = getLang() === 'he';
 
       errorMsg.classList.add('d-none');
       successMsg.classList.add('d-none');
 
       if (!email || !password) {
-        errorMsg.textContent = t('error') + ': ' + t('emailAddress') + ' & ' + t('password');
+        errorMsg.textContent = isHe ? 'אנא הזן מייל וסיסמה.' : 'Please enter email and password.';
         errorMsg.classList.remove('d-none');
         return;
       }
@@ -124,12 +160,21 @@
         const data = await response.json();
 
         if (response.ok) {
+          // שמירת טוקן ומשתמש
           localStorage.setItem('token', data.token);
           localStorage.setItem('user', JSON.stringify(data.user));
 
-          successMsg.textContent = t('success') + '! Redirecting...';
+          // זכירת מייל אם נבחר Remember Me
+          if (rememberMe) {
+            localStorage.setItem('rememberedEmail', email);
+          } else {
+            localStorage.removeItem('rememberedEmail');
+          }
+
+          successMsg.textContent = isHe ? '✅ התחברת בהצלחה! מעביר...' : '✅ Login successful! Redirecting...';
           successMsg.classList.remove('d-none');
 
+          // ניווט לפי תפקיד
           setTimeout(() => {
             if (data.user.role === 'manager') {
               window.location.href = 'dashboard-manager.html';
@@ -146,18 +191,21 @@
         }
 
       } catch (err) {
-        errorMsg.textContent = t('error') + ': Connection failed.';
+        errorMsg.textContent = isHe ? 'שגיאת חיבור. אנא נסה שוב.' : 'Connection error. Please try again.';
         errorMsg.classList.remove('d-none');
       }
     }
 
-    // אפשרות להתחבר עם Enter
+    // התחברות עם Enter
     document.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') login();
     });
 
-    // החלת תרגומים בטעינת הדף
-    document.addEventListener('DOMContentLoaded', applyTranslations);
+    // טעינת הדף
+    document.addEventListener('DOMContentLoaded', () => {
+      applyTranslations();
+      loadSavedCredentials();
+    });
   </script>
 
 </body>

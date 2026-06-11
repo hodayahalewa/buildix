@@ -154,10 +154,34 @@ body {
   font-size: 1.1rem;
 }
 
+/* תוכן ראשי - עם מרווח עליון לפעמונות */
 .main-content {
   margin-left: 250px;
-  padding: 30px;
+  padding: 30px 40px 40px 40px;
+  padding-top: 80px;
   min-height: 100vh;
+}
+
+/* כותרות עמודים - גדולות ובולטות */
+.main-content > div > h4,
+.main-content > div > div > h4 {
+  font-size: 1.8rem !important;
+  font-weight: 700 !important;
+  color: #1f2937 !important;
+  letter-spacing: 0.3px;
+}
+
+.main-content > div > div > small,
+.main-content > div > small {
+  font-size: 0.95rem !important;
+  color: #6b7280 !important;
+}
+
+/* כותרת עמוד - שורת הכותרת העליונה */
+.page-header h4 {
+  font-size: 1.8rem !important;
+  font-weight: 700 !important;
+  color: #1f2937 !important;
 }
 
 /* Status Badges */
@@ -179,6 +203,24 @@ body {
   font-weight: 500;
 }
 
+.badge-in-progress {
+  background-color: #dbeafe;
+  color: #1e40af;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.badge-waiting-part {
+  background-color: #ede9fe;
+  color: #5b21b6;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
 .badge-closed {
   background-color: #d1fae5;
   color: #065f46;
@@ -191,6 +233,24 @@ body {
 .badge-high {
   background-color: #fee2e2;
   color: #991b1b;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.badge-medium {
+  background-color: #fef3c7;
+  color: #92400e;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.badge-low {
+  background-color: #d1fae5;
+  color: #065f46;
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 0.8rem;
@@ -237,7 +297,7 @@ footer {
 
   .main-content {
     margin-left: 0;
-    padding: 15px;
+    padding: 70px 15px 15px 15px;
   }
 
   .hero-section h1 {

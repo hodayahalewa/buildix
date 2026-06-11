@@ -9,49 +9,34 @@
   <link rel="stylesheet" href="css/style.css">
   <script src="js/translations.js"></script>
   <script src="js/lang-switcher.js"></script>
+  <script src="js/alerts.js"></script>
+  <style>
+    .fault-image { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid #dee2e6; transition: transform 0.2s; }
+    .fault-image:hover { transform: scale(1.05); }
+    .img-lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .img-lightbox img { max-width: 90%; max-height: 90%; border-radius: 12px; }
+    .my-fault-badge { background: #1a3a6b; color: white; font-size: 0.7rem; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+    .my-fault-card { border: 2px solid #1a3a6b !important; }
+  </style>
 </head>
 <body>
 
-  <!-- Sidebar -->
   <div class="sidebar">
     <div class="text-center py-4">
-      <h5 class="text-white fw-bold">
-        <img src="logo.png" height="40" class="me-2" alt="BUILDIX"> BUILDIX
-      </h5>
+      <img src="logo.png" height="80" alt="BUILDIX" class="mb-2">
+      <h5 class="text-white fw-bold mb-0">BUILDIX</h5>
       <small class="text-secondary" id="userName"></small>
     </div>
     <ul class="nav flex-column px-2">
-      <li class="nav-item">
-        <a class="nav-link" href="dashboard-tenant.html">
-          <i class="bi bi-speedometer2"></i> <span id="nav-dashboard"></span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="report-fault.html">
-          <i class="bi bi-plus-circle"></i> <span id="nav-reportFault"></span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link active" href="my-faults.html">
-          <i class="bi bi-exclamation-triangle"></i> <span id="nav-myFaults"></span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="announcements.html">
-          <i class="bi bi-megaphone"></i> <span id="nav-announcements"></span>
-        </a>
-      </li>
-      <li class="nav-item mt-4">
-        <a class="nav-link text-danger" href="#" onclick="logout()">
-          <i class="bi bi-box-arrow-left"></i> <span id="nav-logout"></span>
-        </a>
-      </li>
+      <li class="nav-item"><a class="nav-link" href="dashboard-tenant.html"><i class="bi bi-speedometer2"></i> <span id="nav-dashboard"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="report-fault.html"><i class="bi bi-plus-circle"></i> <span id="nav-reportFault"></span></a></li>
+      <li class="nav-item"><a class="nav-link active" href="my-faults.html"><i class="bi bi-exclamation-triangle"></i> <span id="nav-myFaults"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="announcements.html"><i class="bi bi-megaphone"></i> <span id="nav-announcements"></span></a></li>
+      <li class="nav-item mt-4"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-left"></i> <span id="nav-logout"></span></a></li>
     </ul>
   </div>
 
-  <!-- Main Content -->
   <div class="main-content">
-
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
         <h4 class="fw-bold mb-0" id="pageTitle"></h4>
@@ -60,11 +45,17 @@
       <a href="report-fault.html" class="btn btn-primary" id="reportBtn"></a>
     </div>
 
-    <!-- Filters -->
+    <!-- פילטרים -->
     <div class="card border-0 shadow-sm mb-4">
       <div class="card-body">
         <div class="row g-3">
-          <div class="col-md-4">
+          <div class="col-md-3">
+            <select id="filterView" class="form-select" onchange="filterFaults()">
+              <option value="all" id="viewAll"></option>
+              <option value="mine" id="viewMine"></option>
+            </select>
+          </div>
+          <div class="col-md-3">
             <select id="filterStatus" class="form-select" onchange="filterFaults()">
               <option value="" id="allStatuses"></option>
               <option value="open" id="statusOpen"></option>
@@ -73,43 +64,57 @@
               <option value="closed" id="statusClosed"></option>
             </select>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-3">
             <select id="filterUrgency" class="form-select" onchange="filterFaults()">
               <option value="" id="allUrgencies"></option>
-              <option value="low" id="urgencyLow"></option>
-              <option value="medium" id="urgencyMedium"></option>
               <option value="high" id="urgencyHigh"></option>
+              <option value="medium" id="urgencyMedium"></option>
+              <option value="low" id="urgencyLow"></option>
             </select>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-3">
             <button class="btn btn-outline-secondary w-100" onclick="resetFilters()" id="resetBtn"></button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Faults List -->
+    <!-- רשימת תקלות -->
     <div id="faultsList" class="row g-4">
       <div class="col-12 text-center py-4 text-muted" id="loadingText"></div>
     </div>
+  </div>
 
+  <!-- מודל פרטי תקלה -->
+  <div class="modal fade" id="faultDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="detailsTitle"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="detailsBody"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="closeDetailsBtn"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="lightbox" class="img-lightbox d-none" onclick="closeLightbox()">
+    <img id="lightboxImg" src="" alt="">
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
   <script>
-    // בדיקה שהמשתמש מחובר ושהוא דייר
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user'));
-
-    if (!token || !user || user.role !== 'tenant') {
-      window.location.href = 'login.html';
-    }
-
+    if (!token || !user || user.role !== 'tenant') window.location.href = 'login.html';
     document.getElementById('userName').textContent = user.full_name;
-    let allFaults = [];
 
-    // החלת תרגומים
+    let allFaults = [];
+    const urgencyOrder = { high: 1, medium: 2, low: 3 };
+
     function applyTranslations() {
       const isHe = getLang() === 'he';
       document.getElementById('nav-dashboard').textContent = t('dashboard');
@@ -117,43 +122,45 @@
       document.getElementById('nav-myFaults').textContent = t('myFaults');
       document.getElementById('nav-announcements').textContent = t('announcements');
       document.getElementById('nav-logout').textContent = t('logout');
-      document.getElementById('pageTitle').textContent = t('myFaults');
-      document.getElementById('pageSubtitle').textContent = isHe ? 'עקוב אחרי כל התקלות שדווחת' : 'Track all your reported faults';
+      document.getElementById('pageTitle').textContent = isHe ? 'תקלות הבניין' : 'Building Faults';
+      document.getElementById('pageSubtitle').textContent = isHe ? 'כל תקלות הבניין — התקלות שלך מסומנות' : 'All building faults — yours are highlighted';
       document.getElementById('reportBtn').innerHTML = `<i class="bi bi-plus-circle"></i> ${t('reportNewFault')}`;
+      document.getElementById('viewAll').textContent = isHe ? 'כל תקלות הבניין' : 'All Building Faults';
+      document.getElementById('viewMine').textContent = isHe ? 'התקלות שלי בלבד' : 'My Faults Only';
       document.getElementById('allStatuses').textContent = isHe ? 'כל הסטטוסים' : 'All Statuses';
       document.getElementById('statusOpen').textContent = t('open');
       document.getElementById('statusInProgress').textContent = t('in_progress');
       document.getElementById('statusWaiting').textContent = t('waiting_part');
       document.getElementById('statusClosed').textContent = t('closed');
       document.getElementById('allUrgencies').textContent = isHe ? 'כל הדחיפויות' : 'All Urgencies';
-      document.getElementById('urgencyLow').textContent = t('low');
-      document.getElementById('urgencyMedium').textContent = t('medium');
       document.getElementById('urgencyHigh').textContent = t('high');
+      document.getElementById('urgencyMedium').textContent = t('medium');
+      document.getElementById('urgencyLow').textContent = t('low');
       document.getElementById('resetBtn').innerHTML = `<i class="bi bi-arrow-counterclockwise"></i> ${t('reset')}`;
       document.getElementById('loadingText').textContent = t('loading');
+      document.getElementById('closeDetailsBtn').textContent = t('cancel');
     }
 
-    // טעינת התקלות
-    async function loadMyFaults() {
+    async function loadAllFaults() {
       try {
-        const response = await fetch('http://localhost:3000/api/faults/my', {
+        const response = await fetch('http://localhost:3000/api/faults/building', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-
         const data = await response.json();
-        allFaults = data.faults;
-        renderFaults(allFaults);
-
+        allFaults = data.faults.sort((a, b) => {
+          const urgencyDiff = (urgencyOrder[a.urgency] || 99) - (urgencyOrder[b.urgency] || 99);
+          if (urgencyDiff !== 0) return urgencyDiff;
+          return new Date(b.created_at) - new Date(a.created_at);
+        });
+        filterFaults(); // מציג ללא סגורות כברירת מחדל
       } catch (err) {
         console.error('Error loading faults:', err);
       }
     }
 
-    // הצגת תקלות כקלפים
     function renderFaults(faults) {
       const isHe = getLang() === 'he';
       const list = document.getElementById('faultsList');
-
       if (faults.length === 0) {
         list.innerHTML = `
           <div class="col-12 text-center py-5">
@@ -165,65 +172,140 @@
           </div>`;
         return;
       }
-
-      list.innerHTML = faults.map(fault => `
-        <div class="col-md-6">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-              <h6 class="fw-bold mb-0">#${fault.id} - ${fault.title}</h6>
-              <span class="badge-${fault.status.replace('_', '-')}">${t(fault.status)}</span>
-            </div>
-            <div class="card-body">
-              <p class="text-muted small mb-2">${fault.description || (isHe ? 'אין תיאור' : 'No description provided')}</p>
-              <div class="d-flex gap-3 small text-muted">
-                <span><i class="bi bi-tag"></i> ${fault.fault_type}</span>
-                <span><i class="bi bi-layers"></i> ${t('floor')} ${fault.floor || 'N/A'}</span>
-                <span><i class="bi bi-door-open"></i> ${fault.unit_number || 'N/A'}</span>
+      list.innerHTML = faults.map(fault => {
+        const isMyFault = fault.reported_by === user.id;
+        let imagesHtml = '';
+        if (fault.images) {
+          const imgs = typeof fault.images === 'string' ? JSON.parse(fault.images) : fault.images;
+          if (imgs && imgs.length > 0) {
+            imagesHtml = `<div class="d-flex gap-2 flex-wrap mt-2">
+              ${imgs.map(url => `<img src="http://localhost:3000${url}" class="fault-image" onclick="openLightbox('http://localhost:3000${url}')" alt="">`).join('')}
+            </div>`;
+          }
+        }
+        return `
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100 ${isMyFault ? 'my-fault-card' : ''}">
+              <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                  <h6 class="fw-bold mb-0">#${fault.id} - ${fault.title}</h6>
+                  ${isMyFault ? `<span class="my-fault-badge">${isHe ? 'שלי' : 'Mine'}</span>` : ''}
+                </div>
+                <span class="badge-${fault.status.replace('_', '-')}">${t(fault.status)}</span>
+              </div>
+              <div class="card-body">
+                <p class="text-muted small mb-2">${fault.description || (isHe ? 'אין תיאור' : 'No description')}</p>
+                <div class="d-flex gap-3 small text-muted flex-wrap mb-2">
+                  <span><i class="bi bi-tag"></i> ${fault.fault_type}</span>
+                  <span><i class="bi bi-layers"></i> ${t('floor')} ${fault.floor || 'N/A'}</span>
+                  <span><i class="bi bi-door-open"></i> ${fault.unit_number || 'N/A'}</span>
+                  ${fault.reported_by_name ? `<span><i class="bi bi-person"></i> ${fault.reported_by_name}</span>` : ''}
+                </div>
+                ${imagesHtml}
+              </div>
+              <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+                <div class="d-flex gap-2 align-items-center">
+                  <span class="badge-${fault.urgency}">${t(fault.urgency)}</span>
+                  <small class="text-muted"><i class="bi bi-calendar"></i> ${new Date(fault.created_at).toLocaleDateString()}</small>
+                </div>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-sm btn-outline-primary" onclick="openDetails(${fault.id})"><i class="bi bi-eye"></i></button>
+                  ${isMyFault && fault.status === 'open' ? `
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteFault(${fault.id})"><i class="bi bi-trash"></i></button>
+                  ` : ''}
+                </div>
               </div>
             </div>
-            <div class="card-footer bg-white d-flex justify-content-between align-items-center">
-              <span class="badge-${fault.urgency}">${t(fault.urgency)}</span>
-              <small class="text-muted">
-                <i class="bi bi-calendar"></i> ${new Date(fault.created_at).toLocaleDateString()}
-              </small>
-            </div>
-          </div>
-        </div>
-      `).join('');
+          </div>`;
+      }).join('');
     }
 
-    // סינון תקלות
+    async function openDetails(faultId) {
+      const isHe = getLang() === 'he';
+      const fault = allFaults.find(f => f.id === faultId);
+      if (!fault) return;
+      let imagesHtml = '';
+      if (fault.images) {
+        const imgs = typeof fault.images === 'string' ? JSON.parse(fault.images) : fault.images;
+        if (imgs && imgs.length > 0) {
+          imagesHtml = `<div class="mb-3"><strong>${isHe ? 'תמונות:' : 'Photos:'}</strong><div class="d-flex gap-2 flex-wrap mt-2">
+            ${imgs.map(url => `<img src="http://localhost:3000${url}" class="fault-image" onclick="openLightbox('http://localhost:3000${url}')" alt="">`).join('')}
+          </div></div>`;
+        }
+      }
+      let historyHtml = '';
+      try {
+        const res = await fetch(`http://localhost:3000/api/faults/updates/${faultId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        if (data.updates && data.updates.length > 0) {
+          const sc = { open:'#f59e0b', in_progress:'#3b82f6', waiting_part:'#8b5cf6', closed:'#10b981' };
+          historyHtml = `<div class="mb-3"><strong>${isHe ? 'היסטוריית עדכונים:' : 'Update History:'}</strong><div class="mt-2">
+            ${data.updates.map(u => `<div class="d-flex gap-2 mb-2">
+              <div style="width:10px;height:10px;border-radius:50%;background:${sc[u.status]||'#1a3a6b'};margin-top:5px;flex-shrink:0;"></div>
+              <div style="background:#f9fafb;border-radius:8px;padding:8px 12px;flex:1;font-size:0.82rem;">
+                <strong style="color:${sc[u.status]||'#1a3a6b'}">${t(u.status)}</strong>
+                ${u.note ? `<div>${u.note}</div>` : ''}
+                <div style="font-size:0.72rem;color:#9ca3af;">${new Date(u.created_at).toLocaleDateString('he-IL')} ${new Date(u.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
+              </div>
+            </div>`).join('')}
+          </div></div>`;
+        }
+      } catch(err) {}
+      document.getElementById('detailsTitle').textContent = `#${fault.id} - ${fault.title}`;
+      document.getElementById('detailsBody').innerHTML = `
+        <div class="row g-3">
+          <div class="col-md-6"><table class="table table-sm">
+            <tr><td class="text-muted">${isHe?'סטטוס:':'Status:'}</td><td><span class="badge-${fault.status.replace('_','-')}">${t(fault.status)}</span></td></tr>
+            <tr><td class="text-muted">${isHe?'דחיפות:':'Urgency:'}</td><td><span class="badge-${fault.urgency}">${t(fault.urgency)}</span></td></tr>
+            <tr><td class="text-muted">${isHe?'סוג:':'Type:'}</td><td>${fault.fault_type}</td></tr>
+            <tr><td class="text-muted">${isHe?'קומה:':'Floor:'}</td><td>${fault.floor||'N/A'}</td></tr>
+            <tr><td class="text-muted">${isHe?'יחידה:':'Unit:'}</td><td>${fault.unit_number||'N/A'}</td></tr>
+            <tr><td class="text-muted">${isHe?'מדווח:':'Reporter:'}</td><td>${fault.reported_by_name||'N/A'}</td></tr>
+            <tr><td class="text-muted">${isHe?'תאריך:':'Date:'}</td><td>${new Date(fault.created_at).toLocaleDateString('he-IL')}</td></tr>
+          </table></div>
+          <div class="col-md-6"><strong>${isHe?'תיאור:':'Description:'}</strong><p class="text-muted small mt-1">${fault.description||(isHe?'אין תיאור':'No description')}</p></div>
+        </div>${imagesHtml}${historyHtml}`;
+      new bootstrap.Modal(document.getElementById('faultDetailsModal')).show();
+    }
+
+    async function deleteFault(faultId) {
+      const isHe = getLang() === 'he';
+      if (!confirm(isHe ? '⚠️ האם אתה בטוח שברצונך למחוק תקלה זו?' : '⚠️ Are you sure you want to delete this fault?')) return;
+      try {
+        const response = await fetch(`http://localhost:3000/api/faults/delete/${faultId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await response.json();
+        if (response.ok) { loadAllFaults(); }
+        else { alert(data.message); }
+      } catch(err) { alert(isHe ? 'שגיאה במחיקה.' : 'Error deleting fault.'); }
+    }
+
+    // סינון - ברירת מחדל: הסתר סגורות
     function filterFaults() {
+      const view = document.getElementById('filterView').value;
       const status = document.getElementById('filterStatus').value;
       const urgency = document.getElementById('filterUrgency').value;
-
       const filtered = allFaults.filter(fault => {
-        const matchStatus = !status || fault.status === status;
+        const matchView = view === 'all' || fault.reported_by === user.id;
+        // ברירת מחדל: הסתר סגורות — אלא אם נבחר במפורש "סגור"
+        const matchStatus = status === '' ? fault.status !== 'closed' : fault.status === status;
         const matchUrgency = !urgency || fault.urgency === urgency;
-        return matchStatus && matchUrgency;
+        return matchView && matchStatus && matchUrgency;
       });
-
       renderFaults(filtered);
     }
 
-    // איפוס פילטרים
     function resetFilters() {
+      document.getElementById('filterView').value = 'all';
       document.getElementById('filterStatus').value = '';
       document.getElementById('filterUrgency').value = '';
-      renderFaults(allFaults);
+      filterFaults();
     }
 
-    function logout() {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = 'login.html';
-    }
+    function openLightbox(url) { document.getElementById('lightboxImg').src = url; document.getElementById('lightbox').classList.remove('d-none'); }
+    function closeLightbox() { document.getElementById('lightbox').classList.add('d-none'); }
+    function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = 'login.html'; }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      applyTranslations();
-      loadMyFaults();
-    });
+    document.addEventListener('DOMContentLoaded', () => { applyTranslations(); loadAllFaults(); });
   </script>
-
 </body>
 </html>

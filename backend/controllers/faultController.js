@@ -7,21 +7,16 @@ const reportFault = async (req, res) => {
     const { title, description, fault_type, urgency, floor, unit_number } = req.body;
     const reported_by = req.user.id;
 
-    // בדיקה שכל השדות החובה קיימים
     if (!title || !fault_type || !urgency) {
       return res.status(400).json({ message: 'Please fill in all required fields.' });
     }
 
-    // שמירת התקלה החדשה במסד הנתונים
     const [result] = await db.query(
       'INSERT INTO faults (title, description, fault_type, urgency, floor, unit_number, reported_by) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [title, description, fault_type, urgency, floor, unit_number, reported_by]
     );
 
-    res.status(201).json({
-      message: 'Fault reported successfully!',
-      fault_id: result.insertId
-    });
+    res.status(201).json({ message: 'Fault reported successfully!', fault_id: result.insertId });
 
   } catch (err) {
     console.error('Report fault error:', err.message);
@@ -29,10 +24,9 @@ const reportFault = async (req, res) => {
   }
 };
 
-// קבלת כל התקלות - למנהל בלבד
+// קבלת כל התקלות - למנהל בלבד (כולל סגורות - הסינון בצד הלקוח)
 const getAllFaults = async (req, res) => {
   try {
-    // שליפת כל התקלות עם פרטי המדווח והטכנאי
     const [faults] = await db.query(`
       SELECT 
         f.*,
@@ -41,7 +35,9 @@ const getAllFaults = async (req, res) => {
       FROM faults f
       LEFT JOIN users u1 ON f.reported_by = u1.id
       LEFT JOIN users u2 ON f.assigned_to = u2.id
-      ORDER BY f.created_at DESC
+      ORDER BY 
+        FIELD(f.urgency, 'high', 'medium', 'low'),
+        f.created_at DESC
     `);
 
     res.status(200).json({ faults });
@@ -52,16 +48,17 @@ const getAllFaults = async (req, res) => {
   }
 };
 
-// קבלת התקלות של הדייר המחובר בלבד
+// קבלת התקלות של הדייר המחובר בלבד (כולל סגורות - הסינון בצד הלקוח)
 const getMyFaults = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // שליפת התקלות של המשתמש המחובר בלבד
     const [faults] = await db.query(`
       SELECT * FROM faults 
       WHERE reported_by = ?
-      ORDER BY created_at DESC
+      ORDER BY 
+        FIELD(urgency, 'high', 'medium', 'low'),
+        created_at DESC
     `, [userId]);
 
     res.status(200).json({ faults });
@@ -72,12 +69,11 @@ const getMyFaults = async (req, res) => {
   }
 };
 
-// קבלת התקלות המוקצות לטכנאי המחובר
+// קבלת התקלות המוקצות לטכנאי המחובר (כולל סגורות - הסינון בצד הלקוח)
 const getAssignedFaults = async (req, res) => {
   try {
     const technicianId = req.user.id;
 
-    // שליפת התקלות המוקצות לטכנאי הספציפי
     const [faults] = await db.query(`
       SELECT 
         f.*,
@@ -85,7 +81,9 @@ const getAssignedFaults = async (req, res) => {
       FROM faults f
       LEFT JOIN users u ON f.reported_by = u.id
       WHERE f.assigned_to = ?
-      ORDER BY f.created_at DESC
+      ORDER BY 
+        FIELD(f.urgency, 'high', 'medium', 'low'),
+        f.created_at DESC
     `, [technicianId]);
 
     res.status(200).json({ faults });
@@ -101,7 +99,6 @@ const assignFault = async (req, res) => {
   try {
     const { fault_id, technician_id } = req.body;
 
-    // בדיקה שהטכנאי קיים במערכת
     const [technician] = await db.query(
       'SELECT id FROM users WHERE id = ? AND role = ?',
       [technician_id, 'technician']
@@ -111,7 +108,6 @@ const assignFault = async (req, res) => {
       return res.status(404).json({ message: 'Technician not found.' });
     }
 
-    // עדכון שיוך התקלה לטכנאי
     await db.query(
       'UPDATE faults SET assigned_to = ?, status = ? WHERE id = ?',
       [technician_id, 'in_progress', fault_id]
@@ -131,21 +127,15 @@ const updateFaultStatus = async (req, res) => {
     const { fault_id, status, note } = req.body;
     const updated_by = req.user.id;
 
-    // עדכון סטטוס התקלה
     await db.query(
       'UPDATE faults SET status = ?, updated_at = NOW() WHERE id = ?',
       [status, fault_id]
     );
 
-    // אם התקלה נסגרת - שמירת זמן הסגירה לחישוב זמן תגובה
     if (status === 'closed') {
-      await db.query(
-        'UPDATE faults SET closed_at = NOW() WHERE id = ?',
-        [fault_id]
-      );
+      await db.query('UPDATE faults SET closed_at = NOW() WHERE id = ?', [fault_id]);
     }
 
-    // שמירת עדכון בהיסטוריית התקלה
     await db.query(
       'INSERT INTO fault_updates (fault_id, updated_by, status, note) VALUES (?, ?, ?, ?)',
       [fault_id, updated_by, status, note]
@@ -168,7 +158,7 @@ const getFaultUpdates = async (req, res) => {
        FROM fault_updates fu
        LEFT JOIN users u ON fu.updated_by = u.id
        WHERE fu.fault_id = ?
-       ORDER BY fu.created_at DESC`,
+       ORDER BY fu.created_at ASC`,
       [id]
     );
     res.status(200).json({ updates });
@@ -177,6 +167,5 @@ const getFaultUpdates = async (req, res) => {
     res.status(500).json({ message: 'Server error. Please try again.' });
   }
 };
-
 
 module.exports = { reportFault, getAllFaults, getMyFaults, getAssignedFaults, assignFault, updateFaultStatus, getFaultUpdates };

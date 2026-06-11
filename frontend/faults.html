@@ -11,63 +11,14 @@
   <script src="js/lang-switcher.js"></script>
   <script src="js/alerts.js"></script>
   <style>
-    /* עיצוב רשימת טכנאים עם חיפוש */
-    .tech-dropdown {
-      position: absolute;
-      z-index: 1000;
-      background: white;
-      border: 1px solid #dee2e6;
-      border-radius: 8px;
-      width: 100%;
-      max-height: 220px;
-      overflow-y: auto;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    .tech-item {
-      padding: 10px 15px;
-      cursor: pointer;
-      transition: background 0.2s;
-      border-bottom: 1px solid #f0f0f0;
-    }
+    .tech-item { padding: 10px 15px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
     .tech-item:last-child { border-bottom: none; }
     .tech-item:hover { background: #f0f4ff; color: #1a3a6b; }
     .tech-item.selected { background: #e8f0fe; color: #1a3a6b; font-weight: 600; }
-
-    /* עיצוב tooltip להערות */
-    .notes-tooltip {
-      position: relative;
-      display: inline-block;
-    }
-    .notes-tooltip .tooltip-content {
-      visibility: hidden;
-      opacity: 0;
-      background: #1f2937;
-      color: white;
-      border-radius: 8px;
-      padding: 10px 14px;
-      position: absolute;
-      z-index: 1000;
-      bottom: 130%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 280px;
-      font-size: 0.85rem;
-      transition: opacity 0.3s;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-    .notes-tooltip:hover .tooltip-content {
-      visibility: visible;
-      opacity: 1;
-    }
-    .notes-tooltip .tooltip-content::after {
-      content: '';
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      border: 6px solid transparent;
-      border-top-color: #1f2937;
-    }
+    .fault-image { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 2px solid #dee2e6; transition: transform 0.2s; }
+    .fault-image:hover { transform: scale(1.1); }
+    .img-lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .img-lightbox img { max-width: 90%; max-height: 90%; border-radius: 12px; }
   </style>
 </head>
 <body>
@@ -84,6 +35,7 @@
       <li class="nav-item"><a class="nav-link" href="maintenance.html"><i class="bi bi-tools"></i> <span id="nav-maintenance"></span></a></li>
       <li class="nav-item"><a class="nav-link" href="energy.html"><i class="bi bi-lightning"></i> <span id="nav-energy"></span></a></li>
       <li class="nav-item"><a class="nav-link" href="announcements.html"><i class="bi bi-megaphone"></i> <span id="nav-announcements"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="invoices.html"><i class="bi bi-receipt"></i> <span id="nav-invoices"></span></a></li>
       <li class="nav-item"><a class="nav-link" href="reports.html"><i class="bi bi-bar-chart"></i> <span id="nav-reports"></span></a></li>
       <li class="nav-item"><a class="nav-link" href="users.html"><i class="bi bi-people"></i> <span id="nav-users"></span></a></li>
       <li class="nav-item mt-4"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-left"></i> <span id="nav-logout"></span></a></li>
@@ -98,26 +50,21 @@
       </div>
     </div>
 
-    <!-- שורת חיפוש וסינון כללי -->
     <div class="card border-0 shadow-sm mb-4">
       <div class="card-body">
         <div class="row g-3 align-items-end">
-          <!-- חיפוש חופשי -->
           <div class="col-md-3">
             <label class="form-label small fw-bold" id="searchLabel"></label>
             <input type="text" id="searchInput" class="form-control" oninput="filterFaults()">
           </div>
-          <!-- סינון לפי תאריך יצירה מ -->
           <div class="col-md-2">
             <label class="form-label small fw-bold" id="dateFromLabel"></label>
             <input type="date" id="filterDateFrom" class="form-control" onchange="filterFaults()">
           </div>
-          <!-- סינון לפי תאריך יצירה עד -->
           <div class="col-md-2">
             <label class="form-label small fw-bold" id="dateToLabel"></label>
             <input type="date" id="filterDateTo" class="form-control" onchange="filterFaults()">
           </div>
-          <!-- כפתור איפוס -->
           <div class="col-md-2">
             <button class="btn btn-outline-secondary w-100" onclick="resetFilters()" id="resetBtn"></button>
           </div>
@@ -125,7 +72,6 @@
       </div>
     </div>
 
-    <!-- טבלת תקלות -->
     <div class="card border-0 shadow-sm">
       <div class="card-body p-0">
         <div class="table-responsive">
@@ -134,7 +80,6 @@
               <tr>
                 <th>#</th>
                 <th id="thTitle"></th>
-                <!-- סינון לפי סוג תקלה -->
                 <th>
                   <div id="thType"></div>
                   <select id="filterType" class="form-select form-select-sm mt-1" onchange="filterFaults()">
@@ -149,13 +94,11 @@
                     <option value="other" id="typeOther"></option>
                   </select>
                 </th>
-                <!-- סינון לפי מדווח -->
                 <th>
                   <div id="thReportedBy"></div>
                   <input type="text" id="filterReportedBy" class="form-control form-control-sm mt-1" oninput="filterFaults()">
                 </th>
                 <th id="thFloor"></th>
-                <!-- סינון לפי דחיפות -->
                 <th>
                   <div id="thUrgency"></div>
                   <select id="filterUrgency" class="form-select form-select-sm mt-1" onchange="filterFaults()">
@@ -165,7 +108,6 @@
                     <option value="high" id="urgencyHigh"></option>
                   </select>
                 </th>
-                <!-- סינון לפי סטטוס -->
                 <th>
                   <div id="thStatus"></div>
                   <select id="filterStatus" class="form-select form-select-sm mt-1" onchange="filterFaults()">
@@ -177,11 +119,9 @@
                   </select>
                 </th>
                 <th id="thAssigned"></th>
-                <!-- תאריך יצירה עם מיון -->
-                <th style="cursor:pointer" onclick="toggleDateSort('created')">
+                <th style="cursor:pointer" onclick="toggleDateSort()">
                   <span id="thCreatedAt"></span> <i id="createdSortIcon" class="bi bi-arrow-down-up"></i>
                 </th>
-                <!-- תאריך עדכון אחרון -->
                 <th id="thUpdatedAt"></th>
                 <th id="thActions"></th>
               </tr>
@@ -195,7 +135,23 @@
     </div>
   </div>
 
-  <!-- מודל שיוך תקלה לטכנאי - עם רשימה נפתחת וחיפוש -->
+  <!-- מודל פרטי תקלה -->
+  <div class="modal fade" id="faultDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="detailsTitle"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="detailsBody"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="closeDetailsBtn"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- מודל שיוך טכנאי -->
   <div class="modal fade" id="assignModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -205,25 +161,14 @@
         </div>
         <div class="modal-body">
           <input type="hidden" id="assignFaultId">
-
-          <!-- הודעה אם התקלה כבר מוקצת -->
           <div id="alreadyAssignedMsg" class="alert alert-warning d-none mb-3">
             <i class="bi bi-exclamation-triangle me-2"></i>
             <span id="alreadyAssignedText"></span>
           </div>
-
-          <!-- בחירת טכנאי עם חיפוש מובנה -->
           <div class="mb-3">
             <label class="form-label fw-bold" id="selectTechLabel"></label>
-            <div class="position-relative">
-              <!-- שדה חיפוש -->
-              <input type="text" id="techSearch" class="form-control mb-2"
-                oninput="filterTechList()" autocomplete="off">
-              <!-- רשימת טכנאים נפתחת -->
-              <div id="techList" style="max-height:200px; overflow-y:auto; border:1px solid #dee2e6; border-radius:8px;">
-                <!-- הטכנאים יוטענו כאן -->
-              </div>
-            </div>
+            <input type="text" id="techSearch" class="form-control mb-2" oninput="filterTechList()" autocomplete="off">
+            <div id="techList" style="max-height:200px; overflow-y:auto; border:1px solid #dee2e6; border-radius:8px;"></div>
             <input type="hidden" id="selectedTechId">
             <small class="text-success fw-bold mt-1" id="selectedTechName"></small>
           </div>
@@ -236,7 +181,7 @@
     </div>
   </div>
 
-  <!-- מודל עדכון סטטוס - עם כפתורים מעוצבים -->
+  <!-- מודל עדכון סטטוס -->
   <div class="modal fade" id="statusModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -246,8 +191,6 @@
         </div>
         <div class="modal-body">
           <input type="hidden" id="statusFaultId">
-
-          <!-- בחירת סטטוס חדש -->
           <div class="mb-3">
             <label class="form-label fw-bold" id="newStatusLabel"></label>
             <div class="d-flex flex-wrap gap-2 mt-2">
@@ -266,8 +209,6 @@
             </div>
             <input type="hidden" id="selectedStatus">
           </div>
-
-          <!-- הערה אופציונלית -->
           <div class="mb-3">
             <label class="form-label fw-bold" id="noteLabel"></label>
             <textarea id="statusNote" class="form-control" rows="3"></textarea>
@@ -281,24 +222,21 @@
     </div>
   </div>
 
+  <div id="lightbox" class="img-lightbox d-none" onclick="closeLightbox()">
+    <img id="lightboxImg" src="" alt="">
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // בדיקה שהמשתמש מחובר ושהוא מנהל
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user'));
-
-    if (!token || !user || user.role !== 'manager') {
-      window.location.href = 'login.html';
-    }
-
+    if (!token || !user || user.role !== 'manager') window.location.href = 'login.html';
     document.getElementById('managerName').textContent = user.full_name;
 
-    // משתנים גלובליים
     let allFaults = [];
     let allTechnicians = [];
     let dateSortAsc = true;
 
-    // החלת תרגומים על כל אלמנטי הדף
     function applyTranslations() {
       const isHe = getLang() === 'he';
       document.getElementById('nav-dashboard').textContent = t('dashboard');
@@ -306,6 +244,7 @@
       document.getElementById('nav-maintenance').textContent = t('maintenance');
       document.getElementById('nav-energy').textContent = t('energy');
       document.getElementById('nav-announcements').textContent = t('announcements');
+      document.getElementById('nav-invoices').textContent = isHe ? 'חשבוניות' : 'Invoices';
       document.getElementById('nav-reports').textContent = t('reports');
       document.getElementById('nav-users').textContent = t('users');
       document.getElementById('nav-logout').textContent = t('logout');
@@ -328,8 +267,6 @@
       document.getElementById('thUpdatedAt').textContent = isHe ? 'עדכון אחרון' : 'Last Update';
       document.getElementById('thActions').textContent = t('actions');
       document.getElementById('loadingText').textContent = t('loading');
-
-      // סוגי תקלות
       document.getElementById('allTypes').textContent = isHe ? 'כל הסוגים' : 'All Types';
       document.getElementById('typePlumbing').textContent = isHe ? 'אינסטלציה' : 'Plumbing';
       document.getElementById('typeElectrical').textContent = isHe ? 'חשמל' : 'Electrical';
@@ -339,8 +276,6 @@
       document.getElementById('typeAC').textContent = isHe ? 'מיזוג' : 'AC';
       document.getElementById('typeStructural').textContent = isHe ? 'מבני' : 'Structural';
       document.getElementById('typeOther').textContent = isHe ? 'אחר' : 'Other';
-
-      // סטטוסים ודחיפויות
       document.getElementById('allStatuses').textContent = isHe ? 'כל הסטטוסים' : 'All Statuses';
       document.getElementById('statusOpen').textContent = t('open');
       document.getElementById('statusInProgress').textContent = t('in_progress');
@@ -350,15 +285,11 @@
       document.getElementById('urgencyLow').textContent = t('low');
       document.getElementById('urgencyMedium').textContent = t('medium');
       document.getElementById('urgencyHigh').textContent = t('high');
-
-      // מודל שיוך
       document.getElementById('assignModalTitle').textContent = isHe ? 'שייך תקלה לטכנאי' : 'Assign Fault';
       document.getElementById('selectTechLabel').textContent = isHe ? 'בחר טכנאי' : 'Select Technician';
       document.getElementById('techSearch').placeholder = isHe ? 'חפש טכנאי...' : 'Search technician...';
       document.getElementById('cancelBtn').textContent = t('cancel');
       document.getElementById('assignBtn').textContent = isHe ? 'שייך' : 'Assign';
-
-      // מודל סטטוס
       document.getElementById('statusModalTitle').textContent = isHe ? 'עדכון סטטוס תקלה' : 'Update Fault Status';
       document.getElementById('newStatusLabel').textContent = isHe ? 'בחר סטטוס חדש' : 'Select New Status';
       document.getElementById('statusOpenBtn').textContent = t('open');
@@ -369,9 +300,9 @@
       document.getElementById('statusNote').placeholder = isHe ? 'הוסף הערה...' : 'Add a note...';
       document.getElementById('statusCancelBtn').textContent = t('cancel');
       document.getElementById('statusSaveBtn').innerHTML = `<i class="bi bi-check-lg"></i> ${isHe ? 'שמור' : 'Save'}`;
+      document.getElementById('closeDetailsBtn').textContent = t('cancel');
     }
 
-    // טעינת כל התקלות מהשרת
     async function loadFaults() {
       try {
         const response = await fetch('http://localhost:3000/api/faults/all', {
@@ -379,13 +310,12 @@
         });
         const data = await response.json();
         allFaults = data.faults.sort((a, b) => a.id - b.id);
-        renderFaults(allFaults);
+        filterFaults(); // מציג ללא סגורות כברירת מחדל
       } catch (err) {
         console.error('Error loading faults:', err);
       }
     }
 
-    // טעינת כל הטכנאים לשימוש ברשימה
     async function loadTechnicians() {
       try {
         const response = await fetch('http://localhost:3000/api/auth/technicians', {
@@ -398,83 +328,114 @@
       }
     }
 
-    // הצגת תקלות בטבלה עם tooltip להערות
     function renderFaults(faults) {
       const isHe = getLang() === 'he';
       const tbody = document.getElementById('faultsTable');
-
       if (faults.length === 0) {
         tbody.innerHTML = `<tr><td colspan="11" class="text-center py-4 text-muted">${t('noFaults')}</td></tr>`;
         return;
       }
-
-      tbody.innerHTML = faults.map(fault => `
-        <tr>
-          <td>${fault.id}</td>
-          <td>${fault.title}</td>
-          <td>${fault.fault_type}</td>
-          <td>${fault.reported_by_name || 'N/A'}</td>
-          <td>${fault.floor || 'N/A'}</td>
-          <td><span class="badge-${fault.urgency}">${t(fault.urgency)}</span></td>
-          <td><span class="badge-${fault.status.replace('_','-')}">${t(fault.status)}</span></td>
-          <td>${fault.assigned_to_name || (isHe ? 'לא מוקצה' : 'Unassigned')}</td>
-          <td>${new Date(fault.created_at).toLocaleDateString()}</td>
-          <td>${fault.updated_at ? new Date(fault.updated_at).toLocaleDateString() : '-'}</td>
-          <td class="d-flex gap-1 align-items-center">
-            <!-- כפתור שיוך לטכנאי -->
-            <button class="btn btn-sm btn-primary" onclick="openAssignModal(${fault.id}, '${fault.assigned_to_name || ''}')">
-              <i class="bi bi-person-check"></i>
-            </button>
-            <!-- כפתור עדכון סטטוס -->
-            <button class="btn btn-sm btn-warning" onclick="openStatusModal(${fault.id}, '${fault.status}')">
-              <i class="bi bi-pencil"></i>
-            </button>
-            <!-- אייקון הערות עם tooltip - מציג הערות בריחוף -->
-            <div class="notes-tooltip">
-              <button class="btn btn-sm btn-info" id="notesBtn_${fault.id}" onclick="loadNotes(${fault.id})">
-                <i class="bi bi-chat-dots"></i>
-              </button>
-              <div class="tooltip-content" id="notesTooltip_${fault.id}">
-                <div class="fw-bold mb-1">${isHe ? 'הערות:' : 'Notes:'}</div>
-                <div id="notesContent_${fault.id}" class="text-white-50 small">${isHe ? 'לחץ לטעינה...' : 'Click to load...'}</div>
-              </div>
-            </div>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    // טעינת הערות תקלה לתצוגת tooltip
-    async function loadNotes(faultId) {
-      const isHe = getLang() === 'he';
-      try {
-        const response = await fetch(`http://localhost:3000/api/faults/updates/${faultId}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await response.json();
-        const updates = data.updates;
-        const container = document.getElementById(`notesContent_${faultId}`);
-
-        if (!updates || updates.length === 0) {
-          container.textContent = isHe ? 'אין הערות' : 'No notes';
-          return;
+      tbody.innerHTML = faults.map(fault => {
+        let imagesHtml = '';
+        if (fault.images) {
+          const imgs = typeof fault.images === 'string' ? JSON.parse(fault.images) : fault.images;
+          if (imgs && imgs.length > 0) {
+            imagesHtml = `<div class="d-flex gap-1 mt-1">
+              ${imgs.map(url => `<img src="http://localhost:3000${url}" class="fault-image" onclick="openLightbox('http://localhost:3000${url}')">`).join('')}
+            </div>`;
+          }
         }
-
-        // הצגת ההערות האחרונות עם תאריך
-        container.innerHTML = updates.slice(-3).map(u => `
-          <div class="mb-1 border-bottom border-secondary pb-1">
-            <div>${u.note || (isHe ? 'אין הערה' : 'No note')}</div>
-            <div class="text-white-50" style="font-size:0.75rem">
-              ${new Date(u.created_at).toLocaleDateString()} - ${u.status}
-            </div>
-          </div>
-        `).join('');
-      } catch (err) {
-        document.getElementById(`notesContent_${faultId}`).textContent = isHe ? 'שגיאה בטעינה' : 'Error loading';
-      }
+        return `
+          <tr>
+            <td>${fault.id}</td>
+            <td><div>${fault.title}</div>${imagesHtml}</td>
+            <td>${fault.fault_type}</td>
+            <td>${fault.reported_by_name || 'N/A'}</td>
+            <td>${fault.floor || 'N/A'}</td>
+            <td><span class="badge-${fault.urgency}">${t(fault.urgency)}</span></td>
+            <td><span class="badge-${fault.status.replace('_','-')}">${t(fault.status)}</span></td>
+            <td>${fault.assigned_to_name || (isHe ? 'לא מוקצה' : 'Unassigned')}</td>
+            <td>${new Date(fault.created_at).toLocaleDateString()}</td>
+            <td>${fault.updated_at ? new Date(fault.updated_at).toLocaleDateString() : '-'}</td>
+            <td>
+              <div class="d-flex gap-1 align-items-center">
+                <button class="btn btn-sm btn-outline-primary" onclick="openDetails(${fault.id})" title="${isHe ? 'פרטים' : 'Details'}"><i class="bi bi-eye"></i></button>
+                <button class="btn btn-sm btn-primary" onclick="openAssignModal(${fault.id}, '${(fault.assigned_to_name || '').replace(/'/g, "\\'")}')" title="${isHe ? 'שייך' : 'Assign'}"><i class="bi bi-person-check"></i></button>
+                <button class="btn btn-sm btn-warning" onclick="openStatusModal(${fault.id}, '${fault.status}')" title="${isHe ? 'עדכן סטטוס' : 'Update Status'}"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="deleteFault(${fault.id})" title="${isHe ? 'מחק' : 'Delete'}"><i class="bi bi-trash"></i></button>
+              </div>
+            </td>
+          </tr>`;
+      }).join('');
     }
 
-    // סינון תקלות לפי כל הפילטרים
+    async function openDetails(faultId) {
+      const isHe = getLang() === 'he';
+      const fault = allFaults.find(f => f.id === faultId);
+      if (!fault) return;
+      let imagesHtml = '';
+      if (fault.images) {
+        const imgs = typeof fault.images === 'string' ? JSON.parse(fault.images) : fault.images;
+        if (imgs && imgs.length > 0) {
+          imagesHtml = `<div class="mb-3"><strong>${isHe ? 'תמונות:' : 'Photos:'}</strong><div class="d-flex gap-2 flex-wrap mt-2">
+            ${imgs.map(url => `<img src="http://localhost:3000${url}" style="width:120px;height:120px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid #dee2e6;" onclick="openLightbox('http://localhost:3000${url}')" alt="">`).join('')}
+          </div></div>`;
+        }
+      }
+      let historyHtml = '';
+      try {
+        const res = await fetch(`http://localhost:3000/api/faults/updates/${faultId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        if (data.updates && data.updates.length > 0) {
+          const sc = { open:'#f59e0b', in_progress:'#3b82f6', waiting_part:'#8b5cf6', closed:'#10b981' };
+          historyHtml = `<div class="mb-3"><strong>${isHe ? 'היסטוריית עדכונים:' : 'Update History:'}</strong><div class="mt-2" style="max-height:200px;overflow-y:auto;">
+            ${data.updates.map(u => `<div class="d-flex gap-2 mb-2">
+              <div style="width:10px;height:10px;border-radius:50%;background:${sc[u.status]||'#1a3a6b'};margin-top:5px;flex-shrink:0;"></div>
+              <div style="background:#f9fafb;border-radius:8px;padding:8px 12px;flex:1;font-size:0.82rem;">
+                <div class="d-flex justify-content-between">
+                  <strong style="color:${sc[u.status]||'#1a3a6b'}">${t(u.status)}</strong>
+                  <span class="badge bg-light text-dark" style="font-size:0.7rem;">${u.updated_by_name||'N/A'}</span>
+                </div>
+                ${u.note ? `<div class="mt-1">${u.note}</div>` : ''}
+                <div style="font-size:0.72rem;color:#9ca3af;margin-top:3px;">${new Date(u.created_at).toLocaleDateString('he-IL')} ${new Date(u.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
+              </div>
+            </div>`).join('')}
+          </div></div>`;
+        }
+      } catch(err) {}
+      document.getElementById('detailsTitle').textContent = `#${fault.id} - ${fault.title}`;
+      document.getElementById('detailsBody').innerHTML = `
+        <div class="row g-3 mb-3">
+          <div class="col-md-6"><table class="table table-sm">
+            <tr><td class="text-muted">${isHe?'סטטוס:':'Status:'}</td><td><span class="badge-${fault.status.replace('_','-')}">${t(fault.status)}</span></td></tr>
+            <tr><td class="text-muted">${isHe?'דחיפות:':'Urgency:'}</td><td><span class="badge-${fault.urgency}">${t(fault.urgency)}</span></td></tr>
+            <tr><td class="text-muted">${isHe?'סוג:':'Type:'}</td><td>${fault.fault_type}</td></tr>
+            <tr><td class="text-muted">${isHe?'קומה:':'Floor:'}</td><td>${fault.floor||'N/A'}</td></tr>
+            <tr><td class="text-muted">${isHe?'יחידה:':'Unit:'}</td><td>${fault.unit_number||'N/A'}</td></tr>
+            <tr><td class="text-muted">${isHe?'מדווח:':'Reporter:'}</td><td>${fault.reported_by_name||'N/A'}</td></tr>
+            <tr><td class="text-muted">${isHe?'טכנאי:':'Technician:'}</td><td>${fault.assigned_to_name||(isHe?'לא מוקצה':'Unassigned')}</td></tr>
+            <tr><td class="text-muted">${isHe?'תאריך:':'Date:'}</td><td>${new Date(fault.created_at).toLocaleDateString('he-IL')}</td></tr>
+          </table></div>
+          <div class="col-md-6"><strong>${isHe?'תיאור:':'Description:'}</strong><p class="text-muted small mt-1">${fault.description||(isHe?'אין תיאור':'No description')}</p></div>
+        </div>${imagesHtml}${historyHtml}`;
+      new bootstrap.Modal(document.getElementById('faultDetailsModal')).show();
+    }
+
+    async function deleteFault(faultId) {
+      const isHe = getLang() === 'he';
+      if (!confirm(isHe ? '⚠️ האם אתה בטוח שברצונך למחוק תקלה זו?' : '⚠️ Are you sure you want to delete this fault?')) return;
+      try {
+        const response = await fetch(`http://localhost:3000/api/faults/delete/${faultId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await response.json();
+        if (response.ok) { loadFaults(); }
+        else { alert(data.message); }
+      } catch(err) { alert(isHe ? 'שגיאה במחיקה.' : 'Error deleting fault.'); }
+    }
+
+    function openLightbox(url) { document.getElementById('lightboxImg').src = url; document.getElementById('lightbox').classList.remove('d-none'); }
+    function closeLightbox() { document.getElementById('lightbox').classList.add('d-none'); }
+
+    // סינון - ברירת מחדל: הסתר סגורות
     function filterFaults() {
       const search = document.getElementById('searchInput').value.toLowerCase();
       const status = document.getElementById('filterStatus').value;
@@ -485,10 +446,9 @@
       const dateTo = document.getElementById('filterDateTo').value;
 
       const filtered = allFaults.filter(fault => {
-        const matchSearch = !search ||
-          fault.title.toLowerCase().includes(search) ||
-          (fault.reported_by_name && fault.reported_by_name.toLowerCase().includes(search));
-        const matchStatus = !status || fault.status === status;
+        const matchSearch = !search || fault.title.toLowerCase().includes(search) || (fault.reported_by_name && fault.reported_by_name.toLowerCase().includes(search));
+        // ברירת מחדל: הסתר סגורות — אלא אם נבחר במפורש "סגור"
+        const matchStatus = status === '' ? fault.status !== 'closed' : fault.status === status;
         const matchUrgency = !urgency || fault.urgency === urgency;
         const matchType = !type || fault.fault_type === type;
         const matchReportedBy = !reportedBy || (fault.reported_by_name && fault.reported_by_name.toLowerCase().includes(reportedBy));
@@ -497,11 +457,9 @@
         const matchDateTo = !dateTo || faultDate <= new Date(dateTo + 'T23:59:59');
         return matchSearch && matchStatus && matchUrgency && matchType && matchReportedBy && matchDateFrom && matchDateTo;
       });
-
       renderFaults(filtered);
     }
 
-    // איפוס כל הפילטרים
     function resetFilters() {
       document.getElementById('searchInput').value = '';
       document.getElementById('filterStatus').value = '';
@@ -510,75 +468,46 @@
       document.getElementById('filterReportedBy').value = '';
       document.getElementById('filterDateFrom').value = '';
       document.getElementById('filterDateTo').value = '';
-      renderFaults(allFaults);
+      filterFaults();
     }
 
-    // מיון לפי תאריך יצירה
     function toggleDateSort() {
       dateSortAsc = !dateSortAsc;
       document.getElementById('createdSortIcon').className = dateSortAsc ? 'bi bi-arrow-up' : 'bi bi-arrow-down';
-      const sorted = [...allFaults].sort((a, b) =>
-        dateSortAsc
-          ? new Date(a.created_at) - new Date(b.created_at)
-          : new Date(b.created_at) - new Date(a.created_at)
-      );
+      const sorted = [...allFaults].sort((a, b) => dateSortAsc ? new Date(a.created_at) - new Date(b.created_at) : new Date(b.created_at) - new Date(a.created_at));
       renderFaults(sorted);
     }
 
-    // פתיחת מודל שיוך טכנאי - עם הודעה אם כבר מוקצת
     function openAssignModal(faultId, assignedTo) {
       const isHe = getLang() === 'he';
       document.getElementById('assignFaultId').value = faultId;
       document.getElementById('techSearch').value = '';
       document.getElementById('selectedTechId').value = '';
       document.getElementById('selectedTechName').textContent = '';
-
-      // הצגת הודעה אם התקלה כבר מוקצת
       const alreadyMsg = document.getElementById('alreadyAssignedMsg');
       if (assignedTo && assignedTo !== '') {
         alreadyMsg.classList.remove('d-none');
-        document.getElementById('alreadyAssignedText').textContent = isHe
-          ? `⚠️ תקלה זו כבר מוקצת לטכנאי: ${assignedTo}`
-          : `⚠️ This fault is already assigned to: ${assignedTo}`;
-      } else {
-        alreadyMsg.classList.add('d-none');
-      }
-
-      // הצגת כל הטכנאים ברשימה
+        document.getElementById('alreadyAssignedText').textContent = isHe ? `⚠️ תקלה זו כבר מוקצת לטכנאי: ${assignedTo}` : `⚠️ This fault is already assigned to: ${assignedTo}`;
+      } else { alreadyMsg.classList.add('d-none'); }
       renderTechList(allTechnicians);
       new bootstrap.Modal(document.getElementById('assignModal')).show();
     }
 
-    // הצגת רשימת טכנאים
     function renderTechList(technicians) {
       const isHe = getLang() === 'he';
       const list = document.getElementById('techList');
-
-      if (technicians.length === 0) {
-        list.innerHTML = `<div class="p-3 text-muted text-center">${isHe ? 'לא נמצאו טכנאים' : 'No technicians found'}</div>`;
-        return;
-      }
-
+      if (technicians.length === 0) { list.innerHTML = `<div class="p-3 text-muted text-center">${isHe ? 'לא נמצאו טכנאים' : 'No technicians found'}</div>`; return; }
       list.innerHTML = technicians.map(tech => `
-        <div class="tech-item ${document.getElementById('selectedTechId').value == tech.id ? 'selected' : ''}"
-          onclick="selectTechnician(${tech.id}, '${tech.full_name}')">
-          <i class="bi bi-person-fill text-primary me-2"></i>
-          ${tech.full_name}
-          <small class="text-muted ms-2">${tech.phone || ''}</small>
-        </div>
-      `).join('');
+        <div class="tech-item ${document.getElementById('selectedTechId').value == tech.id ? 'selected' : ''}" onclick="selectTechnician(${tech.id}, '${tech.full_name}')">
+          <i class="bi bi-person-fill text-primary me-2"></i>${tech.full_name}<small class="text-muted ms-2">${tech.phone||''}</small>
+        </div>`).join('');
     }
 
-    // סינון רשימת טכנאים לפי חיפוש
     function filterTechList() {
       const query = document.getElementById('techSearch').value.toLowerCase();
-      const filtered = allTechnicians.filter(t =>
-        t.full_name.toLowerCase().includes(query)
-      );
-      renderTechList(filtered);
+      renderTechList(allTechnicians.filter(t => t.full_name.toLowerCase().includes(query)));
     }
 
-    // בחירת טכנאי מהרשימה
     function selectTechnician(id, name) {
       const isHe = getLang() === 'he';
       document.getElementById('selectedTechId').value = id;
@@ -586,131 +515,62 @@
       renderTechList(allTechnicians);
     }
 
-    // שיוך תקלה לטכנאי שנבחר
     async function assignFault() {
       const isHe = getLang() === 'he';
       const fault_id = document.getElementById('assignFaultId').value;
       const technician_id = document.getElementById('selectedTechId').value;
-
-      if (!technician_id) {
-        alert(isHe ? 'אנא בחר טכנאי מהרשימה.' : 'Please select a technician from the list.');
-        return;
-      }
-
+      if (!technician_id) { alert(isHe ? 'אנא בחר טכנאי מהרשימה.' : 'Please select a technician from the list.'); return; }
       try {
-        const response = await fetch('http://localhost:3000/api/faults/assign', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ fault_id, technician_id })
-        });
+        const response = await fetch('http://localhost:3000/api/faults/assign', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ fault_id, technician_id }) });
         const data = await response.json();
-        if (response.ok) {
-          bootstrap.Modal.getInstance(document.getElementById('assignModal')).hide();
-          loadFaults();
-          refreshAlerts();
-        } else {
-          alert(data.message);
-        }
-      } catch (err) {
-        alert(isHe ? 'שגיאה. אנא נסה שוב.' : 'Error. Please try again.');
-      }
+        if (response.ok) { bootstrap.Modal.getInstance(document.getElementById('assignModal')).hide(); loadFaults(); if (window.refreshAlerts) refreshAlerts(); }
+        else { alert(data.message); }
+      } catch(err) { alert(isHe ? 'שגיאה. אנא נסה שוב.' : 'Error. Please try again.'); }
     }
 
-    // פתיחת מודל עדכון סטטוס
     function openStatusModal(faultId, currentStatus) {
       document.getElementById('statusFaultId').value = faultId;
       document.getElementById('selectedStatus').value = '';
       document.getElementById('statusNote').value = '';
-
-      // הדגשת הסטטוס הנוכחי
       document.querySelectorAll('.status-btn').forEach(btn => {
         const color = getStatusColor(btn.dataset.status);
-        if (btn.dataset.status === currentStatus) {
-          btn.classList.remove(`btn-outline-${color}`);
-          btn.classList.add(`btn-${color}`);
-        } else {
-          btn.classList.remove(`btn-${color}`);
-          btn.classList.add(`btn-outline-${color}`);
-        }
+        if (btn.dataset.status === currentStatus) { btn.classList.remove(`btn-outline-${color}`); btn.classList.add(`btn-${color}`); }
+        else { btn.classList.remove(`btn-${color}`); btn.classList.add(`btn-outline-${color}`); }
       });
-
       new bootstrap.Modal(document.getElementById('statusModal')).show();
     }
 
-    // קבלת צבע לפי סטטוס
     function getStatusColor(status) {
-      const colors = { open: 'warning', in_progress: 'primary', waiting_part: 'secondary', closed: 'success' };
-      return colors[status] || 'secondary';
+      return { open:'warning', in_progress:'primary', waiting_part:'secondary', closed:'success' }[status] || 'secondary';
     }
 
-    // בחירת סטטוס חדש עם הדגשה ויזואלית
     function selectStatus(status) {
       document.getElementById('selectedStatus').value = status;
       document.querySelectorAll('.status-btn').forEach(btn => {
         const color = getStatusColor(btn.dataset.status);
-        if (btn.dataset.status === status) {
-          btn.classList.remove(`btn-outline-${color}`);
-          btn.classList.add(`btn-${color}`);
-        } else {
-          btn.classList.remove(`btn-${color}`);
-          btn.classList.add(`btn-outline-${color}`);
-        }
+        if (btn.dataset.status === status) { btn.classList.remove(`btn-outline-${color}`); btn.classList.add(`btn-${color}`); }
+        else { btn.classList.remove(`btn-${color}`); btn.classList.add(`btn-outline-${color}`); }
       });
     }
 
-    // שמירת סטטוס חדש - עם אישור מיוחד לסגירת תקלה
     async function saveStatus() {
       const isHe = getLang() === 'he';
       const fault_id = document.getElementById('statusFaultId').value;
       const status = document.getElementById('selectedStatus').value;
       const note = document.getElementById('statusNote').value;
-
-      if (!status) {
-        alert(isHe ? 'אנא בחר סטטוס.' : 'Please select a status.');
-        return;
-      }
-
-      // אישור מיוחד לסגירת תקלה
-      if (status === 'closed') {
-        const confirmed = confirm(
-          isHe
-            ? '⚠️ האם וידאת שהתקלה אכן טופלה ונסגרה?\n\nלאחר הסגירה התקלה תסומן כמושלמת.'
-            : '⚠️ Have you verified that the fault has been resolved?\n\nAfter closing, the fault will be marked as completed.'
-        );
-        if (!confirmed) return;
-      }
-
+      if (!status) { alert(isHe ? 'אנא בחר סטטוס.' : 'Please select a status.'); return; }
+      if (status === 'closed') { if (!confirm(isHe ? '⚠️ האם וידאת שהתקלה אכן טופלה ונסגרה?' : '⚠️ Have you verified that the fault has been resolved?')) return; }
       try {
-        const response = await fetch('http://localhost:3000/api/faults/status', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ fault_id, status, note })
-        });
+        const response = await fetch('http://localhost:3000/api/faults/status', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ fault_id, status, note }) });
         const data = await response.json();
-        if (response.ok) {
-          bootstrap.Modal.getInstance(document.getElementById('statusModal')).hide();
-          loadFaults();
-        } else {
-          alert(data.message);
-        }
-      } catch (err) {
-        alert(isHe ? 'שגיאה. אנא נסה שוב.' : 'Error. Please try again.');
-      }
+        if (response.ok) { bootstrap.Modal.getInstance(document.getElementById('statusModal')).hide(); loadFaults(); }
+        else { alert(data.message); }
+      } catch(err) { alert(isHe ? 'שגיאה. אנא נסה שוב.' : 'Error. Please try again.'); }
     }
 
-    // פונקציית התנתקות
-    function logout() {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = 'login.html';
-    }
+    function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = 'login.html'; }
 
-    // טעינת הדף - החלת תרגומים, תקלות וטכנאים
-    document.addEventListener('DOMContentLoaded', () => {
-      applyTranslations();
-      loadFaults();
-      loadTechnicians();
-    });
+    document.addEventListener('DOMContentLoaded', () => { applyTranslations(); loadFaults(); loadTechnicians(); });
   </script>
 </body>
 </html>

@@ -1,57 +1,107 @@
 // קובץ להוספת כפתור בחירת שפה לכל הדפים
 
-// יצירת כפתור בחירת שפה
 function createLangSwitcher() {
   const lang = getLang();
+  const isHe = lang === 'he';
 
   const switcher = document.createElement('div');
+  switcher.id = 'langSwitcher';
   switcher.style.cssText = `
     position: fixed;
-    top: 15px;
-    ${lang === 'he' ? 'left' : 'right'}: 15px;
-    z-index: 9999;
-    display: flex;
-    gap: 5px;
-    background: white;
-    border-radius: 20px;
-    padding: 4px 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    top: 20px;
+    ${isHe ? 'left: 260px' : 'right: 20px'};
+    z-index: 9997;
   `;
 
   switcher.innerHTML = `
-    <button 
-      onclick="setLang('en')" 
-      style="
+    <div style="position:relative; display:inline-block;">
+      <!-- כפתור עולם -->
+      <button id="langToggleBtn" onclick="toggleLangMenu()" style="
+        background: white;
         border: none;
-        background: ${lang === 'en' ? '#1a56db' : 'transparent'};
-        color: ${lang === 'en' ? 'white' : '#666'};
-        border-radius: 15px;
-        padding: 4px 12px;
-        font-size: 13px;
-        font-weight: 600;
+        border-radius: 50%;
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         cursor: pointer;
-        transition: all 0.3s;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        font-size: 1.2rem;
+        transition: background 0.2s;
       ">
-      EN
-    </button>
-    <button 
-      onclick="setLang('he')" 
-      style="
-        border: none;
-        background: ${lang === 'he' ? '#1a56db' : 'transparent'};
-        color: ${lang === 'he' ? 'white' : '#666'};
-        border-radius: 15px;
-        padding: 4px 12px;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s;
+        🌐
+      </button>
+
+      <!-- תפריט שפה נפתח - תמיד נפתח שמאלה מהכפתור -->
+      <div id="langMenu" style="
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 50px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        overflow: hidden;
+        min-width: 130px;
+        z-index: 9999;
+        border: 1px solid #e5e7eb;
       ">
-      עב
-    </button>
+        <button onclick="setLang('he')" style="
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          width: 100%;
+          padding: 10px 16px;
+          border: none;
+          background: ${lang === 'he' ? '#eff6ff' : 'white'};
+          color: ${lang === 'he' ? '#1a3a6b' : '#374151'};
+          font-weight: ${lang === 'he' ? '700' : '400'};
+          font-size: 0.9rem;
+          cursor: pointer;
+          text-align: right;
+          border-bottom: 1px solid #f0f0f0;
+        ">
+          ${lang === 'he' ? '✓ ' : ''} 🇮🇱 עברית
+        </button>
+        <button onclick="setLang('en')" style="
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          width: 100%;
+          padding: 10px 16px;
+          border: none;
+          background: ${lang === 'en' ? '#eff6ff' : 'white'};
+          color: ${lang === 'en' ? '#1a3a6b' : '#374151'};
+          font-weight: ${lang === 'en' ? '700' : '400'};
+          font-size: 0.9rem;
+          cursor: pointer;
+          text-align: right;
+        ">
+          ${lang === 'en' ? '✓ ' : ''} 🇺🇸 English
+        </button>
+      </div>
+    </div>
   `;
 
   document.body.appendChild(switcher);
+
+  // סגירת תפריט בלחיצה מחוץ
+  document.addEventListener('click', (e) => {
+    const menu = document.getElementById('langMenu');
+    const btn = document.getElementById('langToggleBtn');
+    if (menu && btn && !btn.contains(e.target) && !menu.contains(e.target)) {
+      menu.style.display = 'none';
+    }
+  });
+}
+
+// פתיחה/סגירה של תפריט השפה
+function toggleLangMenu() {
+  const menu = document.getElementById('langMenu');
+  if (menu) {
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  }
 }
 
 // הפעלת הכפתור בטעינת הדף
