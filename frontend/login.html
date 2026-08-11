@@ -1,152 +1,392 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BUILDIX - Login</title>
+  <title>BUILDIX - כניסה</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="js/translations.js"></script>
   <script src="js/lang-switcher.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Heebo', sans-serif;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .bg-blur {
+      position: fixed; inset: 0; z-index: 0;
+      background: linear-gradient(135deg, #0a0f1e 0%, #1a3a6b 50%, #0a0f1e 100%);
+    }
+
+    .bg-circles { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+
+    .circle {
+      position: absolute; border-radius: 50%; opacity: 0.08;
+      animation: float 8s ease-in-out infinite;
+    }
+
+    .circle-1 { width: 600px; height: 600px; background: #1a3a6b; top: -200px; right: -150px; animation-delay: 0s; }
+    .circle-2 { width: 400px; height: 400px; background: #c9a227; bottom: -100px; left: -100px; animation-delay: 2s; }
+    .circle-3 { width: 300px; height: 300px; background: #1a3a6b; top: 40%; left: 30%; animation-delay: 4s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-30px) scale(1.05); }
+    }
+
+    .bg-image {
+      position: fixed; inset: 0; z-index: 1;
+      background: url('https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1920&q=60') center/cover no-repeat;
+      filter: blur(3px) brightness(0.25);
+    }
+
+    /* NAVBAR */
+    .nav-bar {
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      padding: 16px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(10, 15, 30, 0.4);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .nav-logo img { height: 44px; filter: brightness(10); }
+    .nav-logo span { font-size: 1.3rem; font-weight: 800; color: white; letter-spacing: 1px; }
+
+    .nav-back {
+      color: rgba(255,255,255,0.7); text-decoration: none;
+      font-size: 0.85rem; display: flex; align-items: center; gap: 6px; transition: color 0.2s;
+    }
+    .nav-back:hover { color: #c9a227; }
+
+    /* POPUP */
+    .popup-wrapper {
+      position: fixed; inset: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: center;
+      padding: 80px 20px 20px;
+    }
+
+    .popup-card {
+      background: rgba(255,255,255,0.97);
+      border-radius: 20px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+      width: 100%; max-width: 420px; overflow: hidden;
+      animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.85) translateY(20px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* טאבים */
+    .popup-tabs { display: flex; border-bottom: 2px solid #f0f0f0; }
+
+    .popup-tab {
+      flex: 1; padding: 16px; text-align: center;
+      font-size: 0.9rem; font-weight: 700; color: #9ca3af;
+      cursor: pointer; transition: all 0.2s; border: none;
+      background: none; font-family: 'Heebo', sans-serif;
+      border-bottom: 3px solid transparent; margin-bottom: -2px;
+    }
+    .popup-tab.active { color: #1a3a6b; border-bottom-color: #1a3a6b; }
+    .popup-tab:hover:not(.active) { color: #374151; }
+
+    .popup-body { padding: 28px 32px 32px; }
+
+    .popup-logo { text-align: center; margin-bottom: 20px; }
+    .popup-logo img { height: 52px; margin-bottom: 8px; }
+    .popup-logo h2 { font-size: 1.1rem; font-weight: 700; color: #1a3a6b; margin: 0; }
+    .popup-logo p { font-size: 0.8rem; color: #9ca3af; margin: 4px 0 0; }
+
+    /* שדות */
+    .field-group { margin-bottom: 16px; }
+
+    .field-label {
+      display: block; font-size: 0.78rem; font-weight: 600;
+      color: #374151; margin-bottom: 6px;
+    }
+
+    .field-input-wrap { position: relative; }
+
+    .field-input {
+      width: 100%; padding: 11px 14px 11px 40px;
+      border: 1.5px solid #e5e7eb; border-radius: 10px;
+      font-size: 0.88rem; color: #1f2937; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: 'Heebo', sans-serif; background: #fafafa;
+    }
+    .field-input:focus {
+      border-color: #1a3a6b;
+      box-shadow: 0 0 0 3px rgba(26,58,107,0.1);
+      background: white;
+    }
+
+    .field-icon {
+      position: absolute; left: 13px; top: 50%;
+      transform: translateY(-50%); color: #9ca3af;
+      font-size: 0.95rem; pointer-events: none;
+    }
+
+    .field-icon-btn {
+      position: absolute; right: 13px; top: 50%;
+      transform: translateY(-50%); color: #9ca3af;
+      font-size: 0.95rem; background: none; border: none; cursor: pointer; padding: 0;
+    }
+
+    .field-input.with-right { padding-right: 40px; }
+
+    /* זכור אותי */
+    .remember-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .remember-left { display: flex; align-items: center; gap: 8px; }
+    .remember-row input { accent-color: #1a3a6b; width: 14px; height: 14px; }
+    .remember-row label { font-size: 0.78rem; color: #6b7280; cursor: pointer; }
+
+    /* כפתור שכחתי סיסמה */
+    .forgot-btn {
+      font-size: 0.78rem; color: #1a3a6b; font-weight: 600;
+      background: none; border: none; cursor: pointer;
+      font-family: 'Heebo', sans-serif; text-decoration: underline;
+      padding: 0;
+    }
+    .forgot-btn:hover { color: #c9a227; }
+
+    /* כפתור ראשי */
+    .btn-main {
+      width: 100%; background: #1a3a6b; color: white; border: none;
+      border-radius: 10px; padding: 12px; font-size: 0.95rem; font-weight: 700;
+      cursor: pointer; transition: background 0.2s, transform 0.1s;
+      font-family: 'Heebo', sans-serif; margin-bottom: 16px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-main:hover { background: #c9a227; transform: translateY(-1px); }
+    .btn-main:active { transform: translateY(0); }
+
+    .bottom-link {
+      text-align: center; font-size: 0.78rem; color: #9ca3af;
+    }
+    .bottom-link button {
+      color: #1a3a6b; font-weight: 700; background: none;
+      border: none; cursor: pointer; font-family: 'Heebo', sans-serif;
+      font-size: 0.78rem; text-decoration: underline;
+    }
+
+    /* הודעות */
+    .msg-box {
+      border-radius: 8px; padding: 10px 14px;
+      font-size: 0.8rem; margin-bottom: 14px; display: none;
+    }
+    .msg-error { background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; }
+    .msg-success { background: #d1fae5; border: 1px solid #6ee7b7; color: #059669; }
+
+    /* פאנלים */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* מודל שכחתי סיסמה */
+    .forgot-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+      display: none; align-items: center; justify-content: center;
+    }
+    .forgot-overlay.show { display: flex; }
+
+    .forgot-card {
+      background: white; border-radius: 16px; padding: 32px;
+      width: 100%; max-width: 380px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      animation: popIn 0.3s ease;
+    }
+
+    .forgot-card h3 { font-size: 1.1rem; font-weight: 700; color: #1a3a6b; margin-bottom: 8px; }
+    .forgot-card p { font-size: 0.82rem; color: #6b7280; margin-bottom: 20px; }
+
+    .forgot-close {
+      position: absolute; top: 12px; left: 12px;
+      background: none; border: none; color: #9ca3af;
+      font-size: 1.2rem; cursor: pointer;
+    }
+
+    @media (max-width: 480px) {
+      .popup-body { padding: 20px; }
+      .nav-bar { padding: 14px 20px; }
+    }
+  </style>
 </head>
-<body class="bg-light">
+<body>
 
-  <!-- תפריט עליון -->
-  <nav class="navbar navbar-dark bg-primary">
-    <div class="container">
-      <a class="navbar-brand fw-bold" href="index.html">
-        <img src="logo.png" height="40" class="me-2" alt="BUILDIX"> BUILDIX
-      </a>
-    </div>
-  </nav>
+  <!-- רקע -->
+  <div class="bg-blur"></div>
+  <div class="bg-circles">
+    <div class="circle circle-1"></div>
+    <div class="circle circle-2"></div>
+    <div class="circle circle-3"></div>
+  </div>
+  <div class="bg-image"></div>
 
-  <!-- טופס התחברות -->
-  <div class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-md-5">
+  <!-- נאב בר -->
+  <div class="nav-bar">
+    <a href="index.html" class="nav-logo">
+      <img src="logo.png" alt="BUILDIX">
+      <span>BUILDIX</span>
+    </a>
+    <a href="index.html" class="nav-back" id="backBtn">
+      <i class="bi bi-arrow-right"></i>
+      <span id="backText">חזרה לדף הבית</span>
+    </a>
+  </div>
 
-        <div class="card auth-card">
-          <div class="card-header text-center">
-            <h4 class="text-white fw-bold mb-0">
-              <i class="bi bi-box-arrow-in-right"></i>
-              <span id="loginTitle"></span>
-            </h4>
-            <p class="text-white-50 mt-1 mb-0" id="loginSubtitle"></p>
-          </div>
+  <!-- פופאפ התחברות -->
+  <div class="popup-wrapper">
+    <div class="popup-card">
 
-          <div class="card-body p-4">
-            <div id="errorMsg" class="alert alert-danger d-none"></div>
-            <div id="successMsg" class="alert alert-success d-none"></div>
+      <div class="popup-tabs">
+        <button class="popup-tab active" id="tab-login" onclick="switchTab('login')">התחברות</button>
+        <button class="popup-tab" id="tab-register" onclick="goToRegisterPage()">הרשמה</button>
+      </div>
 
-            <!-- שדה מייל -->
-            <div class="mb-3">
-              <label class="form-label fw-bold" id="emailLabel"></label>
-              <div class="input-group">
-                <span class="input-group-text">
-                  <i class="bi bi-envelope"></i>
-                </span>
-                <input type="email" id="email" class="form-control">
-              </div>
-            </div>
+      <div class="popup-body">
 
-            <!-- שדה סיסמה -->
-            <div class="mb-3">
-              <label class="form-label fw-bold" id="passwordLabel"></label>
-              <div class="input-group">
-                <span class="input-group-text">
-                  <i class="bi bi-lock"></i>
-                </span>
-                <input type="password" id="password" class="form-control">
-                <!-- כפתור הצגת/הסתרת סיסמה -->
-                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()" id="togglePwdBtn">
-                  <i class="bi bi-eye" id="togglePwdIcon"></i>
-                </button>
-              </div>
-            </div>
+        <div class="popup-logo">
+          <img src="logo.png" alt="BUILDIX">
+          <h2>BUILDIX</h2>
+          <p id="popup-subtitle">מערכת ניהול בניינים חכמה</p>
+        </div>
 
-            <!-- זכור אותי -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="rememberMe">
-                <label class="form-check-label text-muted" for="rememberMe" id="rememberMeLabel"></label>
-              </div>
-            </div>
+        <div id="errorMsg" class="msg-box msg-error"></div>
+        <div id="successMsg" class="msg-box msg-success"></div>
 
-            <!-- כפתור התחברות -->
-            <div class="d-grid">
-              <button onclick="login()" class="btn btn-primary btn-lg" id="loginBtn"></button>
-            </div>
+        <!-- פאנל התחברות (הפאנל היחיד בדף הזה - הרשמה עוברת ישירות ל-register.html) -->
+        <div class="panel active" id="panel-login">
 
-            <!-- קישור להרשמה -->
-            <div class="text-center mt-3">
-              <p class="text-muted mb-0">
-                <span id="noAccount"></span>
-                <a href="register.html" class="text-primary fw-bold" id="registerLink"></a>
-              </p>
+          <div class="field-group">
+            <label class="field-label" id="emailLabel">כתובת מייל</label>
+            <div class="field-input-wrap">
+              <i class="bi bi-envelope field-icon"></i>
+              <input type="email" id="email" class="field-input" placeholder="example@email.com">
             </div>
           </div>
+
+          <div class="field-group">
+            <label class="field-label" id="passwordLabel">סיסמה</label>
+            <div class="field-input-wrap">
+              <i class="bi bi-lock field-icon"></i>
+              <input type="password" id="password" class="field-input with-right" placeholder="••••••••">
+              <button class="field-icon-btn" onclick="togglePassword('password', 'toggleIcon1')" type="button">
+                <i class="bi bi-eye" id="toggleIcon1"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="remember-row">
+            <div class="remember-left">
+              <input type="checkbox" id="rememberMe">
+              <label for="rememberMe" id="rememberMeLabel">זכור אותי</label>
+            </div>
+            <button class="forgot-btn" onclick="openForgot()" id="forgotBtn">שכחתי סיסמה</button>
+          </div>
+
+          <button class="btn-main" onclick="login()" id="loginBtn">
+            <i class="bi bi-box-arrow-in-right"></i>
+            <span id="loginBtnText">כניסה למערכת</span>
+          </button>
+
+          <div class="bottom-link">
+            <span id="noAccount">אין לך חשבון?</span>
+            <button onclick="goToRegisterPage()" id="switchToRegister">הירשם כאן</button>
+          </div>
+
         </div>
 
       </div>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- מודל שכחתי סיסמה -->
+  <div class="forgot-overlay" id="forgotOverlay" onclick="closeForgotOutside(event)">
+    <div class="forgot-card" style="position:relative;">
+      <button class="forgot-close" onclick="closeForgot()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+      <h3 id="forgotTitle">🔑 שכחתי סיסמה</h3>
+      <p id="forgotDesc">הזיני את כתובת המייל שלך ונשלח לך סיסמה זמנית</p>
 
+      <div id="forgotError" class="msg-box msg-error"></div>
+      <div id="forgotSuccess" class="msg-box msg-success"></div>
+
+      <div class="field-group">
+        <label class="field-label" id="forgotEmailLabel">כתובת מייל</label>
+        <div class="field-input-wrap">
+          <i class="bi bi-envelope field-icon"></i>
+          <input type="email" id="forgotEmail" class="field-input" placeholder="example@email.com">
+        </div>
+      </div>
+
+      <button class="btn-main" onclick="sendForgotPassword()" id="forgotSendBtn">
+        <i class="bi bi-send"></i>
+        <span id="forgotSendText">שלח סיסמה זמנית</span>
+      </button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // החלת תרגומים על הדף
-    function applyTranslations() {
-      const isHe = getLang() === 'he';
-      document.getElementById('loginTitle').textContent = t('loginBtn');
-      document.getElementById('loginSubtitle').textContent = t('welcomeBack');
-      document.getElementById('emailLabel').textContent = t('emailAddress');
-      document.getElementById('passwordLabel').textContent = t('password');
-      document.getElementById('loginBtn').innerHTML = `<i class="bi bi-box-arrow-in-right"></i> ${t('loginBtn')}`;
-      document.getElementById('noAccount').textContent = t('noAccount');
-      document.getElementById('registerLink').textContent = t('registerHere');
-      document.getElementById('rememberMeLabel').textContent = isHe ? 'זכור אותי' : 'Remember me';
-      document.getElementById('email').placeholder = t('emailAddress');
-      document.getElementById('password').placeholder = t('password');
+    // מעבר ישיר לדף ההרשמה המלא (3 שלבים) - במקום פאנל ביניים בתוך login.html
+    function goToRegisterPage() {
+      window.location.href = 'register.html';
+    }
+
+    // החלפת טאב (נשאר רק להתחברות - טאב הרשמה מנווט ישירות)
+    function switchTab(tab) {
+      document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+      document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+      hideMessages();
     }
 
     // הצגת/הסתרת סיסמה
-    function togglePassword() {
-      const pwd = document.getElementById('password');
-      const icon = document.getElementById('togglePwdIcon');
-      if (pwd.type === 'password') {
-        pwd.type = 'text';
-        icon.className = 'bi bi-eye-slash';
-      } else {
-        pwd.type = 'password';
-        icon.className = 'bi bi-eye';
-      }
+    function togglePassword(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      input.type = input.type === 'password' ? 'text' : 'password';
+      icon.className = input.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
     }
 
-    // טעינת פרטים שמורים מ-localStorage
-    function loadSavedCredentials() {
-      const saved = localStorage.getItem('rememberedEmail');
-      if (saved) {
-        document.getElementById('email').value = saved;
-        document.getElementById('rememberMe').checked = true;
-      }
+    function showError(msg) {
+      const el = document.getElementById('errorMsg');
+      el.textContent = msg; el.style.display = 'block';
+      document.getElementById('successMsg').style.display = 'none';
     }
 
-    // פונקציית התחברות
+    function showSuccess(msg) {
+      const el = document.getElementById('successMsg');
+      el.textContent = msg; el.style.display = 'block';
+      document.getElementById('errorMsg').style.display = 'none';
+    }
+
+    function hideMessages() {
+      document.getElementById('errorMsg').style.display = 'none';
+      document.getElementById('successMsg').style.display = 'none';
+    }
+
+    // התחברות
     async function login() {
-      const email = document.getElementById('email').value;
+      const isHe = getLang() === 'he';
+      const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       const rememberMe = document.getElementById('rememberMe').checked;
-      const errorMsg = document.getElementById('errorMsg');
-      const successMsg = document.getElementById('successMsg');
-      const isHe = getLang() === 'he';
-
-      errorMsg.classList.add('d-none');
-      successMsg.classList.add('d-none');
+      hideMessages();
 
       if (!email || !password) {
-        errorMsg.textContent = isHe ? 'אנא הזן מייל וסיסמה.' : 'Please enter email and password.';
-        errorMsg.classList.remove('d-none');
+        showError(isHe ? 'אנא הזן מייל וסיסמה.' : 'Please enter email and password.');
         return;
       }
 
@@ -156,57 +396,128 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
         });
-
         const data = await response.json();
 
         if (response.ok) {
-          // שמירת טוקן ומשתמש
           localStorage.setItem('token', data.token);
           localStorage.setItem('user', JSON.stringify(data.user));
+          if (rememberMe) localStorage.setItem('rememberedEmail', email);
+          else localStorage.removeItem('rememberedEmail');
 
-          // זכירת מייל אם נבחר Remember Me
-          if (rememberMe) {
-            localStorage.setItem('rememberedEmail', email);
-          } else {
-            localStorage.removeItem('rememberedEmail');
-          }
+          showSuccess(isHe ? '✅ התחברת בהצלחה! מעביר...' : '✅ Login successful!');
 
-          successMsg.textContent = isHe ? '✅ התחברת בהצלחה! מעביר...' : '✅ Login successful! Redirecting...';
-          successMsg.classList.remove('d-none');
-
-          // ניווט לפי תפקיד
           setTimeout(() => {
-            if (data.user.role === 'manager') {
-              window.location.href = 'dashboard-manager.html';
-            } else if (data.user.role === 'technician') {
-              window.location.href = 'dashboard-technician.html';
-            } else {
-              window.location.href = 'dashboard-tenant.html';
+            if (data.user.must_change_password == 1) {
+              localStorage.setItem('must_change_password', '1');
             }
+            if (data.user.role === 'manager') window.location.href = 'dashboard-manager.html';
+            else if (data.user.role === 'technician') window.location.href = 'dashboard-technician.html';
+            else window.location.href = 'dashboard-tenant.html';
           }, 1000);
-
         } else {
-          errorMsg.textContent = data.message;
-          errorMsg.classList.remove('d-none');
+          showError(data.message);
         }
-
       } catch (err) {
-        errorMsg.textContent = isHe ? 'שגיאת חיבור. אנא נסה שוב.' : 'Connection error. Please try again.';
-        errorMsg.classList.remove('d-none');
+        showError(isHe ? 'שגיאת חיבור. אנא נסה שוב.' : 'Connection error.');
       }
     }
 
-    // התחברות עם Enter
+    // שכחתי סיסמה — פתיחת מודל
+    function openForgot() {
+      document.getElementById('forgotOverlay').classList.add('show');
+      document.getElementById('forgotEmail').value = document.getElementById('email').value;
+      document.getElementById('forgotError').style.display = 'none';
+      document.getElementById('forgotSuccess').style.display = 'none';
+    }
+
+    function closeForgot() {
+      document.getElementById('forgotOverlay').classList.remove('show');
+    }
+
+    function closeForgotOutside(e) {
+      if (e.target === document.getElementById('forgotOverlay')) closeForgot();
+    }
+
+    // שליחת סיסמה זמנית
+    async function sendForgotPassword() {
+      const isHe = getLang() === 'he';
+      const email = document.getElementById('forgotEmail').value.trim();
+      const errEl = document.getElementById('forgotError');
+      const sucEl = document.getElementById('forgotSuccess');
+      errEl.style.display = 'none';
+      sucEl.style.display = 'none';
+
+      if (!email) {
+        errEl.textContent = isHe ? 'אנא הזיני כתובת מייל.' : 'Please enter your email.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:3000/api/auth/forgot-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+          sucEl.textContent = isHe ? '✅ סיסמה זמנית נשלחה למייל שלך!' : '✅ Temporary password sent to your email!';
+          sucEl.style.display = 'block';
+          setTimeout(() => closeForgot(), 3000);
+        } else {
+          errEl.textContent = data.message;
+          errEl.style.display = 'block';
+        }
+      } catch (err) {
+        errEl.textContent = isHe ? 'שגיאת חיבור.' : 'Connection error.';
+        errEl.style.display = 'block';
+      }
+    }
+
+    // תרגומים
+    function applyTranslations() {
+      const isHe = getLang() === 'he';
+      document.documentElement.dir = isHe ? 'rtl' : 'ltr';
+      document.getElementById('tab-login').textContent = isHe ? 'התחברות' : 'Login';
+      document.getElementById('tab-register').textContent = isHe ? 'הרשמה' : 'Register';
+      document.getElementById('popup-subtitle').textContent = isHe ? 'מערכת ניהול בניינים חכמה' : 'Smart Building Management';
+      document.getElementById('emailLabel').textContent = isHe ? 'כתובת מייל' : 'Email';
+      document.getElementById('passwordLabel').textContent = isHe ? 'סיסמה' : 'Password';
+      document.getElementById('rememberMeLabel').textContent = isHe ? 'זכור אותי' : 'Remember me';
+      document.getElementById('forgotBtn').textContent = isHe ? 'שכחתי סיסמה' : 'Forgot password';
+      document.getElementById('loginBtnText').textContent = isHe ? 'כניסה למערכת' : 'Login';
+      document.getElementById('noAccount').textContent = isHe ? 'אין לך חשבון?' : "Don't have an account?";
+      document.getElementById('switchToRegister').textContent = isHe ? 'הירשם כאן' : 'Register here';
+      document.getElementById('backText').textContent = isHe ? 'חזרה לדף הבית' : 'Back to Home';
+      document.getElementById('forgotTitle').textContent = isHe ? '🔑 שכחתי סיסמה' : '🔑 Forgot Password';
+      document.getElementById('forgotDesc').textContent = isHe ? 'הזיני את כתובת המייל שלך ונשלח לך סיסמה זמנית' : 'Enter your email and we\'ll send you a temporary password';
+      document.getElementById('forgotEmailLabel').textContent = isHe ? 'כתובת מייל' : 'Email';
+      document.getElementById('forgotSendText').textContent = isHe ? 'שלח סיסמה זמנית' : 'Send Temporary Password';
+    }
+
+    function loadSavedCredentials() {
+      const saved = localStorage.getItem('rememberedEmail');
+      if (saved) {
+        document.getElementById('email').value = saved;
+        document.getElementById('rememberMe').checked = true;
+      }
+    }
+
     document.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') login();
+      if (e.key === 'Enter') {
+        if (document.getElementById('forgotOverlay').classList.contains('show')) {
+          sendForgotPassword();
+        } else {
+          login();
+        }
+      }
     });
 
-    // טעינת הדף
     document.addEventListener('DOMContentLoaded', () => {
       applyTranslations();
       loadSavedCredentials();
     });
   </script>
-
 </body>
 </html>

@@ -68,6 +68,7 @@
               <option value="" id="allStatuses"></option>
               <option value="approved" id="statusApproved"></option>
               <option value="pending" id="statusPending"></option>
+              <option value="rejected" id="statusRejected"></option>
             </select>
           </div>
           <!-- כפתור איפוס -->
@@ -113,12 +114,16 @@
   <!-- מודל שליחת הודעה למשתמש -->
   <div class="modal fade" id="messageModal" tabindex="-1">
     <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="messageModalTitle"></h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      <div class="modal-content" style="border:none; border-radius:16px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+
+        <div class="modal-header" style="background:#1a3a6b; border:none; padding:20px 24px; display:flex; align-items:center;">
+          <h5 class="modal-title text-white fw-bold mb-0" id="messageModalTitle" style="font-size:1.05rem; flex:1;"></h5>
+          <button type="button" class="modal-close-btn" data-bs-dismiss="modal">
+            <i class="bi bi-x-lg"></i>
+          </button>
         </div>
-        <div class="modal-body">
+
+        <div class="modal-body" style="padding:24px;">
           <div id="messageError" class="alert alert-danger d-none"></div>
           <div id="messageSuccess" class="alert alert-success d-none"></div>
           <input type="hidden" id="messageUserId">
@@ -135,13 +140,41 @@
             <textarea id="messageBody" class="form-control" rows="5"></textarea>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="messageCancelBtn"></button>
-          <button type="button" class="btn btn-primary" onclick="sendMessage()" id="messageSendBtn"></button>
+        <div class="modal-footer" style="border:none; padding:16px 24px 24px;">
+          <button type="button" class="btn" data-bs-dismiss="modal" id="messageCancelBtn"
+            style="background:#f3f4f6; color:#374151; border-radius:10px; padding:9px 20px; font-size:0.88rem; font-weight:600;"></button>
+          <button type="button" class="btn btn-primary" onclick="sendMessage()" id="messageSendBtn"
+            style="border-radius:10px; padding:9px 20px; font-size:0.88rem; font-weight:600;"></button>
         </div>
+
       </div>
     </div>
   </div>
+
+  <style>
+    /* כפתור סגירה מעוצב למודל */
+    .modal-close-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+      padding: 0;
+    }
+    .modal-close-btn:hover {
+      background: rgba(255,255,255,0.3);
+      transform: rotate(90deg);
+    }
+    .modal-close-btn i { pointer-events: none; }
+  </style>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
@@ -179,9 +212,10 @@
       document.getElementById('roleTechnician').textContent = isHe ? 'טכנאי' : 'Technician';
       document.getElementById('roleManager').textContent = isHe ? 'מנהל' : 'Manager';
       document.getElementById('filterStatusLabel').textContent = isHe ? 'סטטוס אישור' : 'Approval Status';
-      document.getElementById('allStatuses').textContent = isHe ? 'כולם' : 'All';
+      document.getElementById('allStatuses').textContent = isHe ? 'כולם (ללא נדחים)' : 'All (excluding rejected)';
       document.getElementById('statusApproved').textContent = isHe ? '✅ מאושר' : '✅ Approved';
       document.getElementById('statusPending').textContent = isHe ? '⏳ ממתין' : '⏳ Pending';
+      document.getElementById('statusRejected').textContent = isHe ? '❌ נדחה' : '❌ Rejected';
       document.getElementById('resetBtn').innerHTML = `<i class="bi bi-arrow-counterclockwise"></i> ${isHe ? 'איפוס' : 'Reset'}`;
       document.getElementById('usersTitle').innerHTML = `<i class="bi bi-people text-primary"></i> ${isHe ? 'כל המשתמשים' : 'All Users'}`;
       document.getElementById('thName').textContent = t('fullName');
@@ -202,7 +236,7 @@
       document.getElementById('messageSendBtn').innerHTML = `<i class="bi bi-send"></i> ${isHe ? 'שלח' : 'Send'}`;
     }
 
-    // טעינת כל המשתמשים מהשרת
+    // טעינת כל המשתמשים מהשרת - תמיד המקור האמיתי (single source of truth)
     async function loadUsers() {
       try {
         const response = await fetch('http://localhost:3000/api/auth/all-users', {
@@ -210,7 +244,7 @@
         });
         const data = await response.json();
 
-        // מיון: ממתינים לאישור ראשון, אחר כך מאושרים
+        // מיון: ממתינים לאישור ראשון, אחר כך מאושרים, אחר כך נדחים
         allUsers = data.users.sort((a, b) => {
           if (a.is_approved === b.is_approved) {
             return new Date(b.created_at) - new Date(a.created_at);
@@ -218,10 +252,21 @@
           return a.is_approved - b.is_approved;
         });
 
-        renderUsers(allUsers);
+        filterUsers(); // מציג ללא נדחים כברירת מחדל
       } catch (err) {
         console.error('Error loading users:', err);
       }
+    }
+
+    // תווית וצבע סטטוס
+    function statusBadgeHtml(isApproved, isHe) {
+      if (isApproved === 1) {
+        return `<span class="badge bg-success">✅ ${isHe ? 'מאושר' : 'Approved'}</span>`;
+      }
+      if (isApproved === 2) {
+        return `<span class="badge bg-danger">❌ ${isHe ? 'נדחה' : 'Rejected'}</span>`;
+      }
+      return `<span class="badge bg-warning text-dark">⏳ ${isHe ? 'ממתין' : 'Pending'}</span>`;
     }
 
     // הצגת משתמשים בטבלה
@@ -238,8 +283,40 @@
         return;
       }
 
-      tbody.innerHTML = users.map(u => `
-        <tr class="${!u.is_approved ? 'table-warning' : ''}">
+      tbody.innerHTML = users.map(u => {
+        let actionButtons = '';
+
+        if (u.is_approved === 0) {
+          // ממתין - אפשר לאשר או לדחות. אין אפשרות לשלוח הודעה - המשתמש עדיין לא אושר במערכת
+          actionButtons = `
+            <button class="btn btn-sm btn-success" onclick="approveUser(${u.id}, 'approve')" title="${isHe ? 'אשר' : 'Approve'}">
+              <i class="bi bi-check-lg"></i>
+            </button>
+            <button class="btn btn-sm btn-danger" onclick="approveUser(${u.id}, 'reject')" title="${isHe ? 'דחה' : 'Reject'}">
+              <i class="bi bi-x-lg"></i>
+            </button>`;
+        } else if (u.is_approved === 1) {
+          // מאושר - אפשר לבטל אישור (חוזר לממתין) + לשלוח הודעה
+          actionButtons = `
+            <button class="btn btn-sm btn-outline-warning" onclick="approveUser(${u.id}, 'revoke')" title="${isHe ? 'בטל אישור' : 'Revoke'}">
+              <i class="bi bi-slash-circle"></i>
+            </button>
+            <button class="btn btn-sm btn-info text-white" onclick="openMessageModal(${u.id}, '${u.full_name}', '${u.email}')" title="${isHe ? 'שלח הודעה' : 'Send message'}">
+              <i class="bi bi-envelope"></i>
+            </button>`;
+        } else if (u.is_approved === 2) {
+          // נדחה - אפשר לשקול מחדש ולאשר + לשלוח הודעה (למשל להסביר את הסיבה לדחייה)
+          actionButtons = `
+            <button class="btn btn-sm btn-success" onclick="approveUser(${u.id}, 'approve')" title="${isHe ? 'אשר בכל זאת' : 'Approve anyway'}">
+              <i class="bi bi-arrow-counterclockwise"></i>
+            </button>
+            <button class="btn btn-sm btn-info text-white" onclick="openMessageModal(${u.id}, '${u.full_name}', '${u.email}')" title="${isHe ? 'שלח הודעה' : 'Send message'}">
+              <i class="bi bi-envelope"></i>
+            </button>`;
+        }
+
+        return `
+        <tr class="${u.is_approved === 0 ? 'table-warning' : ''} ${u.is_approved === 2 ? 'table-secondary' : ''}">
           <td>${u.id}</td>
           <td class="fw-bold">${u.full_name}</td>
           <td>${u.email}</td>
@@ -247,42 +324,16 @@
           <td><span class="badge bg-secondary">${translateRole(u.role, isHe)}</span></td>
           <td>${u.floor || 'N/A'}</td>
           <td>${u.unit_number || 'N/A'}</td>
-          <td>
-            ${u.is_approved
-              ? `<span class="badge bg-success">✅ ${isHe ? 'מאושר' : 'Approved'}</span>`
-              : `<span class="badge bg-warning text-dark">⏳ ${isHe ? 'ממתין' : 'Pending'}</span>`
-            }
-          </td>
+          <td>${statusBadgeHtml(u.is_approved, isHe)}</td>
           <td>${new Date(u.created_at).toLocaleDateString()}</td>
           <td>
             <div class="d-flex gap-1">
-              ${!u.is_approved ? `
-                <!-- כפתור אישור -->
-                <button class="btn btn-sm btn-success" onclick="approveUser(${u.id}, true)"
-                  title="${isHe ? 'אשר' : 'Approve'}">
-                  <i class="bi bi-check-lg"></i>
-                </button>
-                <!-- כפתור דחייה -->
-                <button class="btn btn-sm btn-danger" onclick="approveUser(${u.id}, false)"
-                  title="${isHe ? 'דחה' : 'Reject'}">
-                  <i class="bi bi-x-lg"></i>
-                </button>
-              ` : `
-                <!-- כפתור ביטול אישור -->
-                <button class="btn btn-sm btn-outline-warning" onclick="approveUser(${u.id}, false)"
-                  title="${isHe ? 'בטל אישור' : 'Revoke'}">
-                  <i class="bi bi-slash-circle"></i>
-                </button>
-              `}
-              <!-- כפתור שליחת הודעה -->
-              <button class="btn btn-sm btn-info text-white" onclick="openMessageModal(${u.id}, '${u.full_name}', '${u.email}')"
-                title="${isHe ? 'שלח הודעה' : 'Send message'}">
-                <i class="bi bi-envelope"></i>
-              </button>
+              ${actionButtons}
             </div>
           </td>
         </tr>
-      `).join('');
+      `;
+      }).join('');
     }
 
     // תרגום תפקיד
@@ -295,7 +346,7 @@
       return map[role] || role;
     }
 
-    // סינון משתמשים
+    // סינון משתמשים - ברירת מחדל: הסתר נדחים
     function filterUsers() {
       const search = document.getElementById('searchInput').value.toLowerCase();
       const role = document.getElementById('filterRole').value;
@@ -307,9 +358,19 @@
           u.email.toLowerCase().includes(search) ||
           (u.phone && u.phone.includes(search));
         const matchRole = !role || u.role === role;
-        const matchStatus = !status ||
-          (status === 'approved' && u.is_approved) ||
-          (status === 'pending' && !u.is_approved);
+
+        // ברירת מחדל (status === ''): הסתר נדחים, הצג ממתינים ומאושרים
+        let matchStatus;
+        if (status === '') {
+          matchStatus = u.is_approved !== 2;
+        } else if (status === 'approved') {
+          matchStatus = u.is_approved === 1;
+        } else if (status === 'pending') {
+          matchStatus = u.is_approved === 0;
+        } else if (status === 'rejected') {
+          matchStatus = u.is_approved === 2;
+        }
+
         return matchSearch && matchRole && matchStatus;
       });
 
@@ -321,44 +382,38 @@
       document.getElementById('searchInput').value = '';
       document.getElementById('filterRole').value = '';
       document.getElementById('filterStatus').value = '';
-      renderUsers(allUsers);
+      filterUsers();
     }
 
-    // אישור או דחיית משתמש
-    async function approveUser(userId, approved) {
+    // אישור / דחייה / ביטול אישור משתמש
+    // אחרי כל פעולה מרעננים מחדש מהשרת (loadUsers) ולא מעדכנים זיכרון מקומי בלבד -
+    // כדי למנוע חוסר סנכרון בין מה שמוצג למה שבפועל קיים ב-DB
+    async function approveUser(userId, action) {
       const isHe = getLang() === 'he';
-      const action = approved
-        ? (isHe ? 'לאשר' : 'approve')
-        : (isHe ? 'לדחות/לבטל אישור' : 'reject/revoke');
+      const actionText = {
+        approve: isHe ? 'לאשר' : 'approve',
+        reject: isHe ? 'לדחות' : 'reject',
+        revoke: isHe ? 'לבטל את האישור של' : 'revoke access for'
+      };
 
       if (!confirm(isHe
-        ? `האם אתה בטוח שברצונך ${action} משתמש זה?`
-        : `Are you sure you want to ${action} this user?`)) return;
+        ? `האם אתה בטוח שברצונך ${actionText[action]} משתמש זה?`
+        : `Are you sure you want to ${actionText[action]} this user?`)) return;
 
       try {
         const response = await fetch('http://localhost:3000/api/auth/approve', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ user_id: userId, approved })
+          body: JSON.stringify({ user_id: userId, action })
         });
         const data = await response.json();
         if (response.ok) {
-          // עדכון מיידי ללא היעלמות המשתמש
-          const userIndex = allUsers.findIndex(u => u.id === userId);
-          if (userIndex !== -1) {
-            allUsers[userIndex].is_approved = approved ? 1 : 0;
-            // מיון מחדש - ממתינים ראשון
-            allUsers.sort((a, b) => {
-              if (a.is_approved === b.is_approved) {
-                return new Date(b.created_at) - new Date(a.created_at);
-              }
-              return a.is_approved - b.is_approved;
-            });
-          }
-          filterUsers();
-          refreshAlerts();
+          await loadUsers(); // ריענון מלא מהשרת - מונע חוסר סנכרון
+          if (window.refreshAlerts) refreshAlerts();
         } else {
           alert(data.message);
+          // גם במקרה של כישלון (למשל "User not found") מרעננים - מנקה רשומות "רוח רפאים"
+          await loadUsers();
         }
       } catch (err) {
         alert(isHe ? 'שגיאה. אנא נסה שוב.' : 'Error. Please try again.');

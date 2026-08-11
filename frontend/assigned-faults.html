@@ -16,6 +16,7 @@
     .timeline-dot { width: 10px; height: 10px; border-radius: 50%; background: #1a3a6b; margin-top: 5px; flex-shrink: 0; }
     .timeline-content { background: #f9fafb; border-radius: 8px; padding: 8px 12px; flex: 1; font-size: 0.82rem; }
     .timeline-meta { font-size: 0.72rem; color: #9ca3af; margin-top: 3px; }
+    .badge-pending-approval { background: #8b5cf6; color: #fff; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -51,6 +52,7 @@
               <option value="" id="allStatuses"></option>
               <option value="in_progress" id="statusInProgress"></option>
               <option value="waiting_part" id="statusWaiting"></option>
+              <option value="pending_approval" id="statusPendingApproval"></option>
               <option value="closed" id="statusClosed"></option>
             </select>
           </div>
@@ -78,12 +80,16 @@
   <!-- מודל עדכון סטטוס + חשבונית -->
   <div class="modal fade" id="updateModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalTitle"></h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      <div class="modal-content" style="border:none; border-radius:16px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+
+        <div class="modal-header" style="background:#1a3a6b; border:none; padding:20px 24px; display:flex; align-items:center;">
+          <h5 class="modal-title text-white fw-bold mb-0" id="modalTitle" style="font-size:1.05rem; flex:1;"></h5>
+          <button type="button" class="modal-close-btn" data-bs-dismiss="modal">
+            <i class="bi bi-x-lg"></i>
+          </button>
         </div>
-        <div class="modal-body">
+
+        <div class="modal-body" style="padding:24px;">
           <div id="updateError" class="alert alert-danger d-none"></div>
           <input type="hidden" id="updateFaultId">
           <div class="row g-3">
@@ -94,7 +100,7 @@
                 <select id="newStatus" class="form-select" onchange="onStatusChange()">
                   <option value="in_progress" id="statusInProgressOpt"></option>
                   <option value="waiting_part" id="statusWaitingOpt"></option>
-                  <option value="closed" id="statusClosedOpt"></option>
+                  <option value="pending_approval" id="statusPendingApprovalOpt"></option>
                 </select>
               </div>
               <div class="mb-3">
@@ -133,10 +139,13 @@
             </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelBtn"></button>
-          <button type="button" class="btn btn-primary" onclick="updateStatus()" id="updateBtn"></button>
+        <div class="modal-footer" style="border:none; padding:16px 24px 24px;">
+          <button type="button" class="btn" data-bs-dismiss="modal" id="cancelBtn"
+            style="background:#f3f4f6; color:#374151; border-radius:10px; padding:9px 20px; font-size:0.88rem; font-weight:600;"></button>
+          <button type="button" class="btn btn-primary" onclick="updateStatus()" id="updateBtn"
+            style="border-radius:10px; padding:9px 20px; font-size:0.88rem; font-weight:600;"></button>
         </div>
+
       </div>
     </div>
   </div>
@@ -149,6 +158,45 @@
     document.getElementById('techName').textContent = user.full_name;
     let allFaults = [];
 
+    // תווית סטטוס - כולל טיפול מיוחד ל-pending_approval שלא קיים בקובץ התרגומים
+    function statusLabel(status) {
+      const isHe = getLang() === 'he';
+      if (status === 'pending_approval') {
+        return isHe ? 'ממתין לאישור מנהל' : 'Pending Manager Approval';
+      }
+      return t(status);
+    }
+
+    function statusBadgeHtml(status) {
+      if (status === 'pending_approval') {
+        return `<span class="badge-pending-approval">${statusLabel(status)}</span>`;
+      }
+      return `<span class="badge-${status.replace('_','-')}">${statusLabel(status)}</span>`;
+    }
+
+    // תרגום הודעות שגיאה שמגיעות מהשרת (השרת מחזיר טקסט קבוע באנגלית)
+    function translateServerError(msg) {
+      const isHe = getLang() === 'he';
+      if (!isHe || !msg) return msg;
+      const map = {
+        'Only a manager can close a fault. The fault closes automatically once the invoice is approved.':
+          'רק מנהל יכול לסגור תקלה. התקלה נסגרת אוטומטית לאחר אישור החשבונית על ידי המנהל.',
+        'Invalid status value.':
+          'ערך סטטוס לא תקין.',
+        'You must provide fault ID and invoice file.':
+          'יש לצרף מזהה תקלה וקובץ חשבונית.',
+        'Please provide fault ID and invoice file.':
+          'יש לצרף מזהה תקלה וקובץ חשבונית.',
+        'Server error. Please try again.':
+          'שגיאת שרת. נסה שוב.',
+        'Server error.':
+          'שגיאת שרת.',
+        'Fault not found.':
+          'התקלה לא נמצאה.'
+      };
+      return map[msg] || msg;
+    }
+
     function applyTranslations() {
       const isHe = getLang() === 'he';
       document.getElementById('nav-dashboard').textContent = t('dashboard');
@@ -160,6 +208,7 @@
       document.getElementById('allStatuses').textContent = isHe ? 'כל הסטטוסים' : 'All Statuses';
       document.getElementById('statusInProgress').textContent = t('in_progress');
       document.getElementById('statusWaiting').textContent = t('waiting_part');
+      document.getElementById('statusPendingApproval').textContent = isHe ? 'ממתין לאישור מנהל' : 'Pending Approval';
       document.getElementById('statusClosed').textContent = t('closed');
       document.getElementById('allUrgencies').textContent = isHe ? 'כל הדחיפויות' : 'All Urgencies';
       document.getElementById('urgencyHigh').textContent = t('high');
@@ -173,11 +222,11 @@
       document.getElementById('statusLabel').textContent = isHe ? 'סטטוס חדש' : 'New Status';
       document.getElementById('statusInProgressOpt').textContent = t('in_progress');
       document.getElementById('statusWaitingOpt').textContent = t('waiting_part');
-      document.getElementById('statusClosedOpt').textContent = t('closed');
+      document.getElementById('statusPendingApprovalOpt').textContent = isHe ? 'הושלם – ממתין לאישור מנהל' : 'Completed – Pending Manager Approval';
       document.getElementById('noteLabel').textContent = isHe ? 'הערה' : 'Note';
       document.getElementById('cancelBtn').textContent = t('cancel');
       document.getElementById('updateBtn').textContent = isHe ? 'עדכן' : 'Update';
-      document.getElementById('invoiceWarning').textContent = isHe ? '⚠️ לסגירת תקלה חובה להעלות חשבונית!' : '⚠️ To close a fault you must upload an invoice!';
+      document.getElementById('invoiceWarning').textContent = isHe ? '⚠️ לסימון התקלה כהושלמה חובה להעלות חשבונית! התקלה תיסגר סופית רק לאחר אישור המנהל.' : '⚠️ To mark this fault as completed you must upload an invoice! It will close only after manager approval.';
       document.getElementById('invoiceLabel').textContent = isHe ? 'חשבונית (PDF/תמונה) *' : 'Invoice (PDF/Image) *';
       document.getElementById('invoiceHint').textContent = isHe ? 'PDF, JPG, PNG עד 5MB' : 'PDF, JPG, PNG up to 5MB';
       document.getElementById('amountLabel').textContent = isHe ? 'סכום החשבונית' : 'Invoice Amount';
@@ -209,12 +258,31 @@
           </div>`;
         return;
       }
-      list.innerHTML = faults.map(fault => `
+      list.innerHTML = faults.map(fault => {
+        let actionBtn;
+        if (fault.status === 'closed') {
+          actionBtn = `
+            <button class="btn btn-sm btn-outline-secondary" onclick="openUpdateModal(${fault.id}, '${fault.status}')">
+              <i class="bi bi-clock-history"></i> ${isHe ? 'היסטוריה' : 'History'}
+            </button>`;
+        } else if (fault.status === 'pending_approval') {
+          actionBtn = `
+            <button class="btn btn-sm btn-outline-warning" onclick="openUpdateModal(${fault.id}, '${fault.status}')">
+              <i class="bi bi-hourglass-split"></i> ${isHe ? 'ממתין לאישור' : 'Pending Approval'}
+            </button>`;
+        } else {
+          actionBtn = `
+            <button class="btn btn-sm btn-primary" onclick="openUpdateModal(${fault.id}, '${fault.status}')">
+              <i class="bi bi-pencil"></i> ${isHe ? 'עדכן' : 'Update'}
+            </button>`;
+        }
+
+        return `
         <div class="col-md-6">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
               <h6 class="fw-bold mb-0">#${fault.id} - ${fault.title}</h6>
-              <span class="badge-${fault.status.replace('_','-')}">${t(fault.status)}</span>
+              ${statusBadgeHtml(fault.status)}
             </div>
             <div class="card-body">
               <p class="text-muted small mb-2">${fault.description || (isHe ? 'אין תיאור' : 'No description')}</p>
@@ -233,19 +301,12 @@
             <div class="card-footer bg-white d-flex justify-content-between align-items-center">
               <span class="badge-${fault.urgency}">${t(fault.urgency)}</span>
               <div class="d-flex gap-2">
-                ${fault.status !== 'closed' ? `
-                  <button class="btn btn-sm btn-primary" onclick="openUpdateModal(${fault.id}, '${fault.status}')">
-                    <i class="bi bi-pencil"></i> ${isHe ? 'עדכן' : 'Update'}
-                  </button>
-                ` : `
-                  <button class="btn btn-sm btn-outline-secondary" onclick="openUpdateModal(${fault.id}, '${fault.status}')">
-                    <i class="bi bi-clock-history"></i> ${isHe ? 'היסטוריה' : 'History'}
-                  </button>
-                `}
+                ${actionBtn}
               </div>
             </div>
           </div>
-        </div>`).join('');
+        </div>`;
+      }).join('');
     }
 
     async function openUpdateModal(faultId, currentStatus) {
@@ -257,8 +318,13 @@
       document.getElementById('invoiceDesc').value = '';
       document.getElementById('invoiceSection').classList.add('d-none');
       document.getElementById('updateError').classList.add('d-none');
-      document.getElementById('newStatus').value = currentStatus === 'closed' ? 'in_progress' : currentStatus;
-      if (currentStatus === 'closed') {
+
+      // תקלה סגורה או ממתינה לאישור - נעולה לעריכה
+      const isLocked = currentStatus === 'closed' || currentStatus === 'pending_approval';
+
+      document.getElementById('newStatus').value = isLocked ? 'in_progress' : currentStatus;
+
+      if (isLocked) {
         document.getElementById('updateBtn').classList.add('d-none');
         document.getElementById('newStatus').disabled = true;
         document.getElementById('note').disabled = true;
@@ -286,14 +352,14 @@
           historyList.innerHTML = `<div class="text-center text-muted py-3"><i class="bi bi-inbox fs-3"></i><p class="mt-2 small">${isHe ? 'אין עדכונים עדיין' : 'No updates yet'}</p></div>`;
           return;
         }
-        const sc = { open:'#f59e0b', in_progress:'#3b82f6', waiting_part:'#8b5cf6', closed:'#10b981' };
+        const sc = { open:'#f59e0b', in_progress:'#3b82f6', waiting_part:'#8b5cf6', pending_approval:'#a855f7', closed:'#10b981' };
         historyList.innerHTML = `<ul class="timeline">` +
           updates.map(u => `
             <li class="timeline-item">
               <div class="timeline-dot" style="background:${sc[u.status]||'#1a3a6b'};"></div>
               <div class="timeline-content">
                 <div class="d-flex justify-content-between align-items-center">
-                  <strong style="color:${sc[u.status]||'#1a3a6b'};font-size:0.8rem;">${t(u.status)}</strong>
+                  <strong style="color:${sc[u.status]||'#1a3a6b'};font-size:0.8rem;">${statusLabel(u.status)}</strong>
                   <span class="badge bg-light text-dark" style="font-size:0.7rem;">${u.updated_by_name||'N/A'}</span>
                 </div>
                 ${u.note ? `<div class="mt-1" style="color:#374151;">${u.note}</div>` : ''}
@@ -312,9 +378,9 @@
     function onStatusChange() {
       const status = document.getElementById('newStatus').value;
       const isHe = getLang() === 'he';
-      if (status === 'closed') {
+      if (status === 'pending_approval') {
         document.getElementById('invoiceSection').classList.remove('d-none');
-        document.getElementById('updateBtn').textContent = isHe ? '🔒 סגור תקלה ושלח חשבונית' : '🔒 Close & Send Invoice';
+        document.getElementById('updateBtn').textContent = isHe ? '📤 שלח לאישור מנהל' : '📤 Submit for Approval';
       } else {
         document.getElementById('invoiceSection').classList.add('d-none');
         document.getElementById('updateBtn').textContent = isHe ? 'עדכן' : 'Update';
@@ -329,10 +395,10 @@
       const errorEl = document.getElementById('updateError');
       errorEl.classList.add('d-none');
 
-      if (status === 'closed') {
+      if (status === 'pending_approval') {
         const invoiceFile = document.getElementById('invoiceFile').files[0];
         if (!invoiceFile) {
-          errorEl.textContent = isHe ? '⚠️ חובה להעלות חשבונית לפני סגירת תקלה!' : '⚠️ You must upload an invoice before closing a fault!';
+          errorEl.textContent = isHe ? '⚠️ חובה להעלות חשבונית לפני סימון התקלה כהושלמה!' : '⚠️ You must upload an invoice before marking this fault as completed!';
           errorEl.classList.remove('d-none');
           return;
         }
@@ -342,7 +408,12 @@
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ fault_id, status, note })
           });
-          if (!statusRes.ok) { const d = await statusRes.json(); errorEl.textContent = d.message; errorEl.classList.remove('d-none'); return; }
+          if (!statusRes.ok) {
+            const d = await statusRes.json();
+            errorEl.textContent = translateServerError(d.message);
+            errorEl.classList.remove('d-none');
+            return;
+          }
 
           const formData = new FormData();
           formData.append('invoice', invoiceFile);
@@ -356,13 +427,20 @@
             body: formData
           });
           const invoiceData = await invoiceRes.json();
-          if (!invoiceRes.ok) { errorEl.textContent = invoiceData.message; errorEl.classList.remove('d-none'); return; }
+          if (!invoiceRes.ok) {
+            errorEl.textContent = translateServerError(invoiceData.message);
+            errorEl.classList.remove('d-none');
+            return;
+          }
 
           bootstrap.Modal.getInstance(document.getElementById('updateModal')).hide();
-          alert(isHe ? '✅ התקלה נסגרה והחשבונית נשלחה למנהל לאישור!' : '✅ Fault closed and invoice sent to manager!');
+          alert(isHe ? '✅ התקלה סומנה כהושלמה והחשבונית נשלחה למנהל לאישור. התקלה תיסגר סופית לאחר אישור המנהל.' : '✅ Fault marked as completed. Invoice sent for manager approval — it will close once approved.');
           loadAssignedFaults();
           if (window.refreshAlerts) window.refreshAlerts();
-        } catch(err) { errorEl.textContent = isHe ? 'שגיאת חיבור.' : 'Connection error.'; errorEl.classList.remove('d-none'); }
+        } catch(err) {
+          errorEl.textContent = isHe ? 'שגיאת חיבור.' : 'Connection error.';
+          errorEl.classList.remove('d-none');
+        }
       } else {
         try {
           const response = await fetch('http://localhost:3000/api/faults/status', {
@@ -371,9 +449,17 @@
             body: JSON.stringify({ fault_id, status, note })
           });
           const data = await response.json();
-          if (response.ok) { bootstrap.Modal.getInstance(document.getElementById('updateModal')).hide(); loadAssignedFaults(); }
-          else { errorEl.textContent = data.message; errorEl.classList.remove('d-none'); }
-        } catch(err) { errorEl.textContent = isHe ? 'שגיאת חיבור.' : 'Connection error.'; errorEl.classList.remove('d-none'); }
+          if (response.ok) {
+            bootstrap.Modal.getInstance(document.getElementById('updateModal')).hide();
+            loadAssignedFaults();
+          } else {
+            errorEl.textContent = translateServerError(data.message);
+            errorEl.classList.remove('d-none');
+          }
+        } catch(err) {
+          errorEl.textContent = isHe ? 'שגיאת חיבור.' : 'Connection error.';
+          errorEl.classList.remove('d-none');
+        }
       }
     }
 

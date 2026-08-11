@@ -1,12 +1,14 @@
-// קונטרולר לניהול הרשמה והתחברות משתמשים
 const db = require('../config/DB');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
+const {
+  sendApprovalEmail,
+  sendRejectionEmail
+} = require('../services/emailService');
 
 dotenv.config();
 
-// הרשמת משתמש חדש למערכת
 const register = async (req, res) => {
   try {
     const { full_name, email, phone, password, role, unit_number, floor, owner_phone } = req.body;
@@ -18,7 +20,7 @@ const register = async (req, res) => {
       return res.status(400).json({ message: 'Email already registered.' });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const isApproved = role === 'manager' ? true : false;
+    const isApproved = role === 'manager' ? 1 : 0;
     await db.query(
       'INSERT INTO users (full_name, email, phone, password, role, unit_number, floor, owner_phone, is_approved) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [full_name, email, phone, hashedPassword, role, unit_number, floor, owner_phone, isApproved]
@@ -30,7 +32,6 @@ const register = async (req, res) => {
   }
 };
 
-// התחברות משתמש קיים למערכת
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -42,9 +43,14 @@ const login = async (req, res) => {
       return res.status(400).json({ message: 'Invalid email or password.' });
     }
     const user = users[0];
-    if (!user.is_approved) {
+
+    if (user.is_approved === 0) {
       return res.status(403).json({ message: 'Your account is pending manager approval.' });
     }
+    if (user.is_approved === 2) {
+      return res.status(403).json({ message: 'Your registration request was rejected. Please contact the building manager.' });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid email or password.' });
@@ -64,6 +70,7 @@ const login = async (req, res) => {
         role: user.role,
         unit_number: user.unit_number,
         floor: user.floor,
+        must_change_password: user.must_change_password
       }
     });
   } catch (err) {
@@ -72,7 +79,6 @@ const login = async (req, res) => {
   }
 };
 
-// קבלת כל המשתמשים הממתינים לאישור
 const getPendingUsers = async (req, res) => {
   try {
     const [users] = await db.query(
@@ -85,24 +91,54 @@ const getPendingUsers = async (req, res) => {
   }
 };
 
-// אישור או דחיית משתמש
 const approveUser = async (req, res) => {
+  console.log('🔴🔴🔴 approveUser CALLED with body:', req.body);
   try {
-    const { user_id, approved } = req.body;
-    if (approved) {
-      await db.query('UPDATE users SET is_approved = 1 WHERE id = ?', [user_id]);
-      res.status(200).json({ message: 'User approved successfully!' });
-    } else {
-      await db.query('DELETE FROM users WHERE id = ?', [user_id]);
-      res.status(200).json({ message: 'User rejected and removed.' });
+    const { user_id, action } = req.body;
+
+    if (!['approve', 'reject', 'revoke'].includes(action)) {
+      return res.status(400).json({ message: 'Invalid action.' });
     }
+
+    const [users] = await db.query('SELECT full_name, email FROM users WHERE id = ?', [user_id]);
+    if (users.length === 0) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+    const { full_name, email } = users[0];
+
+    if (action === 'approve') {
+      const tempPassword = Math.random().toString(36).slice(-8);
+      const hashedTemp = await bcrypt.hash(tempPassword, 10);
+      await db.query('UPDATE users SET is_approved = 1, password = ?, must_change_password = 1 WHERE id = ?', [hashedTemp, user_id]);
+      try {
+        await sendApprovalEmail(email, full_name, tempPassword);
+      } catch (emailErr) {
+        console.error('Email error:', emailErr.message);
+      }
+      return res.status(200).json({ message: 'User approved successfully!' });
+    }
+
+    if (action === 'reject') {
+      await db.query('UPDATE users SET is_approved = 2 WHERE id = ?', [user_id]);
+      try {
+        await sendRejectionEmail(email, full_name);
+      } catch (emailErr) {
+        console.error('Email error:', emailErr.message);
+      }
+      return res.status(200).json({ message: 'User rejected successfully.' });
+    }
+
+    if (action === 'revoke') {
+      await db.query('UPDATE users SET is_approved = 0 WHERE id = ?', [user_id]);
+      return res.status(200).json({ message: 'User approval revoked.' });
+    }
+
   } catch (err) {
     console.error('Approve user error:', err.message);
     res.status(500).json({ message: 'Server error. Please try again.' });
   }
 };
 
-// קבלת כל הטכנאים
 const getTechnicians = async (req, res) => {
   try {
     const [technicians] = await db.query(
@@ -116,7 +152,6 @@ const getTechnicians = async (req, res) => {
   }
 };
 
-// קבלת כל המשתמשים
 const getAllUsers = async (req, res) => {
   try {
     const [users] = await db.query(
@@ -129,7 +164,6 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-// שליחת הודעה למשתמש ושמירה במסד הנתונים
 const sendMessageToUser = async (req, res) => {
   try {
     const { user_id, subject, body } = req.body;
@@ -152,18 +186,17 @@ const sendMessageToUser = async (req, res) => {
   }
 };
 
-// קבלת כל ההודעות של המשתמש המחובר
 const getMyMessages = async (req, res) => {
   try {
     const user_id = req.user.id;
     const [messages] = await db.query(
-  `SELECT m.*, u.full_name AS from_name 
-   FROM user_messages m
-   LEFT JOIN users u ON m.from_user_id = u.id
-   WHERE m.to_user_id = ? AND m.is_read = 0
-   ORDER BY m.created_at DESC`,
-  [user_id]
-);
+      `SELECT m.*, u.full_name AS from_name 
+       FROM user_messages m
+       LEFT JOIN users u ON m.from_user_id = u.id
+       WHERE m.to_user_id = ? AND m.is_read = 0
+       ORDER BY m.created_at DESC`,
+      [user_id]
+    );
     const unreadCount = messages.filter(m => !m.is_read).length;
     res.status(200).json({ messages, unreadCount });
   } catch (err) {
@@ -172,7 +205,6 @@ const getMyMessages = async (req, res) => {
   }
 };
 
-// סימון הודעה כנקראה
 const markMessageRead = async (req, res) => {
   try {
     const { id } = req.params;
@@ -188,50 +220,83 @@ const markMessageRead = async (req, res) => {
   }
 };
 
-// שליחת תשובה להודעה - שומר ושולח למנהל
 const replyToMessage = async (req, res) => {
   try {
     const { original_message_id, body } = req.body;
     const from_user_id = req.user.id;
-
     if (!original_message_id || !body) {
       return res.status(400).json({ message: 'Please fill in all fields.' });
     }
-
-    // קבלת ההודעה המקורית
-    const [original] = await db.query(
-      'SELECT * FROM user_messages WHERE id = ?',
-      [original_message_id]
-    );
+    const [original] = await db.query('SELECT * FROM user_messages WHERE id = ?', [original_message_id]);
     if (original.length === 0) {
       return res.status(404).json({ message: 'Original message not found.' });
     }
-
-    // קבלת שם השולח
-    const [sender] = await db.query(
-      'SELECT full_name FROM users WHERE id = ?',
-      [from_user_id]
-    );
-
+    const [sender] = await db.query('SELECT full_name FROM users WHERE id = ?', [from_user_id]);
     const senderName = sender[0]?.full_name || 'Unknown';
     const replySubject = `↩️ תשובה מ-${senderName}: ${original[0].subject}`;
-
-    // שמירת התשובה - נשלחת לשולח המקורי
     await db.query(
       'INSERT INTO user_messages (from_user_id, to_user_id, subject, body) VALUES (?, ?, ?, ?)',
       [from_user_id, original[0].from_user_id, replySubject, body]
     );
-
-    // סימון ההודעה המקורית כנקראה
-    await db.query(
-      'UPDATE user_messages SET is_read = 1 WHERE id = ?',
-      [original_message_id]
-    );
-
+    await db.query('UPDATE user_messages SET is_read = 1 WHERE id = ?', [original_message_id]);
     res.status(200).json({ message: 'Reply sent successfully!' });
   } catch (err) {
     console.error('Reply error:', err.message);
     res.status(500).json({ message: 'Server error.' });
+  }
+};
+
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: 'אנא הזיני כתובת מייל.' });
+    }
+    const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+    if (users.length === 0) {
+      return res.status(404).json({ message: 'המייל לא נמצא במערכת.' });
+    }
+    const user = users[0];
+    const tempPassword = Math.random().toString(36).slice(-8);
+    const hashedTemp = await bcrypt.hash(tempPassword, 10);
+    await db.query('UPDATE users SET password = ?, must_change_password = 1 WHERE id = ?', [hashedTemp, user.id]);
+    try {
+      await sendApprovalEmail(user.email, user.full_name, tempPassword);
+    } catch (emailErr) {
+      console.error('Email error:', emailErr.message);
+    }
+    res.status(200).json({ message: 'סיסמה זמנית נשלחה למייל שלך!' });
+  } catch (err) {
+    console.error('Forgot password error:', err.message);
+    res.status(500).json({ message: 'שגיאת שרת. אנא נסי שוב.' });
+  }
+};
+
+const changePassword = async (req, res) => {
+  try {
+    const { newPassword, confirmPassword } = req.body;
+    const userId = req.user.id;
+
+    if (!newPassword || !confirmPassword) {
+      return res.status(400).json({ message: 'אנא מלאי את כל השדות.' });
+    }
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: 'הסיסמאות אינן תואמות.' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'הסיסמה חייבת להכיל לפחות 6 תווים.' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await db.query(
+      'UPDATE users SET password = ?, must_change_password = 0 WHERE id = ?',
+      [hashedPassword, userId]
+    );
+
+    res.status(200).json({ message: 'הסיסמה עודכנה בהצלחה!' });
+  } catch (err) {
+    console.error('Change password error:', err.message);
+    res.status(500).json({ message: 'שגיאת שרת.' });
   }
 };
 
@@ -245,5 +310,7 @@ module.exports = {
   sendMessageToUser,
   getMyMessages,
   markMessageRead,
-  replyToMessage
+  replyToMessage,
+  forgotPassword,
+  changePassword
 };

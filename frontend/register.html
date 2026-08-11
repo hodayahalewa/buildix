@@ -1,188 +1,550 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BUILDIX - Register</title>
+  <title>BUILDIX - הרשמה</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="js/translations.js"></script>
   <script src="js/lang-switcher.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Heebo', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .bg-blur {
+      position: fixed; inset: 0; z-index: 0;
+      background: linear-gradient(135deg, #0a0f1e 0%, #1a3a6b 50%, #0a0f1e 100%);
+    }
+
+    .bg-circles { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+
+    .circle {
+      position: absolute; border-radius: 50%; opacity: 0.08;
+      animation: float 8s ease-in-out infinite;
+    }
+
+    .circle-1 { width: 600px; height: 600px; background: #1a3a6b; top: -200px; right: -150px; animation-delay: 0s; }
+    .circle-2 { width: 400px; height: 400px; background: #c9a227; bottom: -100px; left: -100px; animation-delay: 2s; }
+    .circle-3 { width: 300px; height: 300px; background: #1a3a6b; top: 40%; left: 30%; animation-delay: 4s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-30px) scale(1.05); }
+    }
+
+    .bg-image {
+      position: fixed; inset: 0; z-index: 1;
+      background: url('https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1920&q=60') center/cover no-repeat;
+      filter: blur(3px) brightness(0.25);
+    }
+
+    /* NAVBAR */
+    .nav-bar {
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      padding: 16px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(10, 15, 30, 0.4);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .nav-logo img { height: 44px; filter: brightness(10); }
+    .nav-logo span { font-size: 1.3rem; font-weight: 800; color: white; letter-spacing: 1px; }
+
+    .nav-back {
+      color: rgba(255,255,255,0.7); text-decoration: none;
+      font-size: 0.85rem; display: flex; align-items: center; gap: 6px; transition: color 0.2s;
+    }
+    .nav-back:hover { color: #c9a227; }
+
+    /* POPUP */
+    .popup-wrapper {
+      position: relative; z-index: 50; min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 90px 20px 40px;
+    }
+
+    .popup-card {
+      background: rgba(255,255,255,0.97);
+      border-radius: 20px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+      width: 100%; max-width: 480px; overflow: hidden;
+      animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.85) translateY(20px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .popup-header {
+      background: #1a3a6b; padding: 24px 32px; text-align: center;
+    }
+    .popup-header img { height: 52px; margin-bottom: 10px; }
+    .popup-header h2 { font-size: 1.2rem; font-weight: 800; color: white; margin: 0 0 4px; }
+    .popup-header p { font-size: 0.8rem; color: rgba(255,255,255,0.6); margin: 0; }
+
+    .popup-body { padding: 28px 32px 32px; }
+
+    .msg-box {
+      border-radius: 8px; padding: 10px 14px;
+      font-size: 0.8rem; margin-bottom: 16px; display: none;
+    }
+    .msg-error { background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; }
+    .msg-success { background: #d1fae5; border: 1px solid #6ee7b7; color: #059669; }
+
+    .field-group { margin-bottom: 14px; }
+
+    .field-label {
+      display: block; font-size: 0.78rem; font-weight: 600;
+      color: #374151; margin-bottom: 5px;
+    }
+
+    .field-input-wrap { position: relative; }
+
+    .field-input {
+      width: 100%; padding: 10px 14px 10px 40px;
+      border: 1.5px solid #e5e7eb; border-radius: 10px;
+      font-size: 0.88rem; color: #1f2937; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: 'Heebo', sans-serif; background: #fafafa;
+    }
+    .field-input:focus {
+      border-color: #1a3a6b;
+      box-shadow: 0 0 0 3px rgba(26,58,107,0.1);
+      background: white;
+    }
+
+    .field-icon {
+      position: absolute; left: 13px; top: 50%;
+      transform: translateY(-50%); color: #9ca3af;
+      font-size: 0.9rem; pointer-events: none;
+    }
+
+    .field-icon-btn {
+      position: absolute; right: 13px; top: 50%;
+      transform: translateY(-50%); color: #9ca3af;
+      font-size: 0.9rem; background: none; border: none; cursor: pointer; padding: 0;
+    }
+
+    .field-input.with-right { padding-right: 40px; }
+
+    .row-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .tenant-extra {
+      background: #f0f4ff; border: 1px solid #dbeafe;
+      border-radius: 12px; padding: 16px; margin-bottom: 14px; display: none;
+    }
+    .tenant-extra.show { display: block; }
+
+    .tenant-extra-title {
+      font-size: 0.78rem; font-weight: 700; color: #1a3a6b;
+      margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+    }
+
+    .btn-main {
+      width: 100%; background: #1a3a6b; color: white; border: none;
+      border-radius: 10px; padding: 12px; font-size: 0.95rem; font-weight: 700;
+      cursor: pointer; transition: background 0.2s, transform 0.1s;
+      font-family: 'Heebo', sans-serif; margin-bottom: 14px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-main:hover { background: #c9a227; transform: translateY(-1px); }
+    .btn-main:active { transform: translateY(0); }
+
+    .bottom-link { text-align: center; font-size: 0.78rem; color: #9ca3af; }
+    .bottom-link a { color: #1a3a6b; font-weight: 700; text-decoration: none; }
+    .bottom-link a:hover { text-decoration: underline; }
+
+    /* סטפר */
+    .steps-bar {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; margin-bottom: 24px;
+    }
+
+    .step-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700;
+      border: 2px solid #e5e7eb; color: #9ca3af; transition: all 0.3s;
+    }
+    .step-dot.active { background: #1a3a6b; border-color: #1a3a6b; color: white; }
+    .step-dot.done { background: #10b981; border-color: #10b981; color: white; }
+
+    .step-line {
+      flex: 1; height: 2px; background: #e5e7eb; max-width: 40px; transition: background 0.3s;
+    }
+    .step-line.done { background: #10b981; }
+
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+
+    @media (max-width: 480px) {
+      .popup-body { padding: 20px; }
+      .nav-bar { padding: 14px 20px; }
+      .row-fields { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
-<body class="bg-light">
+<body>
 
-  <nav class="navbar navbar-dark bg-primary">
-    <div class="container">
-      <a class="navbar-brand fw-bold" href="index.html">
-        <img src="logo.png" height="40" class="me-2" alt="BUILDIX"> BUILDIX
-      </a>
-    </div>
-  </nav>
+  <!-- רקע -->
+  <div class="bg-blur"></div>
+  <div class="bg-circles">
+    <div class="circle circle-1"></div>
+    <div class="circle circle-2"></div>
+    <div class="circle circle-3"></div>
+  </div>
+  <div class="bg-image"></div>
 
-  <div class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-md-6">
-        <div class="card auth-card">
-          <div class="card-header text-center">
-            <h4 class="text-white fw-bold mb-0">
-              <i class="bi bi-person-plus"></i>
-              <span id="createAccountTitle"></span>
-            </h4>
-            <p class="text-white-50 mt-1 mb-0" id="joinSubtitle"></p>
+  <!-- נאב בר -->
+  <div class="nav-bar">
+    <a href="index.html" class="nav-logo">
+      <img src="logo.png" alt="BUILDIX">
+      <span>BUILDIX</span>
+    </a>
+    <a href="login.html" class="nav-back" id="backBtn">
+      <i class="bi bi-arrow-right"></i>
+      <span id="backText">חזרה להתחברות</span>
+    </a>
+  </div>
+
+  <!-- פופאפ -->
+  <div class="popup-wrapper">
+    <div class="popup-card">
+
+      <div class="popup-header">
+        <img src="logo.png" alt="BUILDIX">
+        <h2 id="registerTitle">הרשמה למערכת</h2>
+        <p id="registerSubtitle">הצטרפו ל-BUILDIX — מערכת ניהול הבניינים החכמה</p>
+      </div>
+
+      <div class="popup-body">
+
+        <div class="msg-box msg-error" id="errorMsg"></div>
+        <div class="msg-box msg-success" id="successMsg"></div>
+
+        <!-- סטפר -->
+        <div class="steps-bar">
+          <div class="step-dot active" id="dot1">1</div>
+          <div class="step-line" id="line1"></div>
+          <div class="step-dot" id="dot2">2</div>
+          <div class="step-line" id="line2"></div>
+          <div class="step-dot" id="dot3">3</div>
+        </div>
+
+        <!-- שלב 1 — פרטים אישיים -->
+        <div class="step-panel active" id="step1">
+          <div class="row-fields">
+            <div class="field-group">
+              <label class="field-label" id="firstNameLabel">שם פרטי *</label>
+              <div class="field-input-wrap">
+                <i class="bi bi-person field-icon"></i>
+                <input type="text" id="fname" class="field-input" placeholder="ישראל">
+              </div>
+            </div>
+            <div class="field-group">
+              <label class="field-label" id="lastNameLabel">שם משפחה *</label>
+              <div class="field-input-wrap">
+                <i class="bi bi-person field-icon"></i>
+                <input type="text" id="lname" class="field-input" placeholder="ישראלי">
+              </div>
+            </div>
           </div>
 
-          <div class="card-body p-4">
-            <div id="errorMsg" class="alert alert-danger d-none"></div>
-            <div id="successMsg" class="alert alert-success d-none"></div>
-
-            <div class="mb-3">
-              <label class="form-label fw-bold" id="fullNameLabel"></label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-person"></i></span>
-                <input type="text" id="full_name" class="form-control">
-              </div>
+          <div class="field-group">
+            <label class="field-label" id="emailLabel">כתובת מייל *</label>
+            <div class="field-input-wrap">
+              <i class="bi bi-envelope field-icon"></i>
+              <input type="email" id="email" class="field-input" placeholder="example@email.com">
             </div>
+          </div>
 
-            <div class="mb-3">
-              <label class="form-label fw-bold" id="emailLabel"></label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                <input type="email" id="email" class="form-control">
-              </div>
+          <div class="field-group">
+            <label class="field-label" id="phoneLabel">טלפון *</label>
+            <div class="field-input-wrap">
+              <i class="bi bi-phone field-icon"></i>
+              <input type="tel" id="phone" class="field-input" placeholder="050-0000000">
             </div>
+          </div>
 
-            <div class="mb-3">
-              <label class="form-label fw-bold" id="phoneLabel"></label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                <input type="tel" id="phone" class="form-control">
-              </div>
+          <button class="btn-main" onclick="goToStep2()">
+            <span id="nextBtn1">המשך</span>
+            <i class="bi bi-arrow-left"></i>
+          </button>
+        </div>
+
+        <!-- שלב 2 — תפקיד -->
+        <div class="step-panel" id="step2">
+
+          <div class="field-group" style="margin-bottom:20px;">
+            <label class="field-label" id="roleLabel">מה התפקיד שלך בבניין? *</label>
+            <div style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">
+
+              <!-- דייר -->
+              <label style="display:flex; align-items:center; gap:12px; padding:14px 16px; border:1.5px solid #e5e7eb; border-radius:10px; cursor:pointer; transition:all 0.2s;" id="roleCard-tenant" onclick="selectRole('tenant')">
+                <div style="width:20px; height:20px; border-radius:50%; border:2px solid #e5e7eb; display:flex; align-items:center; justify-content:center; flex-shrink:0;" id="radio-tenant"></div>
+                <div>
+                  <div style="font-size:0.88rem; font-weight:700; color:#1f2937;" id="roleTenantTitle">דייר / שוכר</div>
+                  <div style="font-size:0.75rem; color:#9ca3af;" id="roleTenantDesc">אני גר או שוכר בבניין</div>
+                </div>
+                <i class="bi bi-house ms-auto" style="color:#9ca3af; font-size:1.1rem;"></i>
+              </label>
+
+              <!-- טכנאי -->
+              <label style="display:flex; align-items:center; gap:12px; padding:14px 16px; border:1.5px solid #e5e7eb; border-radius:10px; cursor:pointer; transition:all 0.2s;" id="roleCard-technician" onclick="selectRole('technician')">
+                <div style="width:20px; height:20px; border-radius:50%; border:2px solid #e5e7eb; display:flex; align-items:center; justify-content:center; flex-shrink:0;" id="radio-technician"></div>
+                <div>
+                  <div style="font-size:0.88rem; font-weight:700; color:#1f2937;" id="roleTechTitle">טכנאי / קבלן</div>
+                  <div style="font-size:0.75rem; color:#9ca3af;" id="roleTechDesc">אני מטפל בתקלות ותחזוקה</div>
+                </div>
+                <i class="bi bi-tools ms-auto" style="color:#9ca3af; font-size:1.1rem;"></i>
+              </label>
+
             </div>
+            <input type="hidden" id="selectedRole">
+          </div>
 
-            <div class="mb-3">
-              <label class="form-label fw-bold" id="passwordLabel"></label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                <input type="password" id="password" class="form-control">
-              </div>
+          <!-- שדות נוספים לדייר -->
+          <div class="tenant-extra" id="tenantExtra">
+            <div class="tenant-extra-title">
+              <i class="bi bi-info-circle text-primary"></i>
+              <span id="tenantExtraTitle">פרטי דירה</span>
             </div>
-
-            <div class="mb-3">
-              <label class="form-label fw-bold" id="roleLabel"></label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
-                <select id="role" class="form-select" onchange="toggleFields()">
-                  <option value="" id="selectRole"></option>
-                  <option value="tenant" id="tenantOption"></option>
-                  <option value="technician" id="technicianOption"></option>
-                  <option value="manager" id="managerOption"></option>
-                </select>
-              </div>
-            </div>
-
-            <div id="tenantFields" class="d-none">
-              <div class="mb-3">
-                <label class="form-label fw-bold" id="floorLabel"></label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-layers"></i></span>
-                  <input type="text" id="floor" class="form-control" placeholder="e.g. 3">
+            <div class="row-fields">
+              <div class="field-group">
+                <label class="field-label" id="floorLabel">קומה</label>
+                <div class="field-input-wrap">
+                  <i class="bi bi-layers field-icon"></i>
+                  <input type="text" id="floor" class="field-input" placeholder="3">
                 </div>
               </div>
-
-              <div class="mb-3">
-                <label class="form-label fw-bold" id="unitLabel"></label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-door-open"></i></span>
-                  <input type="text" id="unit_number" class="form-control" placeholder="e.g. 12">
-                </div>
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label fw-bold" id="ownerPhoneLabel"></label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-telephone-fill"></i></span>
-                  <input type="tel" id="owner_phone" class="form-control">
+              <div class="field-group">
+                <label class="field-label" id="unitLabel">מספר יחידה</label>
+                <div class="field-input-wrap">
+                  <i class="bi bi-door-open field-icon"></i>
+                  <input type="text" id="unit_number" class="field-input" placeholder="12">
                 </div>
               </div>
             </div>
-
-            <div class="d-grid mt-4">
-              <button onclick="register()" class="btn btn-primary btn-lg" id="createBtn"></button>
+            <div class="field-group" style="margin-bottom:0;">
+              <label class="field-label" id="ownerPhoneLabel">טלפון בעל הנכס</label>
+              <div class="field-input-wrap">
+                <i class="bi bi-telephone field-icon"></i>
+                <input type="tel" id="owner_phone" class="field-input" placeholder="050-0000000">
+              </div>
             </div>
+          </div>
 
-            <div class="text-center mt-3">
-              <p class="text-muted">
-                <span id="alreadyAccount"></span>
-                <a href="login.html" class="text-primary fw-bold" id="loginLink"></a>
-              </p>
-            </div>
+          <div style="display:flex; gap:10px;">
+            <button class="btn-main" onclick="goToStep1()" style="background:#f3f4f6; color:#374151; flex:0 0 auto; width:50px; padding:12px;">
+              <i class="bi bi-arrow-right"></i>
+            </button>
+            <button class="btn-main" onclick="goToStep3()" style="flex:1;">
+              <span id="nextBtn2">המשך</span>
+              <i class="bi bi-arrow-left"></i>
+            </button>
           </div>
         </div>
+
+        <!-- שלב 3 — סיסמה -->
+        <div class="step-panel" id="step3">
+
+          <div class="field-group">
+            <label class="field-label" id="passwordLabel">סיסמה *</label>
+            <div class="field-input-wrap">
+              <i class="bi bi-lock field-icon"></i>
+              <input type="password" id="password" class="field-input with-right" placeholder="לפחות 6 תווים">
+              <button class="field-icon-btn" onclick="togglePwd('password','icon1')" type="button">
+                <i class="bi bi-eye" id="icon1"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="field-group" style="margin-bottom:24px;">
+            <label class="field-label" id="confirmPasswordLabel">אימות סיסמה *</label>
+            <div class="field-input-wrap">
+              <i class="bi bi-lock-fill field-icon"></i>
+              <input type="password" id="confirm_password" class="field-input with-right" placeholder="הזן סיסמה שוב">
+              <button class="field-icon-btn" onclick="togglePwd('confirm_password','icon2')" type="button">
+                <i class="bi bi-eye" id="icon2"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- סיכום -->
+          <div style="background:#f8faff; border:1px solid #dbeafe; border-radius:10px; padding:14px; margin-bottom:20px; font-size:0.8rem; color:#374151;">
+            <div style="font-weight:700; color:#1a3a6b; margin-bottom:8px;" id="summaryTitle">סיכום הרשמה:</div>
+            <div id="summaryContent"></div>
+          </div>
+
+          <div style="display:flex; gap:10px;">
+            <button class="btn-main" onclick="goToStep2()" style="background:#f3f4f6; color:#374151; flex:0 0 auto; width:50px; padding:12px;">
+              <i class="bi bi-arrow-right"></i>
+            </button>
+            <button class="btn-main" onclick="register()" style="flex:1;" id="registerBtn">
+              <i class="bi bi-person-check"></i>
+              <span id="registerBtnText">צור חשבון</span>
+            </button>
+          </div>
+
+        </div>
+
+        <div class="bottom-link" style="margin-top:16px;">
+          <span id="hasAccount">כבר יש לך חשבון?</span>
+          <a href="login.html" id="loginLink"> התחבר כאן</a>
+        </div>
+
       </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
   <script>
-    // החלת תרגומים
-    function applyTranslations() {
-      const isHe = getLang() === 'he';
-      document.getElementById('createAccountTitle').textContent = t('createAccount');
-      document.getElementById('joinSubtitle').textContent = isHe ? 'הצטרף ל-BUILDIX היום' : 'Join BUILDIX today';
-      document.getElementById('fullNameLabel').textContent = t('fullName');
-      document.getElementById('emailLabel').textContent = t('emailAddress');
-      document.getElementById('phoneLabel').textContent = t('phoneNumber');
-      document.getElementById('passwordLabel').textContent = t('password');
-      document.getElementById('roleLabel').textContent = t('role');
-      document.getElementById('selectRole').textContent = isHe ? 'בחר תפקיד' : 'Select your role';
-      document.getElementById('tenantOption').textContent = t('tenant');
-      document.getElementById('technicianOption').textContent = t('technician');
-      document.getElementById('managerOption').textContent = t('manager');
-      document.getElementById('floorLabel').textContent = t('floor');
-      document.getElementById('unitLabel').textContent = t('unitNumber');
-      document.getElementById('ownerPhoneLabel').textContent = t('ownerPhone');
-      document.getElementById('createBtn').innerHTML = `<i class="bi bi-person-check"></i> ${t('createAccount')}`;
-      document.getElementById('alreadyAccount').textContent = t('alreadyAccount');
-      document.getElementById('loginLink').textContent = t('loginHere');
-      document.getElementById('full_name').placeholder = t('fullName');
-      document.getElementById('email').placeholder = t('emailAddress');
-      document.getElementById('phone').placeholder = t('phoneNumber');
-      document.getElementById('password').placeholder = t('password');
-      document.getElementById('owner_phone').placeholder = t('ownerPhone');
+    let currentStep = 1;
+    let selectedRole = '';
+
+    function updateSteps(step) {
+      for (let i = 1; i <= 3; i++) {
+        document.getElementById(`step${i}`).classList.toggle('active', i === step);
+        const dot = document.getElementById(`dot${i}`);
+        if (i < step) {
+          dot.className = 'step-dot done';
+          dot.innerHTML = '<i class="bi bi-check" style="font-size:0.7rem;"></i>';
+        } else if (i === step) {
+          dot.className = 'step-dot active';
+          dot.textContent = i;
+        } else {
+          dot.className = 'step-dot';
+          dot.textContent = i;
+        }
+      }
+      document.getElementById('line1').className = step > 1 ? 'step-line done' : 'step-line';
+      document.getElementById('line2').className = step > 2 ? 'step-line done' : 'step-line';
+      currentStep = step;
     }
 
-    function toggleFields() {
-      const role = document.getElementById('role').value;
-      const tenantFields = document.getElementById('tenantFields');
-      if (role === 'tenant') {
-        tenantFields.classList.remove('d-none');
-      } else {
-        tenantFields.classList.add('d-none');
+    function goToStep1() { updateSteps(1); hideMessages(); }
+
+    function goToStep2() {
+      const isHe = getLang() === 'he';
+      const fname = document.getElementById('fname').value.trim();
+      const lname = document.getElementById('lname').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      if (!fname || !lname || !email || !phone) {
+        showError(isHe ? 'אנא מלא את כל השדות.' : 'Please fill in all fields.');
+        return;
       }
+      hideMessages();
+      updateSteps(2);
+    }
+
+    function goToStep3() {
+      const isHe = getLang() === 'he';
+      if (!selectedRole) {
+        showError(isHe ? 'אנא בחר תפקיד.' : 'Please select a role.');
+        return;
+      }
+      hideMessages();
+      updateSummary();
+      updateSteps(3);
+    }
+
+    function selectRole(role) {
+      selectedRole = role;
+      document.getElementById('selectedRole').value = role;
+      ['tenant', 'technician'].forEach(r => {
+        const card = document.getElementById(`roleCard-${r}`);
+        const radio = document.getElementById(`radio-${r}`);
+        if (r === role) {
+          card.style.borderColor = '#1a3a6b';
+          card.style.background = '#f0f4ff';
+          radio.style.borderColor = '#1a3a6b';
+          radio.style.background = '#1a3a6b';
+          radio.innerHTML = '<div style="width:8px;height:8px;border-radius:50%;background:white;"></div>';
+        } else {
+          card.style.borderColor = '#e5e7eb';
+          card.style.background = 'white';
+          radio.style.borderColor = '#e5e7eb';
+          radio.style.background = 'white';
+          radio.innerHTML = '';
+        }
+      });
+      document.getElementById('tenantExtra').classList.toggle('show', role === 'tenant');
+    }
+
+    function updateSummary() {
+      const isHe = getLang() === 'he';
+      const fname = document.getElementById('fname').value.trim();
+      const lname = document.getElementById('lname').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const roleNames = {
+        tenant: isHe ? 'דייר / שוכר' : 'Tenant',
+        technician: isHe ? 'טכנאי' : 'Technician'
+      };
+      document.getElementById('summaryContent').innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:5px;">
+          <span>👤 ${fname} ${lname}</span>
+          <span>📧 ${email}</span>
+          <span>🏷️ ${roleNames[selectedRole] || ''}</span>
+        </div>`;
+    }
+
+    function togglePwd(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      input.type = input.type === 'password' ? 'text' : 'password';
+      icon.className = input.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('errorMsg');
+      el.textContent = msg;
+      el.style.display = 'block';
+      document.getElementById('successMsg').style.display = 'none';
+    }
+
+    function showSuccess(msg) {
+      const el = document.getElementById('successMsg');
+      el.textContent = msg;
+      el.style.display = 'block';
+      document.getElementById('errorMsg').style.display = 'none';
+    }
+
+    function hideMessages() {
+      document.getElementById('errorMsg').style.display = 'none';
+      document.getElementById('successMsg').style.display = 'none';
     }
 
     async function register() {
       const isHe = getLang() === 'he';
-      const errorMsg = document.getElementById('errorMsg');
-      const successMsg = document.getElementById('successMsg');
-
-      const full_name = document.getElementById('full_name').value;
-      const email = document.getElementById('email').value;
-      const phone = document.getElementById('phone').value;
+      const fname = document.getElementById('fname').value.trim();
+      const lname = document.getElementById('lname').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
       const password = document.getElementById('password').value;
-      const role = document.getElementById('role').value;
-      const floor = document.getElementById('floor')?.value;
-      const unit_number = document.getElementById('unit_number')?.value;
-      const owner_phone = document.getElementById('owner_phone')?.value;
+      const confirm = document.getElementById('confirm_password').value;
+      const floor = document.getElementById('floor')?.value || '';
+      const unit_number = document.getElementById('unit_number')?.value || '';
+      const owner_phone = document.getElementById('owner_phone')?.value || '';
+      hideMessages();
 
-      errorMsg.classList.add('d-none');
-      successMsg.classList.add('d-none');
+      if (!password || password.length < 6) {
+        showError(isHe ? 'הסיסמה חייבת להכיל לפחות 6 תווים.' : 'Password must be at least 6 characters.');
+        return;
+      }
 
-      if (!full_name || !email || !phone || !password || !role) {
-        errorMsg.textContent = isHe ? 'אנא מלא את כל השדות הנדרשים.' : 'Please fill in all required fields.';
-        errorMsg.classList.remove('d-none');
+      if (password !== confirm) {
+        showError(isHe ? 'הסיסמאות אינן תואמות.' : 'Passwords do not match.');
         return;
       }
 
@@ -190,28 +552,58 @@
         const response = await fetch('http://localhost:3000/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ full_name, email, phone, password, role, floor, unit_number, owner_phone })
+          body: JSON.stringify({
+            full_name: `${fname} ${lname}`,
+            email, phone, password,
+            role: selectedRole,
+            floor, unit_number, owner_phone
+          })
         });
-
         const data = await response.json();
 
         if (response.ok) {
-          successMsg.textContent = isHe ? 'החשבון נוצר בהצלחה! אנא המתן לאישור המנהל.' : 'Account created successfully! Please wait for manager approval.';
-          successMsg.classList.remove('d-none');
-          setTimeout(() => { window.location.href = 'login.html'; }, 2000);
+          showSuccess(isHe
+            ? '✅ נרשמת בהצלחה! בקשתך ממתינה לאישור המנהל.'
+            : '✅ Registered successfully! Waiting for manager approval.');
+          setTimeout(() => { window.location.href = 'login.html'; }, 2500);
         } else {
-          errorMsg.textContent = data.message;
-          errorMsg.classList.remove('d-none');
+          showError(data.message);
         }
-
       } catch (err) {
-        errorMsg.textContent = isHe ? 'שגיאת חיבור. אנא נסה שוב.' : 'Connection error. Please try again.';
-        errorMsg.classList.remove('d-none');
+        showError(isHe ? 'שגיאת חיבור. אנא נסה שוב.' : 'Connection error. Please try again.');
       }
     }
 
-    document.addEventListener('DOMContentLoaded', applyTranslations);
-  </script>
+    function applyTranslations() {
+      const isHe = getLang() === 'he';
+      document.documentElement.dir = isHe ? 'rtl' : 'ltr';
+      document.getElementById('registerTitle').textContent = isHe ? 'הרשמה למערכת' : 'Create Account';
+      document.getElementById('registerSubtitle').textContent = isHe ? 'הצטרפו ל-BUILDIX — מערכת ניהול הבניינים החכמה' : 'Join BUILDIX — Smart Building Management';
+      document.getElementById('backText').textContent = isHe ? 'חזרה להתחברות' : 'Back to Login';
+      document.getElementById('firstNameLabel').textContent = isHe ? 'שם פרטי *' : 'First Name *';
+      document.getElementById('lastNameLabel').textContent = isHe ? 'שם משפחה *' : 'Last Name *';
+      document.getElementById('emailLabel').textContent = isHe ? 'כתובת מייל *' : 'Email *';
+      document.getElementById('phoneLabel').textContent = isHe ? 'טלפון *' : 'Phone *';
+      document.getElementById('nextBtn1').textContent = isHe ? 'המשך' : 'Next';
+      document.getElementById('roleLabel').textContent = isHe ? 'מה התפקיד שלך בבניין? *' : 'What is your role? *';
+      document.getElementById('roleTenantTitle').textContent = isHe ? 'דייר / שוכר' : 'Tenant';
+      document.getElementById('roleTenantDesc').textContent = isHe ? 'אני גר או שוכר בבניין' : 'I live or rent in the building';
+      document.getElementById('roleTechTitle').textContent = isHe ? 'טכנאי / קבלן' : 'Technician';
+      document.getElementById('roleTechDesc').textContent = isHe ? 'אני מטפל בתקלות ותחזוקה' : 'I handle faults and maintenance';
+      document.getElementById('tenantExtraTitle').textContent = isHe ? 'פרטי דירה' : 'Apartment Details';
+      document.getElementById('floorLabel').textContent = isHe ? 'קומה' : 'Floor';
+      document.getElementById('unitLabel').textContent = isHe ? 'מספר יחידה' : 'Unit Number';
+      document.getElementById('ownerPhoneLabel').textContent = isHe ? 'טלפון בעל הנכס' : 'Owner Phone';
+      document.getElementById('nextBtn2').textContent = isHe ? 'המשך' : 'Next';
+      document.getElementById('passwordLabel').textContent = isHe ? 'סיסמה *' : 'Password *';
+      document.getElementById('confirmPasswordLabel').textContent = isHe ? 'אימות סיסמה *' : 'Confirm Password *';
+      document.getElementById('summaryTitle').textContent = isHe ? 'סיכום הרשמה:' : 'Registration Summary:';
+      document.getElementById('registerBtnText').textContent = isHe ? 'צור חשבון' : 'Create Account';
+      document.getElementById('hasAccount').textContent = isHe ? 'כבר יש לך חשבון?' : 'Already have an account?';
+      document.getElementById('loginLink').textContent = isHe ? ' התחבר כאן' : ' Login here';
+    }
 
+    document.addEventListener('DOMContentLoaded', () => { applyTranslations(); });
+  </script>
 </body>
 </html>

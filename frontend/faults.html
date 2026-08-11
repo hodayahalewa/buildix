@@ -11,10 +11,6 @@
   <script src="js/lang-switcher.js"></script>
   <script src="js/alerts.js"></script>
   <style>
-    .tech-item { padding: 10px 15px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
-    .tech-item:last-child { border-bottom: none; }
-    .tech-item:hover { background: #f0f4ff; color: #1a3a6b; }
-    .tech-item.selected { background: #e8f0fe; color: #1a3a6b; font-weight: 600; }
     .fault-image { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 2px solid #dee2e6; transition: transform 0.2s; }
     .fault-image:hover { transform: scale(1.1); }
     .img-lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; align-items: center; justify-content: center; cursor: pointer; }
@@ -154,29 +150,44 @@
   <!-- מודל שיוך טכנאי -->
   <div class="modal fade" id="assignModal" tabindex="-1">
     <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="assignModalTitle"></h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      <div class="modal-content" style="border:none; border-radius:16px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+        
+        <div class="modal-header" style="background:#1a3a6b; border:none; padding:20px 24px;">
+          <h5 class="modal-title text-white fw-bold" id="assignModalTitle" style="font-size:1.05rem;">
+            <i class="bi bi-person-check-fill me-2"></i>שייך תקלה לטכנאי
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" style="margin-right:auto; margin-left:0;"></button>
         </div>
-        <div class="modal-body">
+
+        <div class="modal-body" style="padding:24px;">
           <input type="hidden" id="assignFaultId">
-          <div id="alreadyAssignedMsg" class="alert alert-warning d-none mb-3">
-            <i class="bi bi-exclamation-triangle me-2"></i>
-            <span id="alreadyAssignedText"></span>
+
+          <div id="alreadyAssignedMsg" class="d-none mb-3" style="background:#fef3c7; border:1px solid #fcd34d; border-radius:10px; padding:12px 14px; display:flex; align-items:center; gap:10px;">
+            <i class="bi bi-exclamation-triangle-fill" style="color:#d97706; font-size:1.1rem;"></i>
+            <span id="alreadyAssignedText" style="font-size:0.85rem; color:#92400e;"></span>
           </div>
-          <div class="mb-3">
-            <label class="form-label fw-bold" id="selectTechLabel"></label>
-            <input type="text" id="techSearch" class="form-control mb-2" oninput="filterTechList()" autocomplete="off">
-            <div id="techList" style="max-height:200px; overflow-y:auto; border:1px solid #dee2e6; border-radius:8px;"></div>
-            <input type="hidden" id="selectedTechId">
-            <small class="text-success fw-bold mt-1" id="selectedTechName"></small>
+
+          <label class="fw-bold mb-2" id="selectTechLabel" style="font-size:0.85rem; color:#1a3a6b; display:block;">בחר טכנאי</label>
+
+          <div style="position:relative; margin-bottom:14px;">
+            <i class="bi bi-search" style="position:absolute; right:14px; top:50%; transform:translateY(-50%); color:#9ca3af; font-size:0.9rem;"></i>
+            <input type="text" id="techSearch" class="form-control" oninput="filterTechList()" autocomplete="off"
+              style="padding-right:38px; border-radius:10px; border:1.5px solid #e5e7eb; font-size:0.88rem; padding-top:10px; padding-bottom:10px;">
           </div>
+
+          <div id="techList" style="max-height:240px; overflow-y:auto; border:1px solid #e5e7eb; border-radius:12px; overflow-x:hidden;"></div>
+
+          <input type="hidden" id="selectedTechId">
+          <div id="selectedTechName" style="margin-top:10px;"></div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelBtn"></button>
-          <button type="button" class="btn btn-primary" onclick="assignFault()" id="assignBtn"></button>
+
+        <div class="modal-footer" style="border:none; padding:16px 24px 24px; gap:8px;">
+          <button type="button" class="btn" data-bs-dismiss="modal" id="cancelBtn"
+            style="background:#f3f4f6; color:#374151; border-radius:10px; padding:9px 20px; font-size:0.88rem; font-weight:600;">ביטול</button>
+          <button type="button" class="btn" onclick="assignFault()" id="assignBtn"
+            style="background:#1a3a6b; color:white; border-radius:10px; padding:9px 24px; font-size:0.88rem; font-weight:600;">שייך</button>
         </div>
+
       </div>
     </div>
   </div>
@@ -285,10 +296,10 @@
       document.getElementById('urgencyLow').textContent = t('low');
       document.getElementById('urgencyMedium').textContent = t('medium');
       document.getElementById('urgencyHigh').textContent = t('high');
-      document.getElementById('assignModalTitle').textContent = isHe ? 'שייך תקלה לטכנאי' : 'Assign Fault';
+      document.getElementById('assignModalTitle').innerHTML = `<i class="bi bi-person-check-fill me-2"></i>${isHe ? ' שייך תקלה לטכנאי' : 'Assign Fault'}`;
       document.getElementById('selectTechLabel').textContent = isHe ? 'בחר טכנאי' : 'Select Technician';
       document.getElementById('techSearch').placeholder = isHe ? 'חפש טכנאי...' : 'Search technician...';
-      document.getElementById('cancelBtn').textContent = t('cancel');
+      document.getElementById('cancelBtn').textContent = isHe ? 'ביטול' : 'Cancel';
       document.getElementById('assignBtn').textContent = isHe ? 'שייך' : 'Assign';
       document.getElementById('statusModalTitle').textContent = isHe ? 'עדכון סטטוס תקלה' : 'Update Fault Status';
       document.getElementById('newStatusLabel').textContent = isHe ? 'בחר סטטוס חדש' : 'Select New Status';
@@ -310,7 +321,7 @@
         });
         const data = await response.json();
         allFaults = data.faults.sort((a, b) => a.id - b.id);
-        filterFaults(); // מציג ללא סגורות כברירת מחדל
+        filterFaults();
       } catch (err) {
         console.error('Error loading faults:', err);
       }
@@ -435,7 +446,6 @@
     function openLightbox(url) { document.getElementById('lightboxImg').src = url; document.getElementById('lightbox').classList.remove('d-none'); }
     function closeLightbox() { document.getElementById('lightbox').classList.add('d-none'); }
 
-    // סינון - ברירת מחדל: הסתר סגורות
     function filterFaults() {
       const search = document.getElementById('searchInput').value.toLowerCase();
       const status = document.getElementById('filterStatus').value;
@@ -447,7 +457,6 @@
 
       const filtered = allFaults.filter(fault => {
         const matchSearch = !search || fault.title.toLowerCase().includes(search) || (fault.reported_by_name && fault.reported_by_name.toLowerCase().includes(search));
-        // ברירת מחדל: הסתר סגורות — אלא אם נבחר במפורש "סגור"
         const matchStatus = status === '' ? fault.status !== 'closed' : fault.status === status;
         const matchUrgency = !urgency || fault.urgency === urgency;
         const matchType = !type || fault.fault_type === type;
@@ -483,11 +492,11 @@
       document.getElementById('assignFaultId').value = faultId;
       document.getElementById('techSearch').value = '';
       document.getElementById('selectedTechId').value = '';
-      document.getElementById('selectedTechName').textContent = '';
+      document.getElementById('selectedTechName').innerHTML = '';
       const alreadyMsg = document.getElementById('alreadyAssignedMsg');
       if (assignedTo && assignedTo !== '') {
         alreadyMsg.classList.remove('d-none');
-        document.getElementById('alreadyAssignedText').textContent = isHe ? `⚠️ תקלה זו כבר מוקצת לטכנאי: ${assignedTo}` : `⚠️ This fault is already assigned to: ${assignedTo}`;
+        document.getElementById('alreadyAssignedText').textContent = isHe ? `תקלה זו כבר מוקצת לטכנאי: ${assignedTo}` : `This fault is already assigned to: ${assignedTo}`;
       } else { alreadyMsg.classList.add('d-none'); }
       renderTechList(allTechnicians);
       new bootstrap.Modal(document.getElementById('assignModal')).show();
@@ -496,10 +505,32 @@
     function renderTechList(technicians) {
       const isHe = getLang() === 'he';
       const list = document.getElementById('techList');
-      if (technicians.length === 0) { list.innerHTML = `<div class="p-3 text-muted text-center">${isHe ? 'לא נמצאו טכנאים' : 'No technicians found'}</div>`; return; }
-      list.innerHTML = technicians.map(tech => `
-        <div class="tech-item ${document.getElementById('selectedTechId').value == tech.id ? 'selected' : ''}" onclick="selectTechnician(${tech.id}, '${tech.full_name}')">
-          <i class="bi bi-person-fill text-primary me-2"></i>${tech.full_name}<small class="text-muted ms-2">${tech.phone||''}</small>
+      if (technicians.length === 0) {
+        list.innerHTML = `<div style="padding:24px; text-align:center; color:#9ca3af; font-size:0.85rem;">
+          <i class="bi bi-search" style="font-size:1.5rem; display:block; margin-bottom:8px;"></i>
+          ${isHe ? 'לא נמצאו טכנאים' : 'No technicians found'}
+        </div>`;
+        return;
+      }
+      const selectedId = document.getElementById('selectedTechId').value;
+      list.innerHTML = technicians.map((tech, i) => `
+        <div onclick="selectTechnician(${tech.id}, '${tech.full_name}')"
+          style="display:flex; align-items:center; gap:12px; padding:12px 14px; cursor:pointer; transition:all 0.15s;
+                 ${i !== technicians.length - 1 ? 'border-bottom:1px solid #f0f0f0;' : ''}
+                 ${selectedId == tech.id ? 'background:#eef2ff;' : 'background:white;'}"
+          onmouseover="this.style.background='#f8f9ff'"
+          onmouseout="this.style.background='${selectedId == tech.id ? '#eef2ff' : 'white'}'">
+          
+          <div style="width:38px; height:38px; border-radius:50%; background:${selectedId == tech.id ? '#1a3a6b' : '#e5e7eb'}; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background 0.15s;">
+            <i class="bi bi-person-fill" style="color:${selectedId == tech.id ? 'white' : '#6b7280'}; font-size:1rem;"></i>
+          </div>
+
+          <div style="flex:1; min-width:0;">
+            <div style="font-weight:600; font-size:0.88rem; color:#1f2937;">${tech.full_name}</div>
+            ${tech.phone ? `<div style="font-size:0.76rem; color:#9ca3af;">${tech.phone}</div>` : ''}
+          </div>
+
+          ${selectedId == tech.id ? '<i class="bi bi-check-circle-fill" style="color:#1a3a6b; font-size:1.1rem;"></i>' : ''}
         </div>`).join('');
     }
 
@@ -511,7 +542,11 @@
     function selectTechnician(id, name) {
       const isHe = getLang() === 'he';
       document.getElementById('selectedTechId').value = id;
-      document.getElementById('selectedTechName').textContent = isHe ? `✓ נבחר: ${name}` : `✓ Selected: ${name}`;
+      document.getElementById('selectedTechName').innerHTML = `
+        <div style="display:flex; align-items:center; gap:8px; background:#ecfdf5; border:1px solid #6ee7b7; border-radius:10px; padding:10px 14px;">
+          <i class="bi bi-check-circle-fill" style="color:#059669;"></i>
+          <span style="font-size:0.85rem; font-weight:600; color:#065f46;">${isHe ? 'נבחר:' : 'Selected:'} ${name}</span>
+        </div>`;
       renderTechList(allTechnicians);
     }
 

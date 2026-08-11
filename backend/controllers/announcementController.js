@@ -1,7 +1,7 @@
-// קונטרולר לניהול מודעות
 const db = require('../config/DB');
+const { sendAnnouncementEmail } = require('../services/emailService');
 
-// קבלת כל המודעות - מסנן מודעות שפג תוקפן ומודעות שטרם התחילו
+// קבלת כל המודעות
 const getAllAnnouncements = async (req, res) => {
   try {
     const [announcements] = await db.query(`
@@ -26,24 +26,48 @@ const getAllAnnouncements = async (req, res) => {
   }
 };
 
-// הוספת מודעה חדשה עם תאריך התחלה, סיום ורמת דחיפות
+// הוספת מודעה חדשה + שליחת מייל לכל הדיירים והטכנאים (ברקע, לא חוסם את התגובה)
 const addAnnouncement = async (req, res) => {
   try {
     const { title, content, priority, starts_at, expires_at } = req.body;
     const created_by = req.user.id;
 
-    // בדיקה שכל השדות החובה קיימים
     if (!title || !content) {
       return res.status(400).json({ message: 'Please fill in all required fields.' });
     }
 
-    // שמירת המודעה עם כל השדות
     await db.query(
       'INSERT INTO announcements (title, content, priority, starts_at, created_by, expires_at) VALUES (?, ?, ?, ?, ?, ?)',
       [title, content, priority || 'medium', starts_at || null, created_by, expires_at || null]
     );
 
+    // מגיבים למנהל מיד - לא מחכים לשליחת המיילים
     res.status(201).json({ message: 'Announcement added successfully!' });
+
+    // שליחת מיילים ברקע - במקביל לכולם, לא חוסם ולא מעכב את המשתמש
+    (async () => {
+      try {
+        const [users] = await db.query(
+          `SELECT email, full_name FROM users 
+           WHERE role IN ('tenant', 'technician') 
+           AND is_approved = 1`
+        );
+
+        const results = await Promise.allSettled(
+          users.map(u => sendAnnouncementEmail(u.email, u.full_name, title, content))
+        );
+
+        const failed = results.filter(r => r.status === 'rejected');
+        if (failed.length > 0) {
+          console.error(`Announcement emails: ${failed.length}/${users.length} failed to send.`);
+          failed.forEach(f => console.error('  -', f.reason?.message || f.reason));
+        } else {
+          console.log(`Announcement emails: sent successfully to ${users.length} users.`);
+        }
+      } catch (emailErr) {
+        console.error('Email error:', emailErr.message);
+      }
+    })();
 
   } catch (err) {
     console.error('Add announcement error:', err.message);
@@ -51,18 +75,16 @@ const addAnnouncement = async (req, res) => {
   }
 };
 
-// עריכת מודעה קיימת עם כל השדות
+// עריכת מודעה
 const updateAnnouncement = async (req, res) => {
   try {
     const { id } = req.params;
     const { title, content, priority, starts_at, expires_at } = req.body;
 
-    // בדיקה שכל השדות החובה קיימים
     if (!title || !content) {
       return res.status(400).json({ message: 'Please fill in all required fields.' });
     }
 
-    // עדכון המודעה במסד הנתונים
     await db.query(
       'UPDATE announcements SET title=?, content=?, priority=?, starts_at=?, expires_at=? WHERE id=?',
       [title, content, priority || 'medium', starts_at || null, expires_at || null, id]

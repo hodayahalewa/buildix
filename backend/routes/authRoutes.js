@@ -1,5 +1,5 @@
-// נתיבי הרשמה, התחברות וניהול משתמשים
 const express = require('express');
+
 const router = express.Router();
 const {
   register,
@@ -11,7 +11,9 @@ const {
   sendMessageToUser,
   getMyMessages,
   markMessageRead,
-  replyToMessage
+  replyToMessage,
+  forgotPassword,
+  changePassword
 } = require('../controllers/authController');
 const { verifyToken, authorizeRoles } = require('../middleware/auth');
 
@@ -21,28 +23,34 @@ router.post('/register', register);
 // התחברות
 router.post('/login', login);
 
-// קבלת משתמשים ממתינים - מנהל בלבד
+// שכחתי סיסמה
+router.post('/forgot-password', forgotPassword);
+
+// קבלת משתמשים ממתינים
 router.get('/pending', verifyToken, authorizeRoles('manager'), getPendingUsers);
 
-// אישור/דחיית משתמש - מנהל בלבד
+// אישור/דחיית משתמש
 router.put('/approve', verifyToken, authorizeRoles('manager'), approveUser);
 
-// קבלת כל הטכנאים - מנהל בלבד
+// קבלת כל הטכנאים
 router.get('/technicians', verifyToken, authorizeRoles('manager'), getTechnicians);
 
-// קבלת כל המשתמשים - מנהל בלבד
+// קבלת כל המשתמשים
 router.get('/all-users', verifyToken, authorizeRoles('manager'), getAllUsers);
 
-// שליחת הודעה למשתמש - מנהל בלבד
+// שליחת הודעה
 router.post('/send-message', verifyToken, authorizeRoles('manager'), sendMessageToUser);
 
-// קבלת הודעות של המשתמש המחובר - כולם
+// קבלת הודעות
 router.get('/my-messages', verifyToken, getMyMessages);
 
-// סימון הודעה כנקראה - כולם
+// סימון כנקראה
 router.put('/messages/read/:id', verifyToken, markMessageRead);
 
-// שליחת תשובה להודעה - כולם
+// תשובה להודעה
 router.post('/messages/reply', verifyToken, replyToMessage);
+
+router.post('/change-password', verifyToken, changePassword);
+
 
 module.exports = router;
