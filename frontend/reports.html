@@ -12,6 +12,8 @@
   <script src="js/lang-switcher.js"></script>
   <script src="js/alerts.js"></script>
   <style>
+    .main-content { font-size: 16px; }
+
     .chart-slide { display: none; animation: fadeIn 0.5s ease; }
     .chart-slide.active { display: block; }
     @keyframes fadeIn {
@@ -21,20 +23,84 @@
     .carousel-btn {
       position: absolute; top: 50%; transform: translateY(-50%);
       background: #1a3a6b; color: white; border: none; border-radius: 50%;
-      width: 32px; height: 32px; display: flex; align-items: center;
+      width: 38px; height: 38px; display: flex; align-items: center;
       justify-content: center; cursor: pointer; z-index: 10;
       transition: background 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      font-size: 1.1rem;
     }
     .carousel-btn:hover { background: #c9a227; }
-    .carousel-btn-prev { left: 8px; }
-    .carousel-btn-next { right: 8px; }
-    .carousel-dots { display: flex; justify-content: center; gap: 8px; margin-top: 8px; }
-    .carousel-dot { width: 8px; height: 8px; border-radius: 50%; background: #dee2e6; cursor: pointer; transition: background 0.2s; }
+    .carousel-btn-prev { left: 10px; }
+    .carousel-btn-next { right: 10px; }
+    .carousel-dots { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
+    .carousel-dot { width: 10px; height: 10px; border-radius: 50%; background: #dee2e6; cursor: pointer; transition: background 0.2s; }
     .carousel-dot.active { background: #1a3a6b; }
-    .chart-title-bar { background: #1a3a6b; color: white; padding: 7px 50px; text-align: center; font-weight: 600; font-size: 0.88rem; }
-    .chart-progress { height: 3px; background: #dee2e6; overflow: hidden; }
+    .chart-title-bar { background: #1a3a6b; color: white; padding: 12px 56px; text-align: center; font-weight: 700; font-size: 1.05rem; }
+    .chart-progress { height: 4px; background: #dee2e6; overflow: hidden; }
     .chart-progress-bar { height: 100%; background: #c9a227; width: 0%; }
     .export-card { border-left: 4px solid #1a3a6b; }
+    .export-card h6 { font-size: 1.1rem; }
+    .export-card p { font-size: 0.95rem !important; }
+    .export-card .btn { font-size: 0.95rem; padding: 10px 16px; }
+    .export-card .form-label { font-size: 0.88rem !important; }
+    .export-card .form-control { font-size: 0.95rem; padding: 8px 12px; }
+
+    h4#pageTitle { font-size: 1.7rem; }
+    #pageSubtitle { font-size: 1rem !important; }
+
+    /* ===== רצועת נתונים (Stat Strip) - עיצוב מצומצם, טקסט מוגדל ===== */
+    .strip-section-title {
+      font-size: 1.15rem; font-weight: 800; color: #1a3a6b;
+      display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+    }
+    .stat-strip {
+      background: white; border-radius: 18px; border: 1px solid #eef0fa;
+      box-shadow: 0 2px 14px rgba(26,58,107,0.06);
+      display: flex; padding: 10px; margin-bottom: 26px;
+    }
+    .stat-strip-item {
+      flex: 1; display: flex; align-items: center; gap: 16px;
+      padding: 18px 20px; position: relative;
+    }
+    .stat-strip-item:not(:last-child)::after {
+      content: ''; position: absolute; left: 0; top: 10%; bottom: 10%;
+      width: 1px; background: #eef0fa;
+    }
+    .stat-strip-icon {
+      width: 52px; height: 52px; border-radius: 14px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; background: var(--s-bg, #eef2ff); color: var(--s-accent, #1a3a6b);
+    }
+    .stat-strip-value { font-size: 1.85rem; font-weight: 900; color: #1a3a6b; line-height: 1; }
+    .stat-strip-label { font-size: 0.9rem; color: #6b7280; margin-top: 5px; font-weight: 500; }
+
+    @media (max-width: 1100px) {
+      .stat-strip { flex-wrap: wrap; }
+      .stat-strip-item { flex: 0 0 50%; }
+      .stat-strip-item:nth-child(even)::after { display: none; }
+    }
+    @media (max-width: 600px) {
+      .stat-strip-item { flex: 0 0 100%; }
+      .stat-strip-item::after { display: none !important; }
+    }
+
+    /* פס פילוג חשבוניות */
+    .finance-breakdown-card {
+      background: white; border-radius: 18px; padding: 22px 26px;
+      border: 1px solid #eef0fa; box-shadow: 0 2px 14px rgba(26,58,107,0.06);
+      margin-bottom: 26px;
+    }
+    .finance-breakdown-card .small { font-size: 0.95rem !important; }
+    .finance-breakdown-bar {
+      height: 14px; border-radius: 8px; overflow: hidden; display: flex;
+      background: #f0f2f8; margin: 16px 0 14px;
+    }
+    .finance-breakdown-bar .seg { height: 100%; transition: width 0.6s ease; }
+    .seg-approved { background: #10b981; }
+    .seg-pending { background: #f59e0b; }
+    .seg-rejected { background: #ef4444; }
+    .finance-legend { display: flex; gap: 24px; flex-wrap: wrap; }
+    .finance-legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.92rem; color: #6b7280; font-weight: 600; }
+    .finance-legend-dot { width: 11px; height: 11px; border-radius: 50%; }
   </style>
 </head>
 <body>
@@ -47,12 +113,12 @@
     </div>
     <ul class="nav flex-column px-2">
       <li class="nav-item"><a class="nav-link" href="dashboard-manager.html"><i class="bi bi-speedometer2"></i> <span id="nav-dashboard"></span></a></li>
-      <li class="nav-item"><a class="nav-link" href="faults.html"><i class="bi bi-exclamation-triangle"></i> <span id="nav-faults"></span></a></li>
+      <li class="nav-item"><a class="nav-link active" href="faults.html"><i class="bi bi-exclamation-triangle"></i> <span id="nav-faults"></span></a></li>
       <li class="nav-item"><a class="nav-link" href="maintenance.html"><i class="bi bi-tools"></i> <span id="nav-maintenance"></span></a></li>
       <li class="nav-item"><a class="nav-link" href="energy.html"><i class="bi bi-lightning"></i> <span id="nav-energy"></span></a></li>
       <li class="nav-item"><a class="nav-link" href="announcements.html"><i class="bi bi-megaphone"></i> <span id="nav-announcements"></span></a></li>
       <li class="nav-item"><a class="nav-link" href="invoices.html"><i class="bi bi-receipt"></i> <span id="nav-invoices"></span></a></li>
-      <li class="nav-item"><a class="nav-link active" href="reports.html"><i class="bi bi-bar-chart"></i> <span id="nav-reports"></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="reports.html"><i class="bi bi-bar-chart"></i> <span id="nav-reports"></span></a></li>
       <li class="nav-item"><a class="nav-link" href="users.html"><i class="bi bi-people"></i> <span id="nav-users"></span></a></li>
       <li class="nav-item mt-4"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-left"></i> <span id="nav-logout"></span></a></li>
     </ul>
@@ -66,58 +132,115 @@
       </div>
     </div>
 
-    <!-- כרטיסי סטטיסטיקות שורה 1 -->
-    <div class="row g-3 mb-3">
-      <div class="col-md-3">
-        <div class="card stat-card bg-primary text-white">
-          <div class="stat-number" id="totalFaults">0</div>
-          <div class="stat-label text-white-50" id="statTotal"></div>
+    <!-- ===== סיכום פיננסי - רצועה אחת ===== -->
+    <div class="strip-section-title"><i class="bi bi-cash-stack"></i> <span id="financeSectionTitle"></span></div>
+    <div class="stat-strip">
+      <div class="stat-strip-item" style="--s-accent:#10b981; --s-bg:#ecfdf5;">
+        <div class="stat-strip-icon"><i class="bi bi-check-circle-fill"></i></div>
+        <div>
+          <div class="stat-strip-value" id="financeApprovedAmount">₪0</div>
+          <div class="stat-strip-label" id="financeApprovedLabel"></div>
         </div>
       </div>
-      <div class="col-md-3">
-        <div class="card stat-card bg-warning text-white">
-          <div class="stat-number" id="activeFaults">0</div>
-          <div class="stat-label text-white-50" id="statActive"></div>
+      <div class="stat-strip-item" style="--s-accent:#f59e0b; --s-bg:#fffbeb;">
+        <div class="stat-strip-icon"><i class="bi bi-hourglass-split"></i></div>
+        <div>
+          <div class="stat-strip-value" id="financePendingAmount">₪0</div>
+          <div class="stat-strip-label" id="financePendingLabel"></div>
         </div>
       </div>
-      <div class="col-md-3">
-        <div class="card stat-card bg-success text-white">
-          <div class="stat-number" id="closedFaults">0</div>
-          <div class="stat-label text-white-50" id="statClosed"></div>
+      <div class="stat-strip-item" style="--s-accent:#ef4444; --s-bg:#fef2f2;">
+        <div class="stat-strip-icon"><i class="bi bi-x-circle-fill"></i></div>
+        <div>
+          <div class="stat-strip-value" id="financeRejectedCount">0</div>
+          <div class="stat-strip-label" id="financeRejectedLabel"></div>
         </div>
       </div>
-      <div class="col-md-3">
-        <div class="card stat-card bg-info text-white">
-          <div class="stat-number" id="avgResponse">-</div>
-          <div class="stat-label text-white-50" id="statAvg"></div>
+      <div class="stat-strip-item" style="--s-accent:#c9a227; --s-bg:#fdf8ec;">
+        <div class="stat-strip-icon"><i class="bi bi-graph-up-arrow"></i></div>
+        <div>
+          <div class="stat-strip-value" id="financeTotalAmount">₪0</div>
+          <div class="stat-strip-label" id="financeTotalLabel"></div>
         </div>
       </div>
     </div>
 
-    <!-- כרטיסי סטטיסטיקות שורה 2 -->
-    <div class="row g-3 mb-4">
-      <div class="col-md-3">
-        <div class="card stat-card bg-danger text-white">
-          <div class="stat-number" id="openFaults">0</div>
-          <div class="stat-label text-white-50" id="statOpen"></div>
+    <div class="finance-breakdown-card">
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="small fw-bold text-muted" id="breakdownTitle"></span>
+        <span class="small text-muted" id="breakdownCount"></span>
+      </div>
+      <div class="finance-breakdown-bar">
+        <div class="seg seg-approved" id="segApproved" style="width:0%"></div>
+        <div class="seg seg-pending" id="segPending" style="width:0%"></div>
+        <div class="seg seg-rejected" id="segRejected" style="width:0%"></div>
+      </div>
+      <div class="finance-legend">
+        <div class="finance-legend-item"><span class="finance-legend-dot" style="background:#10b981;"></span> <span id="legendApproved"></span></div>
+        <div class="finance-legend-item"><span class="finance-legend-dot" style="background:#f59e0b;"></span> <span id="legendPending"></span></div>
+        <div class="finance-legend-item"><span class="finance-legend-dot" style="background:#ef4444;"></span> <span id="legendRejected"></span></div>
+      </div>
+    </div>
+
+    <!-- ===== מצב תקלות - רצועה אחת ===== -->
+    <div class="strip-section-title"><i class="bi bi-exclamation-triangle"></i> <span id="faultsSectionTitle"></span></div>
+    <div class="stat-strip">
+      <div class="stat-strip-item" style="--s-accent:#1a3a6b; --s-bg:#eef2ff;">
+        <div class="stat-strip-icon"><i class="bi bi-collection"></i></div>
+        <div>
+          <div class="stat-strip-value" id="totalFaults">0</div>
+          <div class="stat-strip-label" id="statTotal"></div>
         </div>
       </div>
-      <div class="col-md-3">
-        <div class="card stat-card text-white" style="background:#6366f1;">
-          <div class="stat-number" id="inProgressFaults">0</div>
-          <div class="stat-label text-white-50" id="statInProgress"></div>
+      <div class="stat-strip-item" style="--s-accent:#f59e0b; --s-bg:#fffbeb;">
+        <div class="stat-strip-icon"><i class="bi bi-lightning-charge"></i></div>
+        <div>
+          <div class="stat-strip-value" id="activeFaults">0</div>
+          <div class="stat-strip-label" id="statActive"></div>
         </div>
       </div>
-      <div class="col-md-3">
-        <div class="card stat-card text-white" style="background:#8b5cf6;">
-          <div class="stat-number" id="waitingFaults">0</div>
-          <div class="stat-label text-white-50" id="statWaiting"></div>
+      <div class="stat-strip-item" style="--s-accent:#10b981; --s-bg:#ecfdf5;">
+        <div class="stat-strip-icon"><i class="bi bi-check2-circle"></i></div>
+        <div>
+          <div class="stat-strip-value" id="closedFaults">0</div>
+          <div class="stat-strip-label" id="statClosed"></div>
         </div>
       </div>
-      <div class="col-md-3">
-        <div class="card stat-card text-white" style="background:#0891b2;">
-          <div class="stat-number" id="fastestResponse">-</div>
-          <div class="stat-label text-white-50" id="statFastest"></div>
+      <div class="stat-strip-item" style="--s-accent:#0891b2; --s-bg:#ecfeff;">
+        <div class="stat-strip-icon"><i class="bi bi-clock-history"></i></div>
+        <div>
+          <div class="stat-strip-value" id="avgResponse">-</div>
+          <div class="stat-strip-label" id="statAvg"></div>
+        </div>
+      </div>
+    </div>
+    <div class="stat-strip">
+      <div class="stat-strip-item" style="--s-accent:#ef4444; --s-bg:#fef2f2;">
+        <div class="stat-strip-icon"><i class="bi bi-door-open"></i></div>
+        <div>
+          <div class="stat-strip-value" id="openFaults">0</div>
+          <div class="stat-strip-label" id="statOpen"></div>
+        </div>
+      </div>
+      <div class="stat-strip-item" style="--s-accent:#6366f1; --s-bg:#eef2ff;">
+        <div class="stat-strip-icon"><i class="bi bi-tools"></i></div>
+        <div>
+          <div class="stat-strip-value" id="inProgressFaults">0</div>
+          <div class="stat-strip-label" id="statInProgress"></div>
+        </div>
+      </div>
+      <div class="stat-strip-item" style="--s-accent:#8b5cf6; --s-bg:#f5f3ff;">
+        <div class="stat-strip-icon"><i class="bi bi-hourglass-split"></i></div>
+        <div>
+          <div class="stat-strip-value" id="waitingFaults">0</div>
+          <div class="stat-strip-label" id="statWaiting"></div>
+        </div>
+      </div>
+      <div class="stat-strip-item" style="--s-accent:#c9a227; --s-bg:#fdf8ec;">
+        <div class="stat-strip-icon"><i class="bi bi-lightning-fill"></i></div>
+        <div>
+          <div class="stat-strip-value" id="fastestResponse">-</div>
+          <div class="stat-strip-label" id="statFastest"></div>
         </div>
       </div>
     </div>
@@ -128,24 +251,24 @@
       <div class="chart-progress">
         <div class="chart-progress-bar" id="progressBar"></div>
       </div>
-      <div class="card-body position-relative px-5 py-3">
+      <div class="card-body position-relative px-5 py-4">
         <button class="carousel-btn carousel-btn-prev" onclick="changeChart(-1)">
           <i class="bi bi-chevron-left"></i>
         </button>
         <button class="carousel-btn carousel-btn-next" onclick="changeChart(1)">
           <i class="bi bi-chevron-right"></i>
         </button>
-        <div style="max-width:380px; height:280px; margin:0 auto; position:relative;">
-          <div class="chart-slide active" id="slide-0" style="height:280px; position:relative;">
+        <div style="max-width:460px; height:320px; margin:0 auto; position:relative;">
+          <div class="chart-slide active" id="slide-0" style="height:320px; position:relative;">
             <canvas id="statusChart"></canvas>
           </div>
-          <div class="chart-slide" id="slide-1" style="height:280px; position:relative;">
+          <div class="chart-slide" id="slide-1" style="height:320px; position:relative;">
             <canvas id="urgencyChart"></canvas>
           </div>
-          <div class="chart-slide" id="slide-2" style="height:280px; position:relative;">
+          <div class="chart-slide" id="slide-2" style="height:320px; position:relative;">
             <canvas id="typeChart"></canvas>
           </div>
-          <div class="chart-slide" id="slide-3" style="height:280px; position:relative;">
+          <div class="chart-slide" id="slide-3" style="height:320px; position:relative;">
             <canvas id="energyChart"></canvas>
           </div>
         </div>
@@ -160,23 +283,23 @@
 
     <!-- ייצוא דוחות -->
     <div class="card border-0 shadow-sm">
-      <div class="card-header text-white" style="background:#1a3a6b;">
-        <h6 class="fw-bold mb-0">
+      <div class="card-header text-white" style="background:#1a3a6b; padding:16px 20px;">
+        <h6 class="fw-bold mb-0" style="font-size:1.15rem;">
           <i class="bi bi-download"></i>
           <span id="exportTitle"></span>
         </h6>
       </div>
-      <div class="card-body">
+      <div class="card-body p-4">
         <div class="row g-4">
 
           <!-- דוח חודשי כולל -->
           <div class="col-md-4">
             <div class="card h-100 export-card border-0 shadow-sm">
               <div class="card-body">
-                <h6 class="fw-bold mb-1"><i class="bi bi-calendar-month text-primary"></i> <span id="monthlyTitle"></span></h6>
-                <p class="text-muted small mb-3" id="monthlyDesc"></p>
-                <label class="form-label small fw-bold" id="selectMonthLabel"></label>
-                <input type="month" id="exportMonth" class="form-control form-control-sm mb-3">
+                <h6 class="fw-bold mb-2"><i class="bi bi-calendar-month text-primary"></i> <span id="monthlyTitle"></span></h6>
+                <p class="text-muted mb-3" id="monthlyDesc"></p>
+                <label class="form-label fw-bold" id="selectMonthLabel"></label>
+                <input type="month" id="exportMonth" class="form-control mb-3">
                 <button class="btn btn-success w-100" onclick="exportMonthly()">
                   <i class="bi bi-file-earmark-excel"></i>
                   <span id="monthlyBtn"></span>
@@ -189,23 +312,23 @@
           <div class="col-md-4">
             <div class="card h-100 export-card border-0 shadow-sm">
               <div class="card-body">
-                <h6 class="fw-bold mb-1"><i class="bi bi-receipt text-warning"></i> <span id="invoicesTitle"></span></h6>
-                <p class="text-muted small mb-3" id="invoicesDesc"></p>
+                <h6 class="fw-bold mb-2"><i class="bi bi-receipt text-warning"></i> <span id="invoicesTitle"></span></h6>
+                <p class="text-muted mb-3" id="invoicesDesc"></p>
                 <div class="row g-2 mb-3">
                   <div class="col-6">
-                    <label class="form-label small fw-bold" id="fromDateLabel"></label>
-                    <input type="date" id="invFrom" class="form-control form-control-sm">
+                    <label class="form-label fw-bold" id="fromDateLabel"></label>
+                    <input type="date" id="invFrom" class="form-control">
                   </div>
                   <div class="col-6">
-                    <label class="form-label small fw-bold" id="toDateLabel"></label>
-                    <input type="date" id="invTo" class="form-control form-control-sm">
+                    <label class="form-label fw-bold" id="toDateLabel"></label>
+                    <input type="date" id="invTo" class="form-control">
                   </div>
                 </div>
                 <div class="d-flex gap-2">
-                  <button class="btn btn-success flex-fill btn-sm" onclick="exportInvoices('excel')">
+                  <button class="btn btn-success flex-fill" onclick="exportInvoices('excel')">
                     <i class="bi bi-file-earmark-excel"></i> Excel
                   </button>
-                  <button class="btn btn-danger flex-fill btn-sm" onclick="exportInvoices('pdf')">
+                  <button class="btn btn-danger flex-fill" onclick="exportInvoices('pdf')">
                     <i class="bi bi-file-earmark-pdf"></i> PDF
                   </button>
                 </div>
@@ -217,23 +340,23 @@
           <div class="col-md-4">
             <div class="card h-100 export-card border-0 shadow-sm">
               <div class="card-body">
-                <h6 class="fw-bold mb-1"><i class="bi bi-lightning text-warning"></i> <span id="energyTitle"></span></h6>
-                <p class="text-muted small mb-3" id="energyDesc"></p>
+                <h6 class="fw-bold mb-2"><i class="bi bi-lightning text-warning"></i> <span id="energyTitle"></span></h6>
+                <p class="text-muted mb-3" id="energyDesc"></p>
                 <div class="row g-2 mb-3">
                   <div class="col-6">
-                    <label class="form-label small fw-bold" id="fromMonthLabel"></label>
-                    <input type="month" id="energyFrom" class="form-control form-control-sm">
+                    <label class="form-label fw-bold" id="fromMonthLabel"></label>
+                    <input type="month" id="energyFrom" class="form-control">
                   </div>
                   <div class="col-6">
-                    <label class="form-label small fw-bold" id="toMonthLabel"></label>
-                    <input type="month" id="energyTo" class="form-control form-control-sm">
+                    <label class="form-label fw-bold" id="toMonthLabel"></label>
+                    <input type="month" id="energyTo" class="form-control">
                   </div>
                 </div>
                 <div class="d-flex gap-2">
-                  <button class="btn btn-success flex-fill btn-sm" onclick="exportEnergy('excel')">
+                  <button class="btn btn-success flex-fill" onclick="exportEnergy('excel')">
                     <i class="bi bi-file-earmark-excel"></i> Excel
                   </button>
-                  <button class="btn btn-danger flex-fill btn-sm" onclick="exportEnergy('pdf')">
+                  <button class="btn btn-danger flex-fill" onclick="exportEnergy('pdf')">
                     <i class="bi bi-file-earmark-pdf"></i> PDF
                   </button>
                 </div>
@@ -264,11 +387,13 @@
     let chartTitles = [];
     const AUTOPLAY_DURATION = 10000;
 
-    // הגדרת חודש נוכחי
     const now = new Date();
     const currentMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
 
-    // החלת תרגומים
+    function formatCurrency(v) {
+      return `₪${v.toLocaleString('he-IL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+    }
+
     function applyTranslations() {
       const isHe = getLang() === 'he';
       document.getElementById('nav-dashboard').textContent = t('dashboard');
@@ -282,6 +407,18 @@
       document.getElementById('nav-logout').textContent = t('logout');
       document.getElementById('pageTitle').textContent = isHe ? 'דוחות וניתוח נתונים' : 'Reports & Analytics';
       document.getElementById('pageSubtitle').textContent = isHe ? 'סקירת ביצועי הבניין' : 'Building performance overview';
+
+      document.getElementById('financeSectionTitle').textContent = isHe ? 'סיכום פיננסי - חשבוניות' : 'Financial Summary - Invoices';
+      document.getElementById('financeApprovedLabel').textContent = isHe ? 'סה"כ מאושר' : 'Total Approved';
+      document.getElementById('financePendingLabel').textContent = isHe ? 'ממתין לאישור' : 'Pending Approval';
+      document.getElementById('financeRejectedLabel').textContent = isHe ? 'חשבוניות שנדחו' : 'Rejected Invoices';
+      document.getElementById('financeTotalLabel').textContent = isHe ? 'סה"כ הוגש במערכת' : 'Total Submitted';
+      document.getElementById('breakdownTitle').textContent = isHe ? 'התפלגות חשבוניות לפי סטטוס' : 'Invoice Distribution by Status';
+      document.getElementById('legendApproved').textContent = isHe ? 'מאושר' : 'Approved';
+      document.getElementById('legendPending').textContent = isHe ? 'ממתין' : 'Pending';
+      document.getElementById('legendRejected').textContent = isHe ? 'נדחה' : 'Rejected';
+
+      document.getElementById('faultsSectionTitle').textContent = isHe ? 'מצב תקלות' : 'Faults Overview';
       document.getElementById('statTotal').textContent = isHe ? 'סה"כ תקלות' : 'Total Faults';
       document.getElementById('statActive').textContent = isHe ? 'תקלות פעילות' : 'Active Faults';
       document.getElementById('statClosed').textContent = isHe ? 'תקלות סגורות' : 'Closed Faults';
@@ -296,7 +433,7 @@
       document.getElementById('selectMonthLabel').textContent = isHe ? 'בחר חודש' : 'Select Month';
       document.getElementById('monthlyBtn').textContent = isHe ? 'הורד Excel' : 'Download Excel';
       document.getElementById('invoicesTitle').textContent = isHe ? 'דוח חשבוניות' : 'Invoices Report';
-      document.getElementById('invoicesDesc').textContent = isHe ? 'כל החשבוניות, סכומים וטכנאים' : 'All invoices, amounts and technicians';
+      document.getElementById('invoicesDesc').textContent = isHe ? 'כל החשבוניות, סכומים, טכנאים ודיירים' : 'All invoices, amounts, technicians and tenants';
       document.getElementById('fromDateLabel').textContent = isHe ? 'מתאריך' : 'From';
       document.getElementById('toDateLabel').textContent = isHe ? 'עד תאריך' : 'To';
       document.getElementById('energyTitle').textContent = isHe ? 'דוח אנרגיה' : 'Energy Report';
@@ -304,7 +441,6 @@
       document.getElementById('fromMonthLabel').textContent = isHe ? 'מחודש' : 'From';
       document.getElementById('toMonthLabel').textContent = isHe ? 'עד חודש' : 'To';
 
-      // הגדרת חודש נוכחי
       document.getElementById('exportMonth').value = currentMonth;
 
       chartTitles = [
@@ -316,7 +452,42 @@
       document.getElementById('currentChartTitle').textContent = chartTitles[0];
     }
 
-    // טעינת נתונים
+    async function loadFinanceSummary() {
+      const isHe = getLang() === 'he';
+      try {
+        const res = await fetch('http://localhost:3000/api/invoices/all', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const invoices = data.invoices || [];
+
+        const approved = invoices.filter(i => i.status === 'approved');
+        const pending = invoices.filter(i => i.status === 'pending');
+        const rejected = invoices.filter(i => i.status === 'rejected');
+
+        const approvedSum = approved.reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
+        const pendingSum = pending.reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
+        const totalSum = invoices.reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
+
+        document.getElementById('financeApprovedAmount').textContent = formatCurrency(approvedSum);
+        document.getElementById('financePendingAmount').textContent = formatCurrency(pendingSum);
+        document.getElementById('financeRejectedCount').textContent = rejected.length;
+        document.getElementById('financeTotalAmount').textContent = formatCurrency(totalSum);
+
+        document.getElementById('breakdownCount').textContent = isHe
+          ? `${invoices.length} חשבוניות בסה"כ`
+          : `${invoices.length} invoices total`;
+
+        const total = invoices.length || 1;
+        document.getElementById('segApproved').style.width = ((approved.length / total) * 100) + '%';
+        document.getElementById('segPending').style.width = ((pending.length / total) * 100) + '%';
+        document.getElementById('segRejected').style.width = ((rejected.length / total) * 100) + '%';
+
+      } catch (err) {
+        console.error('Error loading finance summary:', err);
+      }
+    }
+
     async function loadReports() {
       const isHe = getLang() === 'he';
       try {
@@ -347,8 +518,8 @@
           document.getElementById('avgResponse').textContent = Math.round(hours.reduce((a, b) => a + b, 0) / hours.length);
           document.getElementById('fastestResponse').textContent = Math.round(Math.min(...hours));
         } else {
-          document.getElementById('avgResponse').textContent = isHe ? 'אין נתונים' : 'No data';
-          document.getElementById('fastestResponse').textContent = isHe ? 'אין נתונים' : 'No data';
+          document.getElementById('avgResponse').textContent = '—';
+          document.getElementById('fastestResponse').textContent = '—';
         }
 
         buildPieChart('statusChart',
@@ -396,7 +567,6 @@
       }
     }
 
-    // ייצוא דוח חודשי
     function exportMonthly() {
       const isHe = getLang() === 'he';
       const month = document.getElementById('exportMonth').value;
@@ -407,7 +577,6 @@
       downloadFile(`http://localhost:3000/api/reports/monthly/excel?month=${month}&token=${token}`);
     }
 
-    // ייצוא דוח חשבוניות
     function exportInvoices(format) {
       const from = document.getElementById('invFrom').value;
       const to = document.getElementById('invTo').value;
@@ -417,7 +586,6 @@
       downloadFile(url);
     }
 
-    // ייצוא דוח אנרגיה
     function exportEnergy(format) {
       const from = document.getElementById('energyFrom').value;
       const to = document.getElementById('energyTo').value;
@@ -427,7 +595,6 @@
       downloadFile(url);
     }
 
-    // הורדת קובץ למחשב
     function downloadFile(url) {
       const a = document.createElement('a');
       a.href = url;
@@ -437,7 +604,6 @@
       setTimeout(() => document.body.removeChild(a), 100);
     }
 
-    // ניהול קרוסלה
     function changeChart(direction) {
       currentChart = (currentChart + direction + totalCharts) % totalCharts;
       updateCarousel();
@@ -496,7 +662,7 @@
         data: { labels, datasets: [{ data, backgroundColor: colors }] },
         options: {
           responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }
+          plugins: { legend: { position: 'bottom', labels: { font: { size: 13 } } } }
         }
       });
     }
@@ -508,7 +674,7 @@
         options: {
           responsive: true, maintainAspectRatio: false,
           plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } } } }
+          scales: { y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 13 } } }, x: { ticks: { font: { size: 13 } } } }
         }
       });
     }
@@ -519,7 +685,8 @@
         data: { labels, datasets: [{ label, data, borderColor: color, backgroundColor: color + '20', tension: 0.4, fill: true }] },
         options: {
           responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false } }
+          plugins: { legend: { display: false } },
+          scales: { x: { ticks: { font: { size: 12 } } }, y: { ticks: { font: { size: 12 } } } }
         }
       });
     }
@@ -533,6 +700,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       applyTranslations();
       loadReports();
+      loadFinanceSummary();
     });
   </script>
 </body>

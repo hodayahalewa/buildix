@@ -10,6 +10,29 @@
   <script src="js/translations.js"></script>
   <script src="js/lang-switcher.js"></script>
   <script src="js/alerts.js"></script>
+  <style>
+    .modal-close-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+      padding: 0;
+    }
+    .modal-close-btn:hover {
+      background: rgba(255,255,255,0.3);
+      transform: rotate(90deg);
+    }
+    .modal-close-btn i { pointer-events: none; }
+  </style>
 </head>
 <body>
 
@@ -127,11 +150,15 @@
   <!-- מודל הוספת משימה -->
   <div class="modal fade" id="addMaintenanceModal" tabindex="-1">
     <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalTitle"></h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      <div class="modal-content" style="border:none; border-radius:16px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+
+        <div class="modal-header" style="background:#1a3a6b; border:none; padding:20px 24px; display:flex; align-items:center;">
+          <h5 class="modal-title text-white fw-bold mb-0" id="modalTitle" style="font-size:1.05rem; flex:1;"></h5>
+          <button type="button" class="modal-close-btn" data-bs-dismiss="modal">
+            <i class="bi bi-x-lg"></i>
+          </button>
         </div>
+
         <div class="modal-body">
           <div id="modalError" class="alert alert-danger d-none"></div>
           <div class="mb-3">
@@ -186,10 +213,13 @@
             </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelBtn"></button>
-          <button type="button" class="btn btn-primary" onclick="addMaintenance()" id="addTaskBtn"></button>
+        <div class="modal-footer" style="border:none; padding:16px 24px 24px;">
+          <button type="button" class="btn" data-bs-dismiss="modal" id="cancelBtn"
+            style="background:#f3f4f6; color:#374151; border-radius:10px; padding:9px 20px; font-size:0.88rem; font-weight:600;"></button>
+          <button type="button" class="btn btn-primary" onclick="addMaintenance()" id="addTaskBtn"
+            style="border-radius:10px; padding:9px 20px; font-size:0.88rem; font-weight:600;"></button>
         </div>
+
       </div>
     </div>
   </div>
@@ -197,11 +227,15 @@
   <!-- מודל עריכת משימה -->
   <div class="modal fade" id="editMaintenanceModal" tabindex="-1">
     <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="editModalTitle"></h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      <div class="modal-content" style="border:none; border-radius:16px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+
+        <div class="modal-header" style="background:#1a3a6b; border:none; padding:20px 24px; display:flex; align-items:center;">
+          <h5 class="modal-title text-white fw-bold mb-0" id="editModalTitle" style="font-size:1.05rem; flex:1;"></h5>
+          <button type="button" class="modal-close-btn" data-bs-dismiss="modal">
+            <i class="bi bi-x-lg"></i>
+          </button>
         </div>
+
         <div class="modal-body">
           <div id="editModalError" class="alert alert-danger d-none"></div>
           <input type="hidden" id="editTaskId">
@@ -254,10 +288,13 @@
             </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="editCancelBtn"></button>
-          <button type="button" class="btn btn-primary" onclick="saveEdit()" id="editSaveBtn"></button>
+        <div class="modal-footer" style="border:none; padding:16px 24px 24px;">
+          <button type="button" class="btn" data-bs-dismiss="modal" id="editCancelBtn"
+            style="background:#f3f4f6; color:#374151; border-radius:10px; padding:9px 20px; font-size:0.88rem; font-weight:600;"></button>
+          <button type="button" class="btn btn-primary" onclick="saveEdit()" id="editSaveBtn"
+            style="border-radius:10px; padding:9px 20px; font-size:0.88rem; font-weight:600;"></button>
         </div>
+
       </div>
     </div>
   </div>

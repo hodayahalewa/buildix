@@ -11,6 +11,29 @@
   <script src="js/translations.js"></script>
   <script src="js/lang-switcher.js"></script>
   <script src="js/alerts.js"></script>
+  <style>
+    .modal-close-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+      padding: 0;
+    }
+    .modal-close-btn:hover {
+      background: rgba(255,255,255,0.3);
+      transform: rotate(90deg);
+    }
+    .modal-close-btn i { pointer-events: none; }
+  </style>
 </head>
 <body>
 
@@ -174,11 +197,15 @@
   <!-- מודל הוספת מדידה חדשה -->
   <div class="modal fade" id="addReadingModal" tabindex="-1">
     <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalTitle"></h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      <div class="modal-content" style="border:none; border-radius:16px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+
+        <div class="modal-header" style="background:#1a3a6b; border:none; padding:20px 24px; display:flex; align-items:center;">
+          <h5 class="modal-title text-white fw-bold mb-0" id="modalTitle" style="font-size:1.05rem; flex:1;"></h5>
+          <button type="button" class="modal-close-btn" data-bs-dismiss="modal">
+            <i class="bi bi-x-lg"></i>
+          </button>
         </div>
+
         <div class="modal-body">
           <div id="modalError" class="alert alert-danger d-none"></div>
           <div class="mb-3">
@@ -199,10 +226,13 @@
             <input type="month" id="month" class="form-control" min="2020-01" max="2030-12">
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelBtn"></button>
-          <button type="button" class="btn btn-primary" onclick="addReading()" id="addReadingBtn"></button>
+        <div class="modal-footer" style="border:none; padding:16px 24px 24px;">
+          <button type="button" class="btn" data-bs-dismiss="modal" id="cancelBtn"
+            style="background:#f3f4f6; color:#374151; border-radius:10px; padding:9px 20px; font-size:0.88rem; font-weight:600;"></button>
+          <button type="button" class="btn btn-primary" onclick="addReading()" id="addReadingBtn"
+            style="border-radius:10px; padding:9px 20px; font-size:0.88rem; font-weight:600;"></button>
         </div>
+
       </div>
     </div>
   </div>
@@ -210,11 +240,15 @@
   <!-- מודל עריכת מדידה קיימת -->
   <div class="modal fade" id="editReadingModal" tabindex="-1">
     <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="editModalTitle"></h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      <div class="modal-content" style="border:none; border-radius:16px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+
+        <div class="modal-header" style="background:#1a3a6b; border:none; padding:20px 24px; display:flex; align-items:center;">
+          <h5 class="modal-title text-white fw-bold mb-0" id="editModalTitle" style="font-size:1.05rem; flex:1;"></h5>
+          <button type="button" class="modal-close-btn" data-bs-dismiss="modal">
+            <i class="bi bi-x-lg"></i>
+          </button>
         </div>
+
         <div class="modal-body">
           <div id="editModalError" class="alert alert-danger d-none"></div>
           <input type="hidden" id="editReadingId">
@@ -232,10 +266,13 @@
             <small class="text-muted mt-1" id="editReadingHint"></small>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="editCancelBtn"></button>
-          <button type="button" class="btn btn-primary" onclick="saveEdit()" id="editSaveBtn"></button>
+        <div class="modal-footer" style="border:none; padding:16px 24px 24px;">
+          <button type="button" class="btn" data-bs-dismiss="modal" id="editCancelBtn"
+            style="background:#f3f4f6; color:#374151; border-radius:10px; padding:9px 20px; font-size:0.88rem; font-weight:600;"></button>
+          <button type="button" class="btn btn-primary" onclick="saveEdit()" id="editSaveBtn"
+            style="border-radius:10px; padding:9px 20px; font-size:0.88rem; font-weight:600;"></button>
         </div>
+
       </div>
     </div>
   </div>
@@ -258,23 +295,44 @@
     let waterChartInstance = null;
     let readingSortAsc = true;
     let monthSortAsc = true;
+    let currentSort = null;
 
-    // עדכון טווח המדידה לפי סוג שנבחר
+    // עדכון גבולות/רמזים לפי סוג המדידה שנבחר
     function updateReadingLimits() {
-      const type = document.getElementById('type').value;
-      const readingInput = document.getElementById('reading');
-      const hint = document.getElementById('readingHint');
       const isHe = getLang() === 'he';
-      if (type === 'electricity') {
-        readingInput.max = 99999;
-        hint.textContent = isHe ? 'טווח: 0 - 99,999 קוט"ש' : 'Range: 0 - 99,999 kWh';
-      } else if (type === 'water') {
-        readingInput.max = 9999;
+      const type = document.getElementById('type').value;
+      const hint = document.getElementById('readingHint');
+      const input = document.getElementById('reading');
+      if (type === 'water') {
+        input.max = 9999;
         hint.textContent = isHe ? 'טווח: 0 - 9,999 מ"ק' : 'Range: 0 - 9,999 m³';
+      } else if (type === 'electricity') {
+        input.max = 99999;
+        hint.textContent = isHe ? 'טווח: 0 - 99,999 קוט"ש' : 'Range: 0 - 99,999 kWh';
       } else {
-        readingInput.max = 99999;
+        input.max = '';
         hint.textContent = '';
       }
+    }
+
+    // מיון לפי עמודת קריאה
+    function sortByReading() {
+      readingSortAsc = currentSort === 'reading' ? !readingSortAsc : true;
+      currentSort = 'reading';
+      const sorted = [...allReadings].sort((a, b) => readingSortAsc ? a.reading - b.reading : b.reading - a.reading);
+      document.getElementById('readingSortIcon').className = readingSortAsc ? 'bi bi-sort-numeric-down' : 'bi bi-sort-numeric-up';
+      document.getElementById('monthSortIcon').className = 'bi bi-arrow-down-up';
+      renderTable(sorted);
+    }
+
+    // מיון לפי עמודת חודש
+    function sortByMonth() {
+      monthSortAsc = currentSort === 'month' ? !monthSortAsc : true;
+      currentSort = 'month';
+      const sorted = [...allReadings].sort((a, b) => monthSortAsc ? a.month.localeCompare(b.month) : b.month.localeCompare(a.month));
+      document.getElementById('monthSortIcon').className = monthSortAsc ? 'bi bi-sort-down' : 'bi bi-sort-up';
+      document.getElementById('readingSortIcon').className = 'bi bi-arrow-down-up';
+      renderTable(sorted);
     }
 
     // החלת תרגומים על כל אלמנטי הדף
@@ -290,46 +348,45 @@
       document.getElementById('nav-logout').textContent = t('logout');
       document.getElementById('pageTitle').textContent = isHe ? 'ניהול אנרגיה' : 'Energy Management';
       document.getElementById('pageSubtitle').textContent = isHe ? 'עקוב אחרי צריכת חשמל ומים' : 'Track electricity and water consumption';
-      document.getElementById('addBtn').innerHTML = `<i class="bi bi-plus-circle"></i> ${t('addReading')}`;
-      document.getElementById('electricityLabel').textContent = t('lastElectricity');
-      document.getElementById('waterLabel').textContent = t('lastWater');
-      document.getElementById('electricityChartTitle').innerHTML = `<i class="bi bi-lightning text-warning"></i> ${isHe ? 'צריכת חשמל' : 'Electricity Consumption'}`;
-      document.getElementById('waterChartTitle').innerHTML = `<i class="bi bi-droplet text-info"></i> ${isHe ? 'צריכת מים' : 'Water Consumption'}`;
-      document.getElementById('allReadingsTitle').innerHTML = `<i class="bi bi-table"></i> ${isHe ? 'כל המדידות' : 'All Readings'}`;
+      document.getElementById('addBtn').innerHTML = `<i class="bi bi-plus-circle"></i> ${isHe ? 'הוסף מדידה' : 'Add Reading'}`;
+      document.getElementById('electricityLabel').textContent = isHe ? 'מדידת חשמל אחרונה (קוט"ש)' : 'Last Electricity Reading (kWh)';
+      document.getElementById('waterLabel').textContent = isHe ? 'מדידת מים אחרונה (מ"ק)' : 'Last Water Reading (m³)';
+      document.getElementById('electricityChartTitle').textContent = isHe ? '⚡ צריכת חשמל' : '⚡ Electricity Consumption';
+      document.getElementById('waterChartTitle').textContent = isHe ? '💧 צריכת מים' : '💧 Water Consumption';
       document.getElementById('filterTypeLabel').textContent = isHe ? 'סוג' : 'Type';
-      document.getElementById('filterMonthFromLabel').textContent = isHe ? 'מחודש' : 'From Month';
-      document.getElementById('filterMonthToLabel').textContent = isHe ? 'עד חודש' : 'To Month';
-      document.getElementById('filterMinLabel').textContent = isHe ? 'כמות מינימום' : 'Min Reading';
-      document.getElementById('filterMaxLabel').textContent = isHe ? 'כמות מקסימום' : 'Max Reading';
-      document.getElementById('resetBtn').textContent = isHe ? 'איפוס' : 'Reset';
       document.getElementById('allTypes').textContent = isHe ? 'כל הסוגים' : 'All Types';
       document.getElementById('typeElectricity').textContent = isHe ? 'חשמל' : 'Electricity';
       document.getElementById('typeWater').textContent = isHe ? 'מים' : 'Water';
+      document.getElementById('filterMonthFromLabel').textContent = isHe ? 'מחודש' : 'From Month';
+      document.getElementById('filterMonthToLabel').textContent = isHe ? 'עד חודש' : 'To Month';
+      document.getElementById('resetBtn').textContent = isHe ? 'איפוס' : 'Reset';
+      document.getElementById('filterMinLabel').textContent = isHe ? 'כמות מינימום' : 'Min Amount';
+      document.getElementById('filterMaxLabel').textContent = isHe ? 'כמות מקסימום' : 'Max Amount';
+      document.getElementById('allReadingsTitle').innerHTML = `<i class="bi bi-table text-primary"></i> ${isHe ? 'כל המדידות' : 'All Readings'}`;
       document.getElementById('thType').textContent = isHe ? 'סוג' : 'Type';
       document.getElementById('thReadingText').textContent = isHe ? 'מדידה' : 'Reading';
-      document.getElementById('thMonthText').textContent = t('month');
-      document.getElementById('thDate').textContent = t('date');
+      document.getElementById('thMonthText').textContent = isHe ? 'חודש' : 'Month';
+      document.getElementById('thDate').textContent = isHe ? 'תאריך' : 'Date';
       document.getElementById('thActions').textContent = t('actions');
       document.getElementById('loadingText').textContent = t('loading');
-      document.getElementById('modalTitle').textContent = isHe ? 'הוסף מדידת אנרגיה' : 'Add Energy Reading';
+      document.getElementById('modalTitle').textContent = isHe ? 'הוספת מדידה' : 'Add Reading';
       document.getElementById('typeLabel').textContent = isHe ? 'סוג *' : 'Type *';
       document.getElementById('selectType').textContent = isHe ? 'בחר סוג' : 'Select type';
-      document.getElementById('electricityOpt').textContent = t('electricity');
-      document.getElementById('waterOpt').textContent = t('water');
+      document.getElementById('electricityOpt').textContent = isHe ? 'חשמל' : 'Electricity';
+      document.getElementById('waterOpt').textContent = isHe ? 'מים' : 'Water';
       document.getElementById('readingLabel').textContent = isHe ? 'מדידה *' : 'Reading *';
-      document.getElementById('reading').placeholder = isHe ? 'הזן ערך מדידה' : 'Enter reading value';
-      document.getElementById('monthLabel').textContent = t('month') + ' *';
+      document.getElementById('monthLabel').textContent = isHe ? 'חודש *' : 'Month *';
       document.getElementById('cancelBtn').textContent = t('cancel');
-      document.getElementById('addReadingBtn').innerHTML = `<i class="bi bi-check-lg"></i> ${t('addReading')}`;
+      document.getElementById('addReadingBtn').innerHTML = `<i class="bi bi-check-lg"></i> ${isHe ? 'הוסף' : 'Add'}`;
       document.getElementById('editModalTitle').textContent = isHe ? 'עריכת מדידה' : 'Edit Reading';
       document.getElementById('editTypeLabel').textContent = isHe ? 'סוג' : 'Type';
-      document.getElementById('editMonthLabel').textContent = t('month');
+      document.getElementById('editMonthLabel').textContent = isHe ? 'חודש' : 'Month';
       document.getElementById('editReadingLabel').textContent = isHe ? 'מדידה חדשה *' : 'New Reading *';
       document.getElementById('editCancelBtn').textContent = t('cancel');
       document.getElementById('editSaveBtn').innerHTML = `<i class="bi bi-check-lg"></i> ${isHe ? 'שמור' : 'Save'}`;
     }
 
-    // טעינת מדידות אנרגיה מהשרת
+    // טעינת נתוני אנרגיה מהשרת
     async function loadEnergy() {
       try {
         const response = await fetch('http://localhost:3000/api/energy/all', {
@@ -337,35 +394,27 @@
         });
         const data = await response.json();
         allReadings = data.readings;
-        const isHe = getLang() === 'he';
 
-        // עדכון כרטיסי מדידה אחרונה
-        const electricity = allReadings.filter(r => r.type === 'electricity');
-        const water = allReadings.filter(r => r.type === 'water');
-        if (electricity.length > 0) document.getElementById('lastElectricity').textContent = electricity[0].reading;
-        if (water.length > 0) document.getElementById('lastWater').textContent = water[0].reading;
+        const electricity = allReadings.filter(r => r.type === 'electricity').sort((a,b) => b.month.localeCompare(a.month));
+        const water = allReadings.filter(r => r.type === 'water').sort((a,b) => b.month.localeCompare(a.month));
 
-        // עדכון גרפים
-        buildChart('electricityChart', electricity, isHe ? 'חשמל (קוט"ש)' : 'Electricity (kWh)', '#f59e0b', 'electricityChartInstance');
-        buildChart('waterChart', water, isHe ? 'מים (מ"ק)' : 'Water (m³)', '#06b6d4', 'waterChartInstance');
+        document.getElementById('lastElectricity').textContent = electricity.length ? electricity[0].reading : '-';
+        document.getElementById('lastWater').textContent = water.length ? water[0].reading : '-';
 
-        // הצגת כל המדידות
-        renderReadings(allReadings);
+        buildChart('electricityChart', 'electricityChartInstance', electricity, getLang() === 'he' ? 'חשמל (קוט"ש)' : 'Electricity (kWh)', '#f59e0b');
+        buildChart('waterChart', 'waterChartInstance', water, getLang() === 'he' ? 'מים (מ"ק)' : 'Water (m³)', '#0891b2');
 
+        filterReadings();
       } catch (err) {
         console.error('Error loading energy:', err);
       }
     }
 
-    // הצגת מדידות בטבלה
-    function renderReadings(readings) {
+    // הצגת טבלת מדידות
+    function renderTable(readings) {
       const isHe = getLang() === 'he';
       const tbody = document.getElementById('energyTable');
-
-      // עדכון מונה מדידות
-      document.getElementById('readingsCount').textContent = isHe
-        ? `${readings.length} מדידות`
-        : `${readings.length} readings`;
+      document.getElementById('readingsCount').textContent = isHe ? `${readings.length} מדידות` : `${readings.length} readings`;
 
       if (readings.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">${isHe ? 'לא נמצאו מדידות' : 'No readings found'}</td></tr>`;
@@ -375,12 +424,8 @@
       tbody.innerHTML = readings.map(r => `
         <tr>
           <td>${r.id}</td>
-          <td>
-            <span class="badge ${r.type === 'electricity' ? 'bg-warning text-dark' : 'bg-info'}">
-              ${r.type === 'electricity' ? (isHe ? 'חשמל' : 'Electricity') : (isHe ? 'מים' : 'Water')}
-            </span>
-          </td>
-          <td>${r.reading}</td>
+          <td><span class="badge ${r.type === 'electricity' ? 'bg-warning text-dark' : 'bg-info text-white'}">${r.type === 'electricity' ? (isHe ? 'חשמל' : 'Electricity') : (isHe ? 'מים' : 'Water')}</span></td>
+          <td>${parseFloat(r.reading).toFixed(2)}</td>
           <td>${r.month}</td>
           <td>${new Date(r.created_at).toLocaleDateString()}</td>
           <td class="d-flex gap-1">
@@ -400,60 +445,40 @@
       const type = document.getElementById('filterType').value;
       const monthFrom = document.getElementById('filterMonthFrom').value;
       const monthTo = document.getElementById('filterMonthTo').value;
-      const minVal = document.getElementById('filterMin').value;
-      const maxVal = document.getElementById('filterMax').value;
+      const min = document.getElementById('filterMin').value;
+      const max = document.getElementById('filterMax').value;
 
       const filtered = allReadings.filter(r => {
         const matchType = !type || r.type === type;
         const matchFrom = !monthFrom || r.month >= monthFrom;
         const matchTo = !monthTo || r.month <= monthTo;
-        const matchMin = !minVal || Number(r.reading) >= Number(minVal);
-        const matchMax = !maxVal || Number(r.reading) <= Number(maxVal);
+        const matchMin = !min || r.reading >= parseFloat(min);
+        const matchMax = !max || r.reading <= parseFloat(max);
         return matchType && matchFrom && matchTo && matchMin && matchMax;
-      });
+      }).sort((a,b) => b.month.localeCompare(a.month));
 
-      renderReadings(filtered);
+      renderTable(filtered);
     }
 
-    // איפוס כל הפילטרים
+    // איפוס פילטרים
     function resetFilters() {
       document.getElementById('filterType').value = '';
       document.getElementById('filterMonthFrom').value = '';
       document.getElementById('filterMonthTo').value = '';
       document.getElementById('filterMin').value = '';
       document.getElementById('filterMax').value = '';
-      renderReadings(allReadings);
+      currentSort = null;
+      document.getElementById('readingSortIcon').className = 'bi bi-arrow-down-up';
+      document.getElementById('monthSortIcon').className = 'bi bi-arrow-down-up';
+      filterReadings();
     }
 
-    // מיון לפי כמות מדידה
-    function sortByReading() {
-      readingSortAsc = !readingSortAsc;
-      document.getElementById('readingSortIcon').className = readingSortAsc ? 'bi bi-arrow-up' : 'bi bi-arrow-down';
-      const sorted = [...allReadings].sort((a, b) =>
-        readingSortAsc ? a.reading - b.reading : b.reading - a.reading
-      );
-      renderReadings(sorted);
-    }
+    // בניית גרף קו לפי סוג מדידה
+    function buildChart(canvasId, instanceVar, readings, label, color) {
+      if (window[instanceVar]) window[instanceVar].destroy();
+      const ctx = document.getElementById(canvasId);
+      const sorted = [...readings].sort((a,b) => a.month.localeCompare(b.month));
 
-    // מיון לפי חודש
-    function sortByMonth() {
-      monthSortAsc = !monthSortAsc;
-      document.getElementById('monthSortIcon').className = monthSortAsc ? 'bi bi-arrow-up' : 'bi bi-arrow-down';
-      const sorted = [...allReadings].sort((a, b) =>
-        monthSortAsc
-          ? a.month.localeCompare(b.month)
-          : b.month.localeCompare(a.month)
-      );
-      renderReadings(sorted);
-    }
-
-    // בניית גרף קו - הורס גרף קיים לפני בניית חדש
-    function buildChart(canvasId, data, label, color, instanceVar) {
-      const ctx = document.getElementById(canvasId).getContext('2d');
-      if (window[instanceVar]) {
-        window[instanceVar].destroy();
-      }
-      const sorted = [...data].sort((a, b) => a.month.localeCompare(b.month));
       window[instanceVar] = new Chart(ctx, {
         type: 'line',
         data: {

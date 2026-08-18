@@ -16,6 +16,7 @@
       font-family: 'Heebo', sans-serif;
       min-height: 100vh;
       overflow-x: hidden;
+      font-size: 17px;
     }
 
     .bg-blur {
@@ -48,7 +49,7 @@
     /* NAVBAR */
     .nav-bar {
       position: fixed; top: 0; width: 100%; z-index: 100;
-      padding: 16px 48px;
+      padding: 18px 52px;
       display: flex; align-items: center; justify-content: space-between;
       background: rgba(10, 15, 30, 0.4);
       backdrop-filter: blur(10px);
@@ -56,12 +57,12 @@
     }
 
     .nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-    .nav-logo img { height: 44px; filter: brightness(10); }
-    .nav-logo span { font-size: 1.3rem; font-weight: 800; color: white; letter-spacing: 1px; }
+    .nav-logo img { height: 48px; filter: brightness(10); }
+    .nav-logo span { font-size: 1.45rem; font-weight: 800; color: white; letter-spacing: 1px; }
 
     .nav-back {
-      color: rgba(255,255,255,0.7); text-decoration: none;
-      font-size: 0.85rem; display: flex; align-items: center; gap: 6px; transition: color 0.2s;
+      color: rgba(255,255,255,0.75); text-decoration: none;
+      font-size: 0.95rem; display: flex; align-items: center; gap: 7px; transition: color 0.2s;
     }
     .nav-back:hover { color: #c9a227; }
 
@@ -69,14 +70,14 @@
     .popup-wrapper {
       position: relative; z-index: 50; min-height: 100vh;
       display: flex; align-items: center; justify-content: center;
-      padding: 90px 20px 40px;
+      padding: 100px 20px 40px;
     }
 
     .popup-card {
-      background: rgba(255,255,255,0.97);
-      border-radius: 20px;
+      background: rgba(255,255,255,0.98);
+      border-radius: 24px;
       box-shadow: 0 30px 80px rgba(0,0,0,0.4);
-      width: 100%; max-width: 480px; overflow: hidden;
+      width: 100%; max-width: 560px; overflow: hidden;
       animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
@@ -86,111 +87,137 @@
     }
 
     .popup-header {
-      background: #1a3a6b; padding: 24px 32px; text-align: center;
+      background: #1a3a6b; padding: 32px 40px; text-align: center;
     }
-    .popup-header img { height: 52px; margin-bottom: 10px; }
-    .popup-header h2 { font-size: 1.2rem; font-weight: 800; color: white; margin: 0 0 4px; }
-    .popup-header p { font-size: 0.8rem; color: rgba(255,255,255,0.6); margin: 0; }
+    .popup-header img { height: 60px; margin-bottom: 14px; }
+    .popup-header h2 { font-size: 1.4rem; font-weight: 800; color: white; margin: 0 0 6px; }
+    .popup-header p { font-size: 0.92rem; color: rgba(255,255,255,0.65); margin: 0; }
 
-    .popup-body { padding: 28px 32px 32px; }
+    .popup-body { padding: 36px 40px 40px; }
 
     .msg-box {
-      border-radius: 8px; padding: 10px 14px;
-      font-size: 0.8rem; margin-bottom: 16px; display: none;
+      border-radius: 10px; padding: 13px 16px;
+      font-size: 0.92rem; margin-bottom: 20px; display: none;
     }
     .msg-error { background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; }
     .msg-success { background: #d1fae5; border: 1px solid #6ee7b7; color: #059669; }
 
-    .field-group { margin-bottom: 14px; }
+    .field-group { margin-bottom: 18px; }
 
     .field-label {
-      display: block; font-size: 0.78rem; font-weight: 600;
-      color: #374151; margin-bottom: 5px;
+      display: block; font-size: 0.9rem; font-weight: 600;
+      color: #374151; margin-bottom: 7px;
     }
 
     .field-input-wrap { position: relative; }
 
     .field-input {
-      width: 100%; padding: 10px 14px 10px 40px;
-      border: 1.5px solid #e5e7eb; border-radius: 10px;
-      font-size: 0.88rem; color: #1f2937; outline: none;
+      width: 100%; padding: 13px 16px 13px 44px;
+      border: 1.5px solid #e5e7eb; border-radius: 12px;
+      font-size: 1rem; color: #1f2937; outline: none;
       transition: border-color 0.2s, box-shadow 0.2s;
       font-family: 'Heebo', sans-serif; background: #fafafa;
     }
     .field-input:focus {
       border-color: #1a3a6b;
-      box-shadow: 0 0 0 3px rgba(26,58,107,0.1);
+      box-shadow: 0 0 0 4px rgba(26,58,107,0.1);
       background: white;
     }
 
     .field-icon {
-      position: absolute; left: 13px; top: 50%;
+      position: absolute; left: 15px; top: 50%;
       transform: translateY(-50%); color: #9ca3af;
-      font-size: 0.9rem; pointer-events: none;
+      font-size: 1.05rem; pointer-events: none;
     }
 
     .field-icon-btn {
-      position: absolute; right: 13px; top: 50%;
+      position: absolute; right: 15px; top: 50%;
       transform: translateY(-50%); color: #9ca3af;
-      font-size: 0.9rem; background: none; border: none; cursor: pointer; padding: 0;
+      font-size: 1.05rem; background: none; border: none; cursor: pointer; padding: 0;
     }
 
-    .field-input.with-right { padding-right: 40px; }
+    .field-input.with-right { padding-right: 44px; }
 
-    .row-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .row-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
     .tenant-extra {
       background: #f0f4ff; border: 1px solid #dbeafe;
-      border-radius: 12px; padding: 16px; margin-bottom: 14px; display: none;
+      border-radius: 14px; padding: 20px; margin-bottom: 18px; display: none;
     }
     .tenant-extra.show { display: block; }
 
     .tenant-extra-title {
-      font-size: 0.78rem; font-weight: 700; color: #1a3a6b;
-      margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+      font-size: 0.9rem; font-weight: 700; color: #1a3a6b;
+      margin-bottom: 14px; display: flex; align-items: center; gap: 7px;
     }
+
+    /* בחירת בעלות/שכירות */
+    .residency-choice { display: flex; gap: 10px; margin-bottom: 16px; }
+    .residency-chip {
+      flex: 1; text-align: center; padding: 12px 10px; border: 1.5px solid #e5e7eb;
+      border-radius: 10px; cursor: pointer; transition: all 0.2s; background: white;
+      font-size: 0.88rem; font-weight: 600; color: #6b7280;
+    }
+    .residency-chip:hover { border-color: #1a3a6b; }
+    .residency-chip.selected { border-color: #1a3a6b; background: #1a3a6b; color: white; }
+    .owner-phone-wrap { display: none; }
+    .owner-phone-wrap.show { display: block; }
 
     .btn-main {
       width: 100%; background: #1a3a6b; color: white; border: none;
-      border-radius: 10px; padding: 12px; font-size: 0.95rem; font-weight: 700;
+      border-radius: 12px; padding: 16px; font-size: 1.05rem; font-weight: 700;
       cursor: pointer; transition: background 0.2s, transform 0.1s;
-      font-family: 'Heebo', sans-serif; margin-bottom: 14px;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
+      font-family: 'Heebo', sans-serif; margin-bottom: 18px;
+      display: flex; align-items: center; justify-content: center; gap: 9px;
     }
     .btn-main:hover { background: #c9a227; transform: translateY(-1px); }
     .btn-main:active { transform: translateY(0); }
 
-    .bottom-link { text-align: center; font-size: 0.78rem; color: #9ca3af; }
+    .bottom-link { text-align: center; font-size: 0.92rem; color: #9ca3af; }
     .bottom-link a { color: #1a3a6b; font-weight: 700; text-decoration: none; }
     .bottom-link a:hover { text-decoration: underline; }
 
     /* סטפר */
     .steps-bar {
       display: flex; align-items: center; justify-content: center;
-      gap: 8px; margin-bottom: 24px;
+      gap: 10px; margin-bottom: 30px;
     }
 
     .step-dot {
-      width: 28px; height: 28px; border-radius: 50%;
+      width: 34px; height: 34px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 0.75rem; font-weight: 700;
+      font-size: 0.88rem; font-weight: 700;
       border: 2px solid #e5e7eb; color: #9ca3af; transition: all 0.3s;
     }
     .step-dot.active { background: #1a3a6b; border-color: #1a3a6b; color: white; }
     .step-dot.done { background: #10b981; border-color: #10b981; color: white; }
 
     .step-line {
-      flex: 1; height: 2px; background: #e5e7eb; max-width: 40px; transition: background 0.3s;
+      flex: 1; height: 2px; background: #e5e7eb; max-width: 48px; transition: background 0.3s;
     }
     .step-line.done { background: #10b981; }
 
     .step-panel { display: none; }
     .step-panel.active { display: block; }
 
-    @media (max-width: 480px) {
-      .popup-body { padding: 20px; }
+    .role-card {
+      display:flex; align-items:center; gap:14px; padding:16px 18px; border:1.5px solid #e5e7eb;
+      border-radius:12px; cursor:pointer; transition:all 0.2s;
+    }
+    .role-radio {
+      width:22px; height:22px; border-radius:50%; border:2px solid #e5e7eb;
+      display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    }
+    .role-title { font-size: 0.98rem; font-weight: 700; color: #1f2937; }
+    .role-desc { font-size: 0.84rem; color: #9ca3af; }
+    .role-icon { color: #9ca3af; font-size: 1.25rem; }
+
+    @media (max-width: 560px) {
+      .popup-body { padding: 28px 22px; }
+      .popup-header { padding: 26px 22px; }
       .nav-bar { padding: 14px 20px; }
       .row-fields { grid-template-columns: 1fr; }
+      .popup-card { max-width: 100%; }
     }
   </style>
 </head>
@@ -285,28 +312,28 @@
         <!-- שלב 2 — תפקיד -->
         <div class="step-panel" id="step2">
 
-          <div class="field-group" style="margin-bottom:20px;">
+          <div class="field-group" style="margin-bottom:24px;">
             <label class="field-label" id="roleLabel">מה התפקיד שלך בבניין? *</label>
-            <div style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">
+            <div style="display:flex; flex-direction:column; gap:12px; margin-top:10px;">
 
               <!-- דייר -->
-              <label style="display:flex; align-items:center; gap:12px; padding:14px 16px; border:1.5px solid #e5e7eb; border-radius:10px; cursor:pointer; transition:all 0.2s;" id="roleCard-tenant" onclick="selectRole('tenant')">
-                <div style="width:20px; height:20px; border-radius:50%; border:2px solid #e5e7eb; display:flex; align-items:center; justify-content:center; flex-shrink:0;" id="radio-tenant"></div>
+              <label class="role-card" id="roleCard-tenant" onclick="selectRole('tenant')">
+                <div class="role-radio" id="radio-tenant"></div>
                 <div>
-                  <div style="font-size:0.88rem; font-weight:700; color:#1f2937;" id="roleTenantTitle">דייר / שוכר</div>
-                  <div style="font-size:0.75rem; color:#9ca3af;" id="roleTenantDesc">אני גר או שוכר בבניין</div>
+                  <div class="role-title" id="roleTenantTitle">דייר / שוכר</div>
+                  <div class="role-desc" id="roleTenantDesc">אני גר או שוכר בבניין</div>
                 </div>
-                <i class="bi bi-house ms-auto" style="color:#9ca3af; font-size:1.1rem;"></i>
+                <i class="bi bi-house ms-auto role-icon"></i>
               </label>
 
               <!-- טכנאי -->
-              <label style="display:flex; align-items:center; gap:12px; padding:14px 16px; border:1.5px solid #e5e7eb; border-radius:10px; cursor:pointer; transition:all 0.2s;" id="roleCard-technician" onclick="selectRole('technician')">
-                <div style="width:20px; height:20px; border-radius:50%; border:2px solid #e5e7eb; display:flex; align-items:center; justify-content:center; flex-shrink:0;" id="radio-technician"></div>
+              <label class="role-card" id="roleCard-technician" onclick="selectRole('technician')">
+                <div class="role-radio" id="radio-technician"></div>
                 <div>
-                  <div style="font-size:0.88rem; font-weight:700; color:#1f2937;" id="roleTechTitle">טכנאי / קבלן</div>
-                  <div style="font-size:0.75rem; color:#9ca3af;" id="roleTechDesc">אני מטפל בתקלות ותחזוקה</div>
+                  <div class="role-title" id="roleTechTitle">טכנאי / קבלן</div>
+                  <div class="role-desc" id="roleTechDesc">אני מטפל בתקלות ותחזוקה</div>
                 </div>
-                <i class="bi bi-tools ms-auto" style="color:#9ca3af; font-size:1.1rem;"></i>
+                <i class="bi bi-tools ms-auto role-icon"></i>
               </label>
 
             </div>
@@ -319,6 +346,21 @@
               <i class="bi bi-info-circle text-primary"></i>
               <span id="tenantExtraTitle">פרטי דירה</span>
             </div>
+
+            <!-- בעל/ת הדירה או שוכר/ת -->
+            <div class="field-group">
+              <label class="field-label" id="residencyLabel">מה הסטטוס שלך בדירה? *</label>
+              <div class="residency-choice">
+                <div class="residency-chip" id="chip-owner" onclick="selectResidency('owner')">
+                  <span id="chipOwnerText">בעל/ת הדירה</span>
+                </div>
+                <div class="residency-chip" id="chip-renter" onclick="selectResidency('renter')">
+                  <span id="chipRenterText">שוכר/ת</span>
+                </div>
+              </div>
+              <input type="hidden" id="residencyStatus">
+            </div>
+
             <div class="row-fields">
               <div class="field-group">
                 <label class="field-label" id="floorLabel">קומה</label>
@@ -335,17 +377,24 @@
                 </div>
               </div>
             </div>
-            <div class="field-group" style="margin-bottom:0;">
-              <label class="field-label" id="ownerPhoneLabel">טלפון בעל הנכס</label>
-              <div class="field-input-wrap">
-                <i class="bi bi-telephone field-icon"></i>
-                <input type="tel" id="owner_phone" class="field-input" placeholder="050-0000000">
+
+            <!-- מוצג רק אם שוכר/ת נבחר - חובה -->
+            <div class="owner-phone-wrap" id="ownerPhoneWrap">
+              <div class="field-group" style="margin-bottom:0;">
+                <label class="field-label" id="ownerPhoneLabel">טלפון בעל/ת הנכס *</label>
+                <div class="field-input-wrap">
+                  <i class="bi bi-telephone field-icon"></i>
+                  <input type="tel" id="owner_phone" class="field-input" placeholder="050-0000000">
+                </div>
+                <small style="color:#9ca3af; font-size:0.78rem; display:block; margin-top:5px;" id="ownerPhoneHint">
+                  נדרש עבור שוכרים, ליצירת קשר עם בעל הנכס בעת הצורך
+                </small>
               </div>
             </div>
           </div>
 
           <div style="display:flex; gap:10px;">
-            <button class="btn-main" onclick="goToStep1()" style="background:#f3f4f6; color:#374151; flex:0 0 auto; width:50px; padding:12px;">
+            <button class="btn-main" onclick="goToStep1()" style="background:#f3f4f6; color:#374151; flex:0 0 auto; width:56px; padding:14px;">
               <i class="bi bi-arrow-right"></i>
             </button>
             <button class="btn-main" onclick="goToStep3()" style="flex:1;">
@@ -369,7 +418,7 @@
             </div>
           </div>
 
-          <div class="field-group" style="margin-bottom:24px;">
+          <div class="field-group" style="margin-bottom:28px;">
             <label class="field-label" id="confirmPasswordLabel">אימות סיסמה *</label>
             <div class="field-input-wrap">
               <i class="bi bi-lock-fill field-icon"></i>
@@ -381,13 +430,13 @@
           </div>
 
           <!-- סיכום -->
-          <div style="background:#f8faff; border:1px solid #dbeafe; border-radius:10px; padding:14px; margin-bottom:20px; font-size:0.8rem; color:#374151;">
-            <div style="font-weight:700; color:#1a3a6b; margin-bottom:8px;" id="summaryTitle">סיכום הרשמה:</div>
+          <div style="background:#f8faff; border:1px solid #dbeafe; border-radius:12px; padding:18px; margin-bottom:24px; font-size:0.9rem; color:#374151;">
+            <div style="font-weight:700; color:#1a3a6b; margin-bottom:10px;" id="summaryTitle">סיכום הרשמה:</div>
             <div id="summaryContent"></div>
           </div>
 
           <div style="display:flex; gap:10px;">
-            <button class="btn-main" onclick="goToStep2()" style="background:#f3f4f6; color:#374151; flex:0 0 auto; width:50px; padding:12px;">
+            <button class="btn-main" onclick="goToStep2()" style="background:#f3f4f6; color:#374151; flex:0 0 auto; width:56px; padding:14px;">
               <i class="bi bi-arrow-right"></i>
             </button>
             <button class="btn-main" onclick="register()" style="flex:1;" id="registerBtn">
@@ -398,7 +447,7 @@
 
         </div>
 
-        <div class="bottom-link" style="margin-top:16px;">
+        <div class="bottom-link" style="margin-top:20px;">
           <span id="hasAccount">כבר יש לך חשבון?</span>
           <a href="login.html" id="loginLink"> התחבר כאן</a>
         </div>
@@ -411,6 +460,7 @@
   <script>
     let currentStep = 1;
     let selectedRole = '';
+    let selectedResidency = '';
 
     function updateSteps(step) {
       for (let i = 1; i <= 3; i++) {
@@ -418,7 +468,7 @@
         const dot = document.getElementById(`dot${i}`);
         if (i < step) {
           dot.className = 'step-dot done';
-          dot.innerHTML = '<i class="bi bi-check" style="font-size:0.7rem;"></i>';
+          dot.innerHTML = '<i class="bi bi-check" style="font-size:0.8rem;"></i>';
         } else if (i === step) {
           dot.className = 'step-dot active';
           dot.textContent = i;
@@ -454,6 +504,17 @@
         showError(isHe ? 'אנא בחר תפקיד.' : 'Please select a role.');
         return;
       }
+      if (selectedRole === 'tenant' && !selectedResidency) {
+        showError(isHe ? 'אנא בחר האם את/ה בעל/ת הדירה או שוכר/ת.' : 'Please select whether you own or rent the apartment.');
+        return;
+      }
+      if (selectedRole === 'tenant' && selectedResidency === 'renter') {
+        const ownerPhone = document.getElementById('owner_phone').value.trim();
+        if (!ownerPhone) {
+          showError(isHe ? 'כשוכר/ת, יש להזין את מספר הטלפון של בעל/ת הנכס.' : 'As a renter, you must enter the property owner\'s phone number.');
+          return;
+        }
+      }
       hideMessages();
       updateSummary();
       updateSteps(3);
@@ -470,7 +531,7 @@
           card.style.background = '#f0f4ff';
           radio.style.borderColor = '#1a3a6b';
           radio.style.background = '#1a3a6b';
-          radio.innerHTML = '<div style="width:8px;height:8px;border-radius:50%;background:white;"></div>';
+          radio.innerHTML = '<div style="width:9px;height:9px;border-radius:50%;background:white;"></div>';
         } else {
           card.style.borderColor = '#e5e7eb';
           card.style.background = 'white';
@@ -480,6 +541,26 @@
         }
       });
       document.getElementById('tenantExtra').classList.toggle('show', role === 'tenant');
+      // איפוס בחירת בעלות/שכירות בכל פעם שמחליפים תפקיד
+      if (role !== 'tenant') {
+        selectedResidency = '';
+        document.getElementById('residencyStatus').value = '';
+        document.getElementById('chip-owner').classList.remove('selected');
+        document.getElementById('chip-renter').classList.remove('selected');
+        document.getElementById('ownerPhoneWrap').classList.remove('show');
+      }
+    }
+
+    function selectResidency(status) {
+      selectedResidency = status;
+      document.getElementById('residencyStatus').value = status;
+      document.getElementById('chip-owner').classList.toggle('selected', status === 'owner');
+      document.getElementById('chip-renter').classList.toggle('selected', status === 'renter');
+      // טלפון בעל הנכס נדרש רק לשוכרים
+      document.getElementById('ownerPhoneWrap').classList.toggle('show', status === 'renter');
+      if (status === 'owner') {
+        document.getElementById('owner_phone').value = '';
+      }
     }
 
     function updateSummary() {
@@ -491,11 +572,20 @@
         tenant: isHe ? 'דייר / שוכר' : 'Tenant',
         technician: isHe ? 'טכנאי' : 'Technician'
       };
+      const residencyNames = {
+        owner: isHe ? 'בעל/ת הדירה' : 'Owner',
+        renter: isHe ? 'שוכר/ת' : 'Renter'
+      };
+      let residencyLine = '';
+      if (selectedRole === 'tenant' && selectedResidency) {
+        residencyLine = `<span>🏠 ${residencyNames[selectedResidency]}</span>`;
+      }
       document.getElementById('summaryContent').innerHTML = `
-        <div style="display:flex; flex-direction:column; gap:5px;">
+        <div style="display:flex; flex-direction:column; gap:6px;">
           <span>👤 ${fname} ${lname}</span>
           <span>📧 ${email}</span>
           <span>🏷️ ${roleNames[selectedRole] || ''}</span>
+          ${residencyLine}
         </div>`;
     }
 
@@ -535,7 +625,7 @@
       const confirm = document.getElementById('confirm_password').value;
       const floor = document.getElementById('floor')?.value || '';
       const unit_number = document.getElementById('unit_number')?.value || '';
-      const owner_phone = document.getElementById('owner_phone')?.value || '';
+      const owner_phone = selectedResidency === 'renter' ? (document.getElementById('owner_phone')?.value || '') : '';
       hideMessages();
 
       if (!password || password.length < 6) {
@@ -591,9 +681,13 @@
       document.getElementById('roleTechTitle').textContent = isHe ? 'טכנאי / קבלן' : 'Technician';
       document.getElementById('roleTechDesc').textContent = isHe ? 'אני מטפל בתקלות ותחזוקה' : 'I handle faults and maintenance';
       document.getElementById('tenantExtraTitle').textContent = isHe ? 'פרטי דירה' : 'Apartment Details';
+      document.getElementById('residencyLabel').textContent = isHe ? 'מה הסטטוס שלך בדירה? *' : 'What is your residency status? *';
+      document.getElementById('chipOwnerText').textContent = isHe ? 'בעל/ת הדירה' : 'Owner';
+      document.getElementById('chipRenterText').textContent = isHe ? 'שוכר/ת' : 'Renter';
       document.getElementById('floorLabel').textContent = isHe ? 'קומה' : 'Floor';
       document.getElementById('unitLabel').textContent = isHe ? 'מספר יחידה' : 'Unit Number';
-      document.getElementById('ownerPhoneLabel').textContent = isHe ? 'טלפון בעל הנכס' : 'Owner Phone';
+      document.getElementById('ownerPhoneLabel').textContent = isHe ? 'טלפון בעל/ת הנכס *' : "Owner's Phone *";
+      document.getElementById('ownerPhoneHint').textContent = isHe ? 'נדרש עבור שוכרים, ליצירת קשר עם בעל הנכס בעת הצורך' : 'Required for renters, to contact the property owner when needed';
       document.getElementById('nextBtn2').textContent = isHe ? 'המשך' : 'Next';
       document.getElementById('passwordLabel').textContent = isHe ? 'סיסמה *' : 'Password *';
       document.getElementById('confirmPasswordLabel').textContent = isHe ? 'אימות סיסמה *' : 'Confirm Password *';

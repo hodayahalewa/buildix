@@ -9,43 +9,49 @@
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Heebo', sans-serif; color: #1f2937; overflow-x: hidden; }
+    body { font-family: 'Heebo', sans-serif; color: #1f2937; overflow-x: hidden; font-size: 17px; }
 
-    /* ===== NAVBAR ===== */
+    /* ===== NAVBAR (single, unified) ===== */
     .navbar-custom {
       position: fixed; top: 0; width: 100%; z-index: 1000;
-      padding: 14px 60px;
-      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 44px;
+      display: flex; align-items: center; justify-content: space-between; gap: 20px;
       background: rgba(255,255,255,0.97);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid rgba(26,58,107,0.08);
       box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+      flex-wrap: wrap;
     }
-    .nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-    .nav-logo img { height: 50px; }
-    .nav-logo span { font-size: 1.4rem; font-weight: 900; color: #1a3a6b; letter-spacing: 1px; }
-    .nav-links { display: flex; align-items: center; gap: 36px; }
-    .nav-links a { color: #374151; text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+    .nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; flex-shrink: 0; }
+    .nav-logo img { height: 46px; }
+    .nav-logo span { font-size: 1.35rem; font-weight: 900; color: #1a3a6b; letter-spacing: 1px; }
+    .nav-links { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+    .nav-links a { color: #374151; text-decoration: none; font-size: 0.94rem; font-weight: 600; transition: color 0.2s; position: relative; white-space: nowrap; }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -4px; right: 0; width: 0; height: 2px;
+      background: #c9a227; transition: width 0.25s ease;
+    }
     .nav-links a:hover { color: #1a3a6b; }
-    .nav-actions { display: flex; align-items: center; gap: 12px; }
+    .nav-links a:hover::after { width: 100%; }
+    .nav-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
     .lang-btn {
       background: #f3f4f6; border: 1px solid #e5e7eb; color: #374151;
-      border-radius: 20px; padding: 6px 16px; font-size: 0.82rem; font-weight: 600;
+      border-radius: 20px; padding: 6px 15px; font-size: 0.85rem; font-weight: 600;
       cursor: pointer; transition: all 0.2s; font-family: 'Heebo', sans-serif;
     }
     .lang-btn:hover { background: #e5e7eb; }
     .btn-login-nav {
       background: transparent; border: 1.5px solid #1a3a6b; color: #1a3a6b;
-      border-radius: 8px; padding: 8px 20px; font-size: 0.88rem; font-weight: 600;
+      border-radius: 8px; padding: 8px 18px; font-size: 0.88rem; font-weight: 600;
       cursor: pointer; transition: all 0.2s; text-decoration: none; font-family: 'Heebo', sans-serif;
     }
     .btn-login-nav:hover { background: #1a3a6b; color: white; }
     .btn-register-nav {
       background: #1a3a6b; border: none; color: white;
-      border-radius: 8px; padding: 8px 20px; font-size: 0.88rem; font-weight: 600;
+      border-radius: 8px; padding: 8px 18px; font-size: 0.88rem; font-weight: 600;
       cursor: pointer; transition: all 0.2s; text-decoration: none; font-family: 'Heebo', sans-serif;
     }
-    .btn-register-nav:hover { background: #c9a227; }
+    .btn-register-nav:hover { background: #c9a227; transform: translateY(-1px); }
 
     /* ===== HERO ===== */
     .hero {
@@ -58,215 +64,480 @@
       position: absolute; inset: 0; z-index: 1;
       background: linear-gradient(to bottom, rgba(10,20,50,0.45) 0%, rgba(10,20,50,0.35) 50%, rgba(10,20,50,0.75) 100%);
     }
-    .hero-content { position: relative; z-index: 2; max-width: 820px; padding: 0 24px; }
+    .hero-content { position: relative; z-index: 2; max-width: 900px; padding: 0 24px; }
     .hero-tag {
       display: inline-block; background: rgba(255,255,255,0.15);
       border: 1px solid rgba(255,255,255,0.4); color: white;
-      font-size: 0.78rem; font-weight: 700; letter-spacing: 2px;
-      padding: 6px 18px; border-radius: 20px; margin-bottom: 1.5rem; text-transform: uppercase;
+      font-size: 0.92rem; font-weight: 700; letter-spacing: 2px;
+      padding: 9px 24px; border-radius: 22px; margin-bottom: 2rem; text-transform: uppercase;
+      opacity: 0; animation: fadeInDown 0.8s ease 0.1s forwards, pulseGlow 3s ease-in-out 1s infinite;
+    }
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(201,162,39,0); }
+      50% { box-shadow: 0 0 0 6px rgba(201,162,39,0.12); }
     }
     .hero h1 {
-      font-size: 3.8rem; font-weight: 900; line-height: 1.15; margin-bottom: 1.2rem;
+      font-size: 4.8rem; font-weight: 900; line-height: 1.14; margin-bottom: 1.5rem;
       color: white; text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+      opacity: 0; animation: fadeInUp 0.9s ease 0.3s forwards;
     }
     .hero h1 span { color: #c9a227; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
     .hero-desc {
-      font-size: 1.05rem; color: rgba(255,255,255,0.9); line-height: 1.8; margin-bottom: 2.5rem;
-      max-width: 640px; margin-left: auto; margin-right: auto;
+      font-size: 1.32rem; color: rgba(255,255,255,0.92); line-height: 1.85; margin-bottom: 3rem;
+      max-width: 720px; margin-left: auto; margin-right: auto;
       text-shadow: 0 1px 10px rgba(0,0,0,0.3);
+      opacity: 0; animation: fadeInUp 0.9s ease 0.5s forwards;
     }
-    .hero-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .hero-btns {
+      display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+      opacity: 0; animation: fadeInUp 0.9s ease 0.7s forwards;
+    }
     .btn-primary-hero {
       background: #1a3a6b; color: white; border: none; border-radius: 10px;
-      padding: 14px 32px; font-size: 1rem; font-weight: 700; cursor: pointer;
-      transition: all 0.2s; text-decoration: none; display: inline-flex;
+      padding: 17px 38px; font-size: 1.15rem; font-weight: 700; cursor: pointer;
+      transition: all 0.25s; text-decoration: none; display: inline-flex;
       align-items: center; gap: 8px; font-family: 'Heebo', sans-serif;
     }
-    .btn-primary-hero:hover { background: #c9a227; color: white; transform: translateY(-2px); }
+    .btn-primary-hero:hover { background: #c9a227; color: white; transform: translateY(-3px); box-shadow: 0 12px 28px rgba(201,162,39,0.35); }
     .btn-outline-hero {
       background: rgba(255,255,255,0.1); color: white; border: 1.5px solid rgba(255,255,255,0.6);
-      border-radius: 10px; padding: 14px 32px; font-size: 1rem; font-weight: 600;
-      cursor: pointer; transition: all 0.2s; text-decoration: none;
+      border-radius: 10px; padding: 17px 38px; font-size: 1.15rem; font-weight: 600;
+      cursor: pointer; transition: all 0.25s; text-decoration: none;
       display: inline-flex; align-items: center; gap: 8px; font-family: 'Heebo', sans-serif;
       backdrop-filter: blur(4px);
     }
-    .btn-outline-hero:hover { background: white; color: #1a3a6b; }
+    .btn-outline-hero:hover { background: white; color: #1a3a6b; transform: translateY(-3px); }
 
-    /* סטטיסטיקות */
     .hero-stats {
       position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
       background: white; border-top: 1px solid #e5e7eb; display: flex; justify-content: center;
     }
-    .stats-inner { display: flex; max-width: 900px; width: 100%; }
-    .stat-item { flex: 1; text-align: center; padding: 28px 20px; border-left: 1px solid #f0f0f0; }
+    .stats-inner { display: flex; max-width: 1020px; width: 100%; }
+    .stat-item { flex: 1; text-align: center; padding: 34px 20px; border-left: 1px solid #f0f0f0; transition: background 0.25s; }
+    .stat-item:hover { background: #f8f9ff; }
     .stat-item:last-child { border-left: none; }
-    .stat-num { font-size: 2.6rem; font-weight: 900; color: #1a3a6b; line-height: 1; display: block; }
+    .stat-num { font-size: 3.3rem; font-weight: 900; color: #1a3a6b; line-height: 1; display: block; }
     .stat-suffix { color: #c9a227; }
-    .stat-label { font-size: 0.82rem; color: #6b7280; margin-top: 6px; font-weight: 500; }
+    .stat-label { font-size: 0.98rem; color: #6b7280; margin-top: 9px; font-weight: 500; }
 
     /* ===== SECTIONS ===== */
-    section { padding: 100px 60px; }
+    section { padding: 120px 60px; }
     .section-tag {
       display: inline-block; background: rgba(26,58,107,0.07);
       border: 1px solid rgba(26,58,107,0.15); color: #1a3a6b;
-      font-size: 0.72rem; font-weight: 700; letter-spacing: 2px;
-      padding: 5px 14px; border-radius: 20px; margin-bottom: 1rem; text-transform: uppercase;
+      font-size: 0.85rem; font-weight: 700; letter-spacing: 2px;
+      padding: 7px 18px; border-radius: 20px; margin-bottom: 1.2rem; text-transform: uppercase;
     }
-    .section-title { font-size: 2.4rem; font-weight: 900; color: #1a3a6b; margin-bottom: 1rem; line-height: 1.2; }
+    .section-title { font-size: 3rem; font-weight: 900; color: #1a3a6b; margin-bottom: 1.2rem; line-height: 1.22; }
     .section-title span { color: #c9a227; }
-    .section-subtitle { font-size: 1rem; color: #6b7280; line-height: 1.75; }
+    .section-subtitle { font-size: 1.2rem; color: #6b7280; line-height: 1.8; }
 
     /* ===== ABOUT ===== */
     .about-section { background: white; }
-    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; max-width: 1200px; margin: 0 auto; }
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; max-width: 1240px; margin: 0 auto; }
     .about-img-wrap { position: relative; border-radius: 20px; overflow: hidden; }
     .about-img-wrap img { width: 100%; height: 520px; object-fit: cover; border-radius: 20px; display: block; }
     .about-badge {
       position: absolute; bottom: 28px; left: 28px; background: white;
-      border-radius: 14px; padding: 18px 22px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); text-align: center;
+      border-radius: 14px; padding: 20px 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); text-align: center;
       border-left: 4px solid #c9a227;
     }
-    .about-badge .num { font-size: 1.8rem; font-weight: 900; color: #c9a227; line-height: 1; }
-    .about-badge .lbl { font-size: 0.75rem; color: #6b7280; margin-top: 3px; }
+    .about-badge .num { font-size: 2rem; font-weight: 900; color: #c9a227; line-height: 1; }
+    .about-badge .lbl { font-size: 0.85rem; color: #6b7280; margin-top: 4px; }
     .about-features { margin-top: 2.5rem; display: flex; flex-direction: column; gap: 16px; }
     .about-feature {
-      display: flex; align-items: flex-start; gap: 16px; padding: 18px 20px;
+      display: flex; align-items: flex-start; gap: 18px; padding: 22px 24px;
       background: #f8f9ff; border: 1px solid #e8ecf8; border-radius: 12px;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
     }
-    .about-feature:hover { border-color: #1a3a6b; box-shadow: 0 4px 16px rgba(26,58,107,0.08); }
+    .about-feature:hover { border-color: #1a3a6b; box-shadow: 0 4px 16px rgba(26,58,107,0.08); transform: translateX(-3px); }
     .feat-icon {
-      width: 42px; height: 42px; background: #1a3a6b; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; flex-shrink: 0;
+      width: 50px; height: 50px; background: #1a3a6b; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; color: white; font-size: 1.3rem; flex-shrink: 0;
     }
-    .feat-text h4 { font-size: 0.92rem; font-weight: 700; color: #1a3a6b; margin-bottom: 4px; }
-    .feat-text p { font-size: 0.8rem; color: #6b7280; line-height: 1.5; margin: 0; }
+    .feat-text h4 { font-size: 1.1rem; font-weight: 700; color: #1a3a6b; margin-bottom: 6px; }
+    .feat-text p { font-size: 0.95rem; color: #6b7280; line-height: 1.6; margin: 0; }
 
     /* ===== SERVICES ===== */
     .services-section { background: #f8f9ff; }
     .services-img-grid {
       display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 28px; max-width: 1300px; margin: 60px auto 0;
+      gap: 30px; max-width: 1340px; margin: 68px auto 0;
     }
     .service-img-card {
       background: white; border-radius: 20px; overflow: hidden;
-      border: 1px solid #e8ecf8; transition: all 0.35s;
+      border: 1px solid #e8ecf8; transition: all 0.35s cubic-bezier(0.22,1,0.36,1);
       box-shadow: 0 4px 20px rgba(26,58,107,0.06);
     }
-    .service-img-card:hover { transform: translateY(-8px); box-shadow: 0 20px 50px rgba(26,58,107,0.15); border-color: #c9a227; }
-    .service-img-wrap { position: relative; overflow: hidden; height: 220px; }
-    .service-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
-    .service-img-card:hover .service-img-wrap img { transform: scale(1.08); }
+    .service-img-card:hover { transform: translateY(-10px); box-shadow: 0 24px 55px rgba(26,58,107,0.18); border-color: #c9a227; }
+    .service-img-wrap { position: relative; overflow: hidden; height: 230px; }
+    .service-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.55s ease; }
+    .service-img-card:hover .service-img-wrap img { transform: scale(1.1) rotate(0.5deg); }
     .service-img-overlay {
       position: absolute; inset: 0;
       background: linear-gradient(to bottom, transparent 30%, rgba(10,20,50,0.4) 100%);
     }
-    .service-img-body { padding: 22px 22px 26px; }
+    .service-img-body { padding: 26px 26px 30px; }
     .service-img-body h3 {
-      font-size: 1.05rem; font-weight: 800; color: #1a3a6b;
-      margin-bottom: 10px; position: relative; padding-bottom: 12px;
+      font-size: 1.25rem; font-weight: 800; color: #1a3a6b;
+      margin-bottom: 13px; position: relative; padding-bottom: 13px;
     }
     .service-img-body h3::after {
       content: ''; position: absolute; bottom: 0; right: 0;
       width: 40px; height: 2.5px; background: #c9a227; border-radius: 2px;
+      transition: width 0.3s ease;
     }
-    .service-img-body p { font-size: 0.82rem; color: #6b7280; line-height: 1.7; margin: 0; }
+    .service-img-card:hover .service-img-body h3::after { width: 64px; }
+    .service-img-body p { font-size: 0.96rem; color: #6b7280; line-height: 1.75; margin: 0; }
 
-    /* ===== HOW IT WORKS ===== */
-    .how-section { background: white; text-align: center; }
-    .steps-grid {
-      display: grid; grid-template-columns: repeat(4, 1fr);
-      gap: 32px; max-width: 1100px; margin: 60px auto 0; position: relative;
+    /* ===== PROCESS SLIDER (lighter dark navy) ===== */
+    .process-section {
+      background: linear-gradient(160deg, #16294f 0%, #101d38 100%);
+      position: relative; overflow: hidden; color: white; text-align: center;
     }
-    .steps-grid::before {
-      content: ''; position: absolute; top: 28px;
-      right: 12.5%; left: 12.5%; height: 2px;
-      background: linear-gradient(to left, #e5e7eb, #1a3a6b, #e5e7eb);
+    .process-bg-lines {
+      position: absolute; inset: 0; opacity: 0.5;
+      background-image:
+        repeating-linear-gradient(60deg, rgba(201,162,39,0.12) 0px, rgba(201,162,39,0.12) 1px, transparent 1px, transparent 60px),
+        repeating-linear-gradient(-60deg, rgba(201,162,39,0.12) 0px, rgba(201,162,39,0.12) 1px, transparent 1px, transparent 60px);
     }
-    .step-item { position: relative; z-index: 1; }
-    .step-num {
-      width: 56px; height: 56px; border-radius: 50%; background: #1a3a6b; color: white;
-      font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 1.2rem; box-shadow: 0 4px 16px rgba(26,58,107,0.25);
+    .process-section .section-tag { background: rgba(201,162,39,0.15); border-color: rgba(201,162,39,0.35); color: #dcb84a; }
+    .process-section .section-title { color: white; }
+    .process-section .section-subtitle { color: rgba(255,255,255,0.68); }
+    .process-wrap { position: relative; z-index: 2; max-width: 1300px; margin: 60px auto 0; }
+    .process-track-outer { position: relative; }
+    .process-track {
+      display: flex; gap: 26px; overflow-x: auto; scroll-behavior: smooth;
+      padding: 10px 4px 24px; scrollbar-width: none;
     }
-    .step-item h4 { font-size: 0.95rem; font-weight: 700; color: #1a3a6b; margin-bottom: 8px; }
-    .step-item p { font-size: 0.82rem; color: #6b7280; line-height: 1.6; }
+    .process-track::-webkit-scrollbar { display: none; }
+    .process-card {
+      flex: 0 0 280px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 18px; overflow: hidden; text-align: right; transition: transform 0.3s, border-color 0.3s;
+    }
+    .process-card:hover { transform: translateY(-6px); border-color: #c9a227; }
+    .process-card-img { height: 190px; overflow: hidden; }
+    .process-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+    .process-card:hover .process-card-img img { transform: scale(1.08); }
+    .process-card-body { padding: 20px 22px 24px; }
+    .process-card-num {
+      display: inline-flex; width: 30px; height: 30px; border-radius: 50%; background: #c9a227;
+      color: #0a0f1e; font-weight: 800; align-items: center; justify-content: center; font-size: 0.85rem;
+      margin-bottom: 12px;
+    }
+    .process-card h3 { font-size: 1.1rem; font-weight: 800; color: #dcb84a; margin-bottom: 10px; }
+    .process-card p { font-size: 0.9rem; color: rgba(255,255,255,0.7); line-height: 1.7; margin: 0; }
+    .process-arrow {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 46px; height: 46px; border-radius: 50%; background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.3); color: white; display: flex; align-items: center;
+      justify-content: center; cursor: pointer; z-index: 3; transition: background 0.2s;
+      font-size: 1.1rem;
+    }
+    .process-arrow:hover { background: #c9a227; color: #0a0f1e; border-color: #c9a227; }
+    .process-arrow-left { right: -10px; }
+    .process-arrow-right { left: -10px; }
+    @media (max-width: 700px) { .process-arrow { display: none; } }
+
+    /* ===== ADVANTAGES ===== */
+    .advantages-section { background: white; text-align: center; }
+    .advantages-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px;
+      max-width: 1140px; margin: 64px auto 0;
+    }
+    .advantage-card {
+      background: #f8f9ff; border: 1px solid #e8ecf8; border-radius: 18px;
+      padding: 32px 26px; transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+      text-align: center;
+    }
+    .advantage-card:hover { transform: translateY(-8px); box-shadow: 0 20px 45px rgba(26,58,107,0.12); border-color: #c9a227; }
+    .advantage-icon {
+      width: 68px; height: 68px; border-radius: 50%; background: white; border: 2px solid #e8ecf8;
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 18px;
+      font-size: 1.7rem; color: #1a3a6b; transition: transform 0.4s ease, background 0.3s, border-color 0.3s;
+    }
+    .advantage-card:hover .advantage-icon { transform: rotate(360deg) scale(1.08); background: #1a3a6b; color: #c9a227; border-color: #1a3a6b; }
+    .advantage-card h4 { font-size: 1.1rem; font-weight: 800; color: #1a3a6b; margin-bottom: 10px; }
+    .advantage-card p { font-size: 0.92rem; color: #6b7280; line-height: 1.65; margin: 0; }
+
+    /* ===== TESTIMONIALS SLIDER (auto-rotating) ===== */
+    .testimonials-section { background: #f8f9ff; text-align: center; }
+    .testi-slider-wrap { max-width: 720px; margin: 60px auto 0; position: relative; }
+    .testi-slide {
+      background: white; border-radius: 20px; padding: 44px 40px; text-align: center;
+      box-shadow: 0 10px 40px rgba(26,58,107,0.1); border: 1px solid #e8ecf8;
+      display: none; opacity: 0; transition: opacity 0.5s ease;
+    }
+    .testi-slide.active { display: block; opacity: 1; }
+    .testi-avatar-wrap { position: relative; width: 84px; height: 84px; margin: 0 auto 18px; }
+    .testi-avatar {
+      width: 84px; height: 84px; border-radius: 50%; background: #1a3a6b; color: #c9a227;
+      display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.8rem;
+      overflow: hidden; border: 3px solid #f0f2fa;
+    }
+    .testi-avatar img { width: 100%; height: 100%; object-fit: cover; display: none; }
+    .testi-stars { display: flex; gap: 5px; justify-content: center; margin-bottom: 18px; }
+    .testi-stars i { color: #c9a227; font-size: 1.15rem; }
+    .testi-text { font-size: 1.08rem; color: #374151; line-height: 1.85; margin-bottom: 22px; min-height: 100px; }
+    .testi-name { font-weight: 800; color: #1a3a6b; font-size: 1.02rem; }
+    .testi-role { font-size: 0.86rem; color: #9ca3af; margin-top: 3px; }
+    .testi-dots { display: flex; gap: 9px; justify-content: center; margin-top: 26px; }
+    .testi-dot {
+      width: 10px; height: 10px; border-radius: 50%; background: #d1d5db; cursor: pointer;
+      transition: background 0.25s, transform 0.25s; border: none; padding: 0;
+    }
+    .testi-dot.active { background: #c9a227; transform: scale(1.25); }
+
+    /* ===== WHO WE ARE ===== */
+    .whoweare-section { background: white; }
+    .whoweare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 70px; align-items: center; max-width: 1200px; margin: 0 auto; }
+    .whoweare-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+    .whoweare-photos .founder-card {
+      background: #1a3a6b; border-radius: 18px; padding: 30px 18px; text-align: center; color: white;
+      transition: transform 0.3s;
+    }
+    .whoweare-photos .founder-card:hover { transform: translateY(-6px); }
+    .founder-avatar {
+      width: 84px; height: 84px; border-radius: 50%; background: #c9a227; color: #1a3a6b;
+      display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.8rem;
+      margin: 0 auto 16px; overflow: hidden;
+    }
+    .founder-avatar img { width: 100%; height: 100%; object-fit: cover; display: none; }
+    .founder-card h4 { font-size: 1.05rem; font-weight: 800; margin-bottom: 4px; }
+    .founder-card p { font-size: 0.8rem; color: rgba(255,255,255,0.65); }
+    .whoweare-text p { font-size: 1.02rem; color: #4b5563; line-height: 1.85; margin-bottom: 18px; }
+    .whoweare-text p:last-of-type { margin-bottom: 28px; }
+    .btn-story {
+      background: #c9a227; color: #1a3a6b; border: none; border-radius: 10px;
+      padding: 14px 30px; font-size: 1rem; font-weight: 700; cursor: pointer;
+      font-family: 'Heebo', sans-serif; transition: all 0.25s; display: inline-flex;
+      align-items: center; gap: 8px;
+    }
+    .btn-story:hover { background: #1a3a6b; color: white; transform: translateY(-2px); }
+
+    /* ===== COMPARISON TABLE (lighter, symmetric) ===== */
+    .comparison-section {
+      background: linear-gradient(160deg, #16294f 0%, #101d38 100%);
+      position: relative; overflow: hidden; color: white; text-align: center;
+    }
+    .comparison-section .process-bg-lines { opacity: 0.45; }
+    .comparison-section .section-tag { background: rgba(201,162,39,0.15); border-color: rgba(201,162,39,0.35); color: #dcb84a; }
+    .comparison-section .section-title { color: white; }
+    .comparison-section .section-subtitle { color: rgba(255,255,255,0.68); }
+    .comparison-wrap { position: relative; z-index: 2; max-width: 940px; margin: 60px auto 0; }
+    .comparison-table { width: 100%; border-collapse: collapse; text-align: center; table-layout: fixed; }
+    .comparison-table col.col-feature { width: 33.34%; }
+    .comparison-table col.col-buildix { width: 33.33%; }
+    .comparison-table col.col-old { width: 33.33%; }
+    .comparison-table th {
+      padding: 18px 16px; font-size: 0.95rem; font-weight: 800; background: rgba(255,255,255,0.06);
+    }
+    .comparison-table th.feature-head { text-align: right; color: rgba(255,255,255,0.6); border-radius: 0 12px 0 0; }
+    .comparison-table th.buildix-head { color: #dcb84a; }
+    .comparison-table th.old-head { color: rgba(255,255,255,0.55); border-radius: 12px 0 0 0; }
+    .comparison-table td { padding: 18px 16px; font-size: 0.9rem; border-top: 1px solid rgba(255,255,255,0.1); }
+    .comparison-table td.feature-name { text-align: right; font-weight: 700; color: white; }
+    .comparison-table tr:hover td { background: rgba(255,255,255,0.04); }
+    .comparison-table .check { color: #4ade80; font-size: 1.15rem; margin-left: 6px; }
+    .comparison-table .cross { color: #f87171; font-size: 1.15rem; margin-left: 6px; }
+    .comparison-table .val-cell { display: flex; align-items: center; justify-content: center; gap: 4px; flex-wrap: wrap; }
+
+    /* ===== FAQ ===== */
+    .faq-section { background: white; }
+    .faq-wrap { max-width: 880px; margin: 60px auto 0; display: flex; flex-direction: column; gap: 14px; }
+    .faq-item { border: 1px solid #e8ecf8; border-radius: 14px; overflow: hidden; background: #f8f9ff; }
+    .faq-question {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      padding: 20px 24px; cursor: pointer; font-weight: 700; color: #1a3a6b; font-size: 1.02rem;
+      transition: background 0.2s;
+    }
+    .faq-question:hover { background: rgba(26,58,107,0.04); }
+    .faq-icon {
+      width: 30px; height: 30px; border-radius: 50%; background: #1a3a6b; color: white;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1rem;
+      transition: transform 0.3s ease, background 0.3s ease;
+    }
+    .faq-item.open .faq-icon { transform: rotate(45deg); background: #c9a227; }
+    .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.35s ease; padding: 0 24px; }
+    .faq-item.open .faq-answer { max-height: 260px; padding: 0 24px 20px; }
+    .faq-answer p { font-size: 0.94rem; color: #6b7280; line-height: 1.75; margin: 0; }
 
     /* ===== CONTACT ===== */
     .contact-section { background: linear-gradient(135deg, #1a3a6b 0%, #0d2147 100%); text-align: center; color: white; }
     .contact-section .section-title { color: white; }
-    .contact-section .section-subtitle { color: rgba(255,255,255,0.7); max-width: 560px; margin: 0 auto 2.5rem; }
+    .contact-section .section-subtitle { color: rgba(255,255,255,0.7); max-width: 600px; margin: 0 auto 2.5rem; }
     .contact-form {
       background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 20px; padding: 40px; max-width: 600px; margin: 0 auto; backdrop-filter: blur(10px);
+      border-radius: 20px; padding: 42px; max-width: 620px; margin: 0 auto; backdrop-filter: blur(10px);
     }
     .contact-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
     .contact-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
-    .contact-field label { font-size: 0.78rem; font-weight: 600; color: rgba(255,255,255,0.8); }
+    .contact-field label { font-size: 0.9rem; font-weight: 600; color: rgba(255,255,255,0.8); }
     .contact-input {
       background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 10px; padding: 11px 14px; color: white; font-size: 0.88rem;
+      border-radius: 10px; padding: 13px 14px; color: white; font-size: 1rem;
       font-family: 'Heebo', sans-serif; outline: none; transition: border-color 0.2s; width: 100%;
     }
     .contact-input::placeholder { color: rgba(255,255,255,0.35); }
     .contact-input:focus { border-color: #c9a227; }
     .btn-whatsapp {
       width: 100%; background: #25D366; color: white; border: none; border-radius: 10px;
-      padding: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+      padding: 16px; font-size: 1.12rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
       font-family: 'Heebo', sans-serif; display: flex; align-items: center; justify-content: center;
       gap: 10px; margin-top: 8px;
     }
     .btn-whatsapp:hover { background: #1ea952; transform: translateY(-1px); }
 
-    /* ===== FOOTER ===== */
-    footer { background: #060e1f; padding: 40px 60px 24px; border-top: 1px solid rgba(255,255,255,0.06); }
-    .footer-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    .footer-logo { display: flex; align-items: center; gap: 10px; }
-    .footer-logo img { height: 40px; filter: brightness(10); }
-    .footer-logo span { font-size: 1.2rem; font-weight: 800; color: white; }
-    .footer-links { display: flex; gap: 24px; }
-    .footer-links a { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
-    .footer-links a:hover { color: #c9a227; }
-    .footer-bottom { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 20px; text-align: center; color: rgba(255,255,255,0.3); font-size: 0.78rem; }
+    /* ===== FLOATING WHATSAPP BUTTON ===== */
+    .whatsapp-float {
+      position: fixed; bottom: 26px; left: 26px; z-index: 999;
+      width: 62px; height: 62px; border-radius: 50%;
+      background: #25D366; display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 1.8rem; text-decoration: none; border: none; cursor: pointer;
+      box-shadow: 0 6px 24px rgba(37,211,102,0.45);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      animation: floatBounce 2.8s ease-in-out infinite;
+    }
+    .whatsapp-float:hover { transform: scale(1.1); color: white; box-shadow: 0 10px 32px rgba(37,211,102,0.6); }
+    @keyframes floatBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+    .whatsapp-float.hidden-btn { opacity: 0; pointer-events: none; transform: scale(0.6); }
 
-    /* Animations */
+    /* ===== WHATSAPP CHAT POPUP (SIMULATED, FULL CONVERSATION IN-SITE) ===== */
+    .wa-popup {
+      position: fixed; bottom: 100px; left: 26px; z-index: 1000;
+      width: 370px; max-width: calc(100vw - 40px);
+      background: #e5ddd5;
+      border-radius: 16px; overflow: hidden;
+      box-shadow: 0 16px 50px rgba(0,0,0,0.28);
+      opacity: 0; transform: translateY(20px) scale(0.95); pointer-events: none;
+      transition: opacity 0.28s ease, transform 0.28s ease;
+      display: flex; flex-direction: column;
+    }
+    .wa-popup.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+
+    .wa-popup-header {
+      background: #075E54; color: white; padding: 16px 18px;
+      display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+    }
+    .wa-popup-avatar {
+      width: 44px; height: 44px; border-radius: 50%; background: #1a3a6b;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      font-weight: 800; font-size: 1.2rem; color: #c9a227; border: 2px solid rgba(255,255,255,0.4);
+    }
+    .wa-popup-title { font-weight: 700; font-size: 1rem; }
+    .wa-popup-status { font-size: 0.78rem; color: rgba(255,255,255,0.75); display: flex; align-items: center; gap: 5px; }
+    .wa-popup-status .dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; display: inline-block; }
+    .wa-popup-close {
+      margin-right: auto; background: none; border: none; color: white;
+      font-size: 1.2rem; cursor: pointer; opacity: 0.85; padding: 4px;
+    }
+    .wa-popup-close:hover { opacity: 1; }
+
+    .wa-popup-body {
+      padding: 18px; min-height: 200px; max-height: 380px; overflow-y: auto;
+      background-image: radial-gradient(rgba(0,0,0,0.02) 1px, transparent 1px);
+      background-size: 14px 14px;
+    }
+    .wa-bubble {
+      background: white; border-radius: 0 12px 12px 12px; padding: 12px 14px;
+      max-width: 85%; font-size: 0.92rem; line-height: 1.55; color: #1f2937;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      opacity: 0; transform: translateY(8px);
+      animation: bubbleIn 0.35s ease forwards; margin-bottom: 10px;
+    }
+    .wa-bubble.me {
+      margin-right: auto; margin-left: 0; background: #dcf8c6; border-radius: 12px 0 12px 12px;
+    }
+    @keyframes bubbleIn { to { opacity: 1; transform: translateY(0); } }
+    .wa-bubble-time { font-size: 0.68rem; color: #9ca3af; margin-top: 4px; text-align: left; }
+    .wa-quick-replies { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+    .wa-quick-btn {
+      background: white; border: 1.5px solid #075E54; color: #075E54; border-radius: 20px;
+      padding: 8px 14px; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+      font-family: 'Heebo', sans-serif; transition: all 0.2s;
+    }
+    .wa-quick-btn:hover { background: #075E54; color: white; }
+    .wa-typing { display: flex; gap: 4px; padding: 12px 14px; background: white; border-radius: 0 12px 12px 12px; width: fit-content; margin-bottom: 10px; }
+    .wa-typing span { width: 6px; height: 6px; border-radius: 50%; background: #9ca3af; animation: typingBounce 1.2s infinite; }
+    .wa-typing span:nth-child(2) { animation-delay: 0.15s; }
+    .wa-typing span:nth-child(3) { animation-delay: 0.3s; }
+    @keyframes typingBounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
+
+    .wa-popup-footer { background: #f0f0f0; padding: 12px 14px; display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+    .wa-popup-input {
+      flex: 1; border: none; border-radius: 20px; padding: 10px 16px;
+      font-size: 0.9rem; font-family: 'Heebo', sans-serif; outline: none;
+    }
+    .wa-popup-send {
+      width: 40px; height: 40px; border-radius: 50%; background: #075E54; border: none;
+      color: white; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0; transition: background 0.2s; font-size: 1.1rem;
+    }
+    .wa-popup-send:hover { background: #128C7E; }
+
+    @media (max-width: 480px) {
+      .wa-popup { left: 10px; right: 10px; width: auto; bottom: 96px; }
+    }
+
+    /* ===== FOOTER ===== */
+    footer { background: #060e1f; padding: 44px 60px 26px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .footer-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 26px; flex-wrap: wrap; gap: 20px; }
+    .footer-logo { display: flex; align-items: center; gap: 10px; }
+    .footer-logo img { height: 42px; filter: brightness(10); }
+    .footer-logo span { font-size: 1.3rem; font-weight: 800; color: white; }
+    .footer-links { display: flex; gap: 26px; flex-wrap: wrap; }
+    .footer-links a { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.96rem; transition: color 0.2s; }
+    .footer-links a:hover { color: #c9a227; }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 22px; text-align: center; color: rgba(255,255,255,0.3); font-size: 0.86rem; }
+
     .fade-up { opacity: 0; transform: translateY(40px); transition: opacity 0.7s ease, transform 0.7s ease; }
     .fade-up.visible { opacity: 1; transform: translateY(0); }
 
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 1100px) { .services-img-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 1100px) {
+      .services-img-grid { grid-template-columns: repeat(2, 1fr); }
+      .advantages-grid { grid-template-columns: repeat(2, 1fr); }
+    }
     @media (max-width: 900px) {
       .navbar-custom { padding: 14px 24px; }
       .nav-links { display: none; }
-      .hero h1 { font-size: 2.2rem; }
-      .about-grid { grid-template-columns: 1fr; gap: 40px; }
-      .steps-grid { grid-template-columns: 1fr 1fr; }
-      .steps-grid::before { display: none; }
-      section { padding: 70px 24px; }
+      .hero h1 { font-size: 2.7rem; }
+      .hero-desc { font-size: 1.1rem; }
+      .about-grid, .whoweare-grid { grid-template-columns: 1fr; gap: 40px; }
+      section { padding: 76px 24px; }
       .contact-row { grid-template-columns: 1fr; }
+      .whatsapp-float { width: 54px; height: 54px; font-size: 1.5rem; bottom: 18px; left: 18px; }
+      .wa-popup { bottom: 88px; }
+      .comparison-table { font-size: 0.85rem; }
+      .testi-slide { padding: 32px 22px; }
     }
     @media (max-width: 600px) {
-      .hero h1 { font-size: 1.8rem; }
-      .services-img-grid { grid-template-columns: 1fr; }
-      .steps-grid { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 2.1rem; }
+      .services-img-grid, .advantages-grid { grid-template-columns: 1fr; }
       .stats-inner { flex-direction: column; }
       .stat-item { border-left: none; border-bottom: 1px solid #f0f0f0; }
-      .section-title { font-size: 1.8rem; }
+      .section-title { font-size: 2.1rem; }
+      .whoweare-photos { grid-template-columns: 1fr; }
+      .comparison-table th, .comparison-table td { padding: 12px 8px; font-size: 0.78rem; }
     }
   </style>
 </head>
-<body>
+<body id="top">
 
-  <!-- ===== NAVBAR ===== -->
+  <!-- ===== NAVBAR (single, unified) ===== -->
   <nav class="navbar-custom">
-    <a href="index.html" class="nav-logo">
+    <a href="#top" class="nav-logo">
       <img src="logo.png" alt="BUILDIX">
       <span>BUILDIX</span>
     </a>
     <div class="nav-links">
-      <a href="#about" id="nav-about">אודות</a>
+      <a href="#top" id="nav-home">דף הבית</a>
+      <a href="#whoweare" id="nav-aboutus">אודותינו</a>
       <a href="#services" id="nav-services">שירותים</a>
-      <a href="#how" id="nav-how">איך זה עובד</a>
+      <a href="#process" id="nav-how">איך זה עובד</a>
+      <a href="#whybuildix" id="nav-why">למה BUILDIX</a>
+      <a href="#faq" id="nav-faq">שאלות נפוצות</a>
       <a href="#contact" id="nav-contact">צור קשר</a>
     </div>
     <div class="nav-actions">
@@ -431,33 +702,277 @@
     </div>
   </section>
 
-  <!-- ===== HOW IT WORKS ===== -->
-  <section class="how-section" id="how">
-    <div class="fade-up">
-      <div class="section-tag" id="how-tag">איך זה עובד</div>
-      <h2 class="section-title" id="how-title">מתחילים ב<span>4 צעדים</span></h2>
-      <p class="section-subtitle" id="how-desc">תהליך פשוט וברור להתחלת עבודה עם BUILDIX</p>
+  <!-- ===== PROCESS SLIDER ===== -->
+  <section class="process-section" id="process">
+    <div class="process-bg-lines"></div>
+    <div class="fade-up" style="position:relative;z-index:2;">
+      <div class="section-tag" id="process-tag">התהליך שלנו</div>
+      <h2 class="section-title" id="process-title">מדיווח <span>לפתרון</span>, צעד אחר צעד</h2>
+      <p class="section-subtitle" id="process-desc">כך תקלה הופכת לפתרון בשקיפות מלאה, מהרגע שדווחה ועד לסגירה המאושרת</p>
     </div>
-    <div class="steps-grid">
-      <div class="step-item fade-up">
-        <div class="step-num">1</div>
-        <h4 id="step1-title">נרשמים למערכת</h4>
-        <p id="step1-desc">מנהל הבניין נרשם ויוצר פרופיל בניין תוך דקות.</p>
+    <div class="process-wrap fade-up">
+      <div class="process-track-outer">
+        <button class="process-arrow process-arrow-right" onclick="scrollProcess(-1)"><i class="bi bi-chevron-right"></i></button>
+        <div class="process-track" id="processTrack">
+          <div class="process-card">
+            <div class="process-card-img"><img src="images/svc1-faults.jpg" alt=""></div>
+            <div class="process-card-body">
+              <div class="process-card-num">1</div>
+              <h3 id="proc1-title">דיווח תקלה</h3>
+              <p id="proc1-desc">דייר מדווח תקלה עם תמונה, מיקום ורמת דחיפות — תוך פחות מדקה מהטלפון.</p>
+            </div>
+          </div>
+          <div class="process-card">
+            <div class="process-card-img"><img src="images/svc4-tenants.jpg" alt=""></div>
+            <div class="process-card-body">
+              <div class="process-card-num">2</div>
+              <h3 id="proc2-title">שיוך טכנאי</h3>
+              <p id="proc2-desc">המנהל משייך את הטכנאי המתאים, וזה מקבל התראה מיידית בדוא"ל ובמערכת.</p>
+            </div>
+          </div>
+          <div class="process-card">
+            <div class="process-card-img"><img src="images/svc2-maintenance.jpg" alt=""></div>
+            <div class="process-card-body">
+              <div class="process-card-num">3</div>
+              <h3 id="proc3-title">טיפול ועדכון סטטוס</h3>
+              <p id="proc3-desc">הטכנאי מעדכן סטטוס בזמן אמת — בטיפול, ממתין לחלק — כולם רואים היכן זה עומד.</p>
+            </div>
+          </div>
+          <div class="process-card">
+            <div class="process-card-img"><img src="images/svc3-energy.jpg" alt=""></div>
+            <div class="process-card-body">
+              <div class="process-card-num">4</div>
+              <h3 id="proc4-title">חשבונית ואישור</h3>
+              <p id="proc4-desc">הטכנאי מצרף חשבונית, המנהל בודק ומאשר, והתקלה נסגרת רק לאחר אישור מלא.</p>
+            </div>
+          </div>
+          <div class="process-card">
+            <div class="process-card-img"><img src="images/svc5-announcemnts.jpg" alt=""></div>
+            <div class="process-card-body">
+              <div class="process-card-num">5</div>
+              <h3 id="proc5-title">דיווח וסגירה</h3>
+              <p id="proc5-desc">הדייר מקבל עדכון סופי במייל, והכל מתועד לדוח החודשי לשקיפות מלאה.</p>
+            </div>
+          </div>
+        </div>
+        <button class="process-arrow process-arrow-left" onclick="scrollProcess(1)"><i class="bi bi-chevron-left"></i></button>
       </div>
-      <div class="step-item fade-up">
-        <div class="step-num">2</div>
-        <h4 id="step2-title">מוסיפים משתמשים</h4>
-        <p id="step2-desc">הזמנת דיירים וטכנאים לפי תפקיד.</p>
+    </div>
+  </section>
+
+  <!-- ===== ADVANTAGES ===== -->
+  <section class="advantages-section" id="advantages">
+    <div class="fade-up">
+      <div class="section-tag" id="adv-tag">היתרונות שלנו</div>
+      <h2 class="section-title" id="adv-title">היתרון שלנו, <span>השקט הנפשי שלכם</span></h2>
+      <p class="section-subtitle" id="adv-desc">שילוב של טכנולוגיה, שירות אישי וסטנדרט מקצועי שאין שני לו</p>
+    </div>
+    <div class="advantages-grid">
+      <div class="advantage-card fade-up">
+        <div class="advantage-icon"><i class="bi bi-cpu"></i></div>
+        <h4 id="adv1-title">פתרונות מתקדמים</h4>
+        <p id="adv1-desc">שימוש בטכנולוגיה חכמה כדי להעניק שקיפות מלאה וניהול יעיל של כל מערכות הבניין.</p>
       </div>
-      <div class="step-item fade-up">
-        <div class="step-num">3</div>
-        <h4 id="step3-title">מדווחים תקלות</h4>
-        <p id="step3-desc">דיירים מדווחים, טכנאים מטפלים, מנהל עוקב.</p>
+      <div class="advantage-card fade-up">
+        <div class="advantage-icon"><i class="bi bi-heart"></i></div>
+        <h4 id="adv2-title">שירות אישי ואכפתי</h4>
+        <p id="adv2-desc">זמינות מלאה 24/7 לכל קריאה. אנחנו מתייחסים לבניין שלכם בדיוק כמו לבית הפרטי שלנו.</p>
       </div>
-      <div class="step-item fade-up">
-        <div class="step-num">4</div>
-        <h4 id="step4-title">מנתחים ומשפרים</h4>
-        <p id="step4-desc">דוחות, גרפים וסטטיסטיקות לשיפור מתמיד.</p>
+      <div class="advantage-card fade-up">
+        <div class="advantage-icon"><i class="bi bi-gear-wide-connected"></i></div>
+        <h4 id="adv3-title">ניהול חכם ומתוכנן</h4>
+        <p id="adv3-desc">אסטרטגיית תחזוקה מונעת שחוסכת לוועד הבית כסף, זמן וכאבי ראש עתידיים.</p>
+      </div>
+      <div class="advantage-card fade-up">
+        <div class="advantage-icon"><i class="bi bi-people"></i></div>
+        <h4 id="adv4-title">שקיפות מלאה לדיירים</h4>
+        <p id="adv4-desc">כל דייר רואה בדיוק מה קורה עם התקלה שדיווח — בלי טלפונים, בלי אי ודאות.</p>
+      </div>
+      <div class="advantage-card fade-up">
+        <div class="advantage-icon"><i class="bi bi-calculator"></i></div>
+        <h4 id="adv5-title">שקיפות פיננסית</h4>
+        <p id="adv5-desc">ניהול כספי ועד הבית וגבייה בצורה מאוזנת, מדויקת וגלויה לחלוטין לפני כל דיירים.</p>
+      </div>
+      <div class="advantage-card fade-up">
+        <div class="advantage-icon"><i class="bi bi-patch-check"></i></div>
+        <h4 id="adv6-title">שותפות ואמינות</h4>
+        <p id="adv6-desc">התנהלות שקופה בגובה העיניים מול ועד הבית, ועבודה מול אנשי מקצוע אמינים בלבד.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TESTIMONIALS (auto-rotating slider) ===== -->
+  <section class="testimonials-section" id="testimonials">
+    <div class="fade-up">
+      <div class="section-tag" id="testi-tag">מה אומרים עלינו</div>
+      <h2 class="section-title" id="testi-title">אנחנו מאמינים <span>בעבודה קשה, אמינות ומקצועיות</span></h2>
+      <p class="section-subtitle" id="testi-desc">כך זה מרגיש לנהל בניין עם BUILDIX, מפי אלו שכבר חוו את זה</p>
+    </div>
+    <div class="testi-slider-wrap fade-up">
+      <div class="testi-slide active" data-index="0">
+        <div class="testi-avatar-wrap">
+          <div class="testi-avatar">ד<img src="" alt=""></div>
+        </div>
+        <div class="testi-stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+        <p class="testi-text" id="testi1-text">"סוף סוף אני יודע בדיוק מה קורה בבניין בלי לרדוף אחרי אף אחד. כל תקלה מתועדת, ואני רואה בזמן אמת מתי היא נסגרה. חסך לי המון כאבי ראש כוועד בית."</p>
+        <div class="testi-name" id="testi1-name">דוד לוי</div>
+        <div class="testi-role" id="testi1-role">יו"ר ועד בית, רמת גן</div>
+      </div>
+      <div class="testi-slide" data-index="1">
+        <div class="testi-avatar-wrap">
+          <div class="testi-avatar">מ<img src="" alt=""></div>
+        </div>
+        <div class="testi-stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+        <p class="testi-text" id="testi2-text">"כדיירת, הדבר שהכי שינה לי את החוויה זה שאני יכולה לדווח תקלה עם תמונה מהטלפון ולראות בדיוק באיזה שלב היא נמצאת. אין יותר הודעות וואטסאפ שהולכות לאיבוד."</p>
+        <div class="testi-name" id="testi2-name">מיכל אברהם</div>
+        <div class="testi-role" id="testi2-role">דיירת, מגדל מגורים בפתח תקווה</div>
+      </div>
+      <div class="testi-slide" data-index="2">
+        <div class="testi-avatar-wrap">
+          <div class="testi-avatar">ע<img src="" alt=""></div>
+        </div>
+        <div class="testi-stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+        <p class="testi-text" id="testi3-text">"בתור טכנאי שעובד עם כמה בניינים, המערכת הזאת פשוט חוסכת לי זמן. אני מקבל את הקריאה עם כל הפרטים, מעדכן סטטוס בלחיצה, ומצרף חשבונית ישר מהטלפון."</p>
+        <div class="testi-name" id="testi3-name">עידן שמעוני</div>
+        <div class="testi-role" id="testi3-role">טכנאי תחזוקה עצמאי</div>
+      </div>
+      <div class="testi-dots" id="testiDots">
+        <button class="testi-dot active" onclick="goToTesti(0)"></button>
+        <button class="testi-dot" onclick="goToTesti(1)"></button>
+        <button class="testi-dot" onclick="goToTesti(2)"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== WHO WE ARE ===== -->
+  <section class="whoweare-section" id="whoweare">
+    <div class="whoweare-grid">
+      <div class="whoweare-photos fade-up">
+        <div class="founder-card">
+          <div class="founder-avatar">נ<img src="" alt=""></div>
+          <h4>נועה כהן</h4>
+          <p id="founder1-role">מייסדת שותפה, Frontend & UX</p>
+        </div>
+        <div class="founder-card">
+          <div class="founder-avatar">ה<img src="" alt=""></div>
+          <h4>הודיה בר</h4>
+          <p id="founder2-role">מייסדת שותפה, Backend & מערכות</p>
+        </div>
+      </div>
+      <div class="fade-up">
+        <div class="section-tag" id="who-tag">מי אנחנו</div>
+        <h2 class="section-title" id="who-title">הסיפור <span>מאחורי BUILDIX</span></h2>
+        <p id="who-p1">הכל התחיל מתסכול פשוט: קבוצת וואטסאפ עמוסה, קובץ אקסל שאף אחד לא מעדכן, ותקלה שנשארת פתוחה שבועות כי אף אחד לא זוכר למי היא הוקצתה. שתי סטודנטיות למערכות מידע, נועה והודיה, ראו את זה קורה שוב ושוב בבניינים סביבן — והחליטו שיש דרך טובה יותר.</p>
+        <p id="who-p2">כך נולדה BUILDIX: מערכת אחת שמחליפה את כל הכלים המפוזרים במקום מרכזי, שקוף ופשוט לשימוש — גם למי שלא "טכנולוגי". דיווח תקלה שלוקח פחות מדקה, מעקב שקוף לכל דייר, ותחזוקה מונעת שמונעת בעיות לפני שהן קורות.</p>
+        <p id="who-p3">היום BUILDIX ממשיכה להתפתח מתוך אותה מטרה: לתת לכל בניין — קטן כגדול — ניהול ברמה מקצועית, בלי הכאוס ובלי הבלגן.</p>
+        <button class="btn-story" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
+          <i class="bi bi-arrow-left-short"></i>
+          <span id="who-btn">בואו נדבר על הבניין שלכם</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== COMPARISON TABLE ===== -->
+  <section class="comparison-section" id="whybuildix">
+    <div class="process-bg-lines"></div>
+    <div class="fade-up" style="position:relative;z-index:2;">
+      <div class="section-tag" id="comp-tag">למה BUILDIX</div>
+      <h2 class="section-title" id="comp-title">BUILDIX מול <span>הדרך הישנה</span></h2>
+      <p class="section-subtitle" id="comp-desc">ההבדל בין ניהול בניין מסודר לבין כאוס של וואטסאפ ואקסל</p>
+    </div>
+    <div class="comparison-wrap fade-up">
+      <table class="comparison-table">
+        <colgroup>
+          <col class="col-feature"><col class="col-buildix"><col class="col-old">
+        </colgroup>
+        <thead>
+          <tr>
+            <th class="feature-head" id="comp-col1">תחום</th>
+            <th class="buildix-head" id="comp-col2">BUILDIX</th>
+            <th class="old-head" id="comp-col3">וואטסאפ ואקסל</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="feature-name" id="comp-row1">זמן תגובה לתקלה</td>
+            <td><div class="val-cell"><i class="bi bi-check-circle-fill check"></i> <span id="comp-row1-a">עד 24 שעות</span></div></td>
+            <td><div class="val-cell"><i class="bi bi-x-circle-fill cross"></i> <span id="comp-row1-b">48-72 שעות ויותר</span></div></td>
+          </tr>
+          <tr>
+            <td class="feature-name" id="comp-row2">שקיפות לדיירים</td>
+            <td><div class="val-cell"><i class="bi bi-check-circle-fill check"></i> <span id="comp-row2-a">מעקב מלא בזמן אמת</span></div></td>
+            <td><div class="val-cell"><i class="bi bi-x-circle-fill cross"></i> <span id="comp-row2-b">ללא מעקב ברור</span></div></td>
+          </tr>
+          <tr>
+            <td class="feature-name" id="comp-row3">תחזוקה מונעת</td>
+            <td><div class="val-cell"><i class="bi bi-check-circle-fill check"></i> <span id="comp-row3-a">תזכורות אוטומטיות</span></div></td>
+            <td><div class="val-cell"><i class="bi bi-x-circle-fill cross"></i> <span id="comp-row3-b">ידני ולעיתים נשכח</span></div></td>
+          </tr>
+          <tr>
+            <td class="feature-name" id="comp-row4">דוחות וחשבוניות</td>
+            <td><div class="val-cell"><i class="bi bi-check-circle-fill check"></i> <span id="comp-row4-a">אוטומטי ומאורגן</span></div></td>
+            <td><div class="val-cell"><i class="bi bi-x-circle-fill cross"></i> <span id="comp-row4-b">קבצים מפוזרים</span></div></td>
+          </tr>
+          <tr>
+            <td class="feature-name" id="comp-row5">היסטוריית תקלות</td>
+            <td><div class="val-cell"><i class="bi bi-check-circle-fill check"></i> <span id="comp-row5-a">מתועד לצמיתות</span></div></td>
+            <td><div class="val-cell"><i class="bi bi-x-circle-fill cross"></i> <span id="comp-row5-b">נעלם בגלילה</span></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="faq-section" id="faq">
+    <div class="fade-up" style="text-align:center;">
+      <div class="section-tag" id="faq-tag">שאלות ותשובות</div>
+      <h2 class="section-title" id="faq-title">עושים לכם <span>סדר</span></h2>
+      <p class="section-subtitle" id="faq-desc">אנחנו כאן עם כל התשובות</p>
+    </div>
+    <div class="faq-wrap">
+      <div class="faq-item fade-up">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span id="faq1-q">האם המערכת מתאימה גם לבניין קטן וגם לבניין גדול?</span>
+          <div class="faq-icon"><i class="bi bi-plus"></i></div>
+        </div>
+        <div class="faq-answer"><p id="faq1-a">כן, BUILDIX בנויה כך שתתאים לבניין בודד מכל גודל — בין אם מדובר בבניין מגורים קטן או בניין משרדים גדול. המערכת מתמקדת כרגע בניהול בניין יחיד, עם אפשרות עתידית להרחבה למספר בניינים.</p></div>
+      </div>
+      <div class="faq-item fade-up">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span id="faq2-q">מי יכול להירשם למערכת ואיך מתבצע האישור?</span>
+          <div class="faq-icon"><i class="bi bi-plus"></i></div>
+        </div>
+        <div class="faq-answer"><p id="faq2-a">דיירים וטכנאים יכולים להירשם עצמאית דרך עמוד ההרשמה. כל בקשת הרשמה חדשה ממתינה לאישור ידני של מנהל הבניין, כדי לוודא שרק מי שבאמת שייך לבניין מקבל גישה.</p></div>
+      </div>
+      <div class="faq-item fade-up">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span id="faq3-q">איך מתבצע דיווח תקלה, וכמה זמן זה לוקח?</span>
+          <div class="faq-icon"><i class="bi bi-plus"></i></div>
+        </div>
+        <div class="faq-answer"><p id="faq3-a">דייר בוחר סוג תקלה, קומה ויחידה, מוסיף תיאור ותמונה (אופציונלי), ובוחר רמת דחיפות — הכל תוך פחות מדקה מהטלפון. הטכנאי הרלוונטי מקבל התראה מיידית ברגע שהתקלה משויכת אליו.</p></div>
+      </div>
+      <div class="faq-item fade-up">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span id="faq4-q">מתי תקלה נחשבת סגורה סופית?</span>
+          <div class="faq-icon"><i class="bi bi-plus"></i></div>
+        </div>
+        <div class="faq-answer"><p id="faq4-a">תקלה נסגרת רק לאחר שהטכנאי מדווח שסיים וצירף חשבונית, והמנהל מאשר אותה. כך יש בקרה כפולה שמונעת סגירת תקלות בטעות או בלי טיפול בפועל.</p></div>
+      </div>
+      <div class="faq-item fade-up">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span id="faq5-q">איך אני יודע כמה הבניין חוסך בעזרת המערכת?</span>
+          <div class="faq-icon"><i class="bi bi-plus"></i></div>
+        </div>
+        <div class="faq-answer"><p id="faq5-a">בעמוד הדוחות תוכלו לראות גרפים ונתונים על צריכת אנרגיה, עלויות חשבוניות ותקלות לאורך זמן, וכן לייצא דוחות ל-Excel ו-PDF להצגה בפני ועד הבית.</p></div>
+      </div>
+      <div class="faq-item fade-up">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span id="faq6-q">האם הנתונים שלנו מאובטחים?</span>
+          <div class="faq-icon"><i class="bi bi-plus"></i></div>
+        </div>
+        <div class="faq-answer"><p id="faq6-a">כן. סיסמאות מוצפנות, הגישה מוגבלת לפי תפקיד (דייר, טכנאי, מנהל), וכל בקשת הרשמה עוברת אישור ידני של המנהל לפני קבלת גישה למידע כלשהו.</p></div>
       </div>
     </div>
   </section>
@@ -503,9 +1018,10 @@
         <span>BUILDIX</span>
       </div>
       <div class="footer-links">
-        <a href="#about" id="footer-about">אודות</a>
+        <a href="#whoweare" id="footer-about">אודות</a>
         <a href="#services" id="footer-services">שירותים</a>
-        <a href="#how" id="footer-how">איך זה עובד</a>
+        <a href="#process" id="footer-how">איך זה עובד</a>
+        <a href="#faq" id="footer-faq">שאלות נפוצות</a>
         <a href="#contact" id="footer-contact">צור קשר</a>
         <a href="login.html" id="footer-login">כניסה</a>
       </div>
@@ -514,6 +1030,32 @@
       <p id="footer-copy">© 2026 BUILDIX — Building Management Simplified | נועה כהן & הודיה בר</p>
     </div>
   </footer>
+
+  <!-- ===== WHATSAPP CHAT POPUP ===== -->
+  <div class="wa-popup" id="waPopup">
+    <div class="wa-popup-header">
+      <div class="wa-popup-avatar">B</div>
+      <div>
+        <div class="wa-popup-title">BUILDIX</div>
+        <div class="wa-popup-status"><span class="dot"></span><span id="wa-status-text">בדרך כלל עונים תוך כמה דקות</span></div>
+      </div>
+      <button class="wa-popup-close" onclick="closeWaPopup()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    <div class="wa-popup-body" id="waPopupBody"></div>
+    <div class="wa-popup-footer">
+      <input type="text" class="wa-popup-input" id="waPopupInput" placeholder="כתבו הודעה...">
+      <button class="wa-popup-send" onclick="sendWaPopupMessage()">
+        <i class="bi bi-send-fill"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== FLOATING WHATSAPP BUTTON ===== -->
+  <button id="whatsappFloat" class="whatsapp-float" onclick="toggleWaPopup()" aria-label="WhatsApp">
+    <i class="bi bi-whatsapp"></i>
+  </button>
 
   <script>
     const counterTargets = [24, 60, 100, 90];
@@ -531,16 +1073,11 @@
         }, 16);
       });
     }
-
     const statsObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        if (entry.isIntersecting && !countersStarted) {
-          countersStarted = true;
-          animateCounters();
-        }
+        if (entry.isIntersecting && !countersStarted) { countersStarted = true; animateCounters(); }
       });
     }, { threshold: 0.3 });
-
     const statsEl = document.querySelector('.hero-stats');
     if (statsEl) statsObserver.observe(statsEl);
 
@@ -548,6 +1085,43 @@
       entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
     }, { threshold: 0.1 });
     document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    function scrollProcess(dir) {
+      document.getElementById('processTrack').scrollBy({ left: dir * 306, behavior: 'smooth' });
+    }
+
+    function toggleFaq(el) {
+      const item = el.parentElement;
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!wasOpen) item.classList.add('open');
+    }
+
+    // ===== Testimonials auto-rotating slider =====
+    let testiIndex = 0;
+    let testiTimer = null;
+    const testiSlides = document.querySelectorAll('.testi-slide');
+    const testiDots = document.querySelectorAll('.testi-dot');
+
+    function goToTesti(i) {
+      testiSlides.forEach(s => s.classList.remove('active'));
+      testiDots.forEach(d => d.classList.remove('active'));
+      testiSlides[i].classList.add('active');
+      testiDots[i].classList.add('active');
+      testiIndex = i;
+      resetTestiTimer();
+    }
+
+    function nextTesti() { goToTesti((testiIndex + 1) % testiSlides.length); }
+
+    function resetTestiTimer() {
+      clearInterval(testiTimer);
+      testiTimer = setInterval(nextTesti, 5000);
+    }
+    resetTestiTimer();
+
+    // ===== WhatsApp =====
+    const WHATSAPP_NUMBER = '972545511344';
 
     function sendWhatsApp() {
       const isHe = currentLang === 'he';
@@ -562,15 +1136,169 @@
       const text = isHe
         ? `שלום! אני מעוניין במערכת BUILDIX 🏢\n\nשם: ${name}\nטלפון: ${phone}${building ? `\nבניין: ${building}` : ''}${message ? `\nהודעה: ${message}` : ''}`
         : `Hello! I'm interested in BUILDIX 🏢\n\nName: ${name}\nPhone: ${phone}${building ? `\nBuilding: ${building}` : ''}${message ? `\nMessage: ${message}` : ''}`;
-      window.open(`https://wa.me/972545511344?text=${encodeURIComponent(text)}`, '_blank');
+      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`, '_blank');
     }
+
+    let waPopupOpen = false;
+    let waStep = 0;
+    let waLeadData = { type: '', name: '', phone: '' };
+
+    function toggleWaPopup() { waPopupOpen ? closeWaPopup() : openWaPopup(); }
+
+    function openWaPopup() {
+      waPopupOpen = true;
+      document.getElementById('waPopup').classList.add('open');
+      document.getElementById('whatsappFloat').classList.add('hidden-btn');
+      if (waStep === 0) startWaConversation();
+      setTimeout(() => document.getElementById('waPopupInput').focus(), 300);
+    }
+
+    function closeWaPopup() {
+      waPopupOpen = false;
+      document.getElementById('waPopup').classList.remove('open');
+      document.getElementById('whatsappFloat').classList.remove('hidden-btn');
+    }
+
+    function nowTime() {
+      const isHe = currentLang === 'he';
+      return new Date().toLocaleTimeString(isHe ? 'he-IL' : 'en-US', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function addBotBubble(text, withQuickReplies) {
+      const body = document.getElementById('waPopupBody');
+      const typing = document.createElement('div');
+      typing.className = 'wa-typing';
+      typing.innerHTML = '<span></span><span></span><span></span>';
+      body.appendChild(typing);
+      body.scrollTop = body.scrollHeight;
+
+      setTimeout(() => {
+        typing.remove();
+        const bubble = document.createElement('div');
+        bubble.className = 'wa-bubble';
+        bubble.innerHTML = `<span></span><div class="wa-bubble-time"></div>`;
+        bubble.querySelector('span').textContent = text;
+        bubble.querySelector('.wa-bubble-time').textContent = nowTime();
+        body.appendChild(bubble);
+
+        if (withQuickReplies && withQuickReplies.length) {
+          const qr = document.createElement('div');
+          qr.className = 'wa-quick-replies';
+          withQuickReplies.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'wa-quick-btn';
+            btn.textContent = opt;
+            btn.onclick = () => handleQuickReply(opt);
+            qr.appendChild(btn);
+          });
+          body.appendChild(qr);
+        }
+        body.scrollTop = body.scrollHeight;
+      }, 700);
+    }
+
+    function addMeBubble(text) {
+      const body = document.getElementById('waPopupBody');
+      const bubble = document.createElement('div');
+      bubble.className = 'wa-bubble me';
+      bubble.innerHTML = `<span></span><div class="wa-bubble-time"></div>`;
+      bubble.querySelector('span').textContent = text;
+      bubble.querySelector('.wa-bubble-time').textContent = nowTime();
+      body.appendChild(bubble);
+      body.scrollTop = body.scrollHeight;
+    }
+
+    function clearQuickReplies() { document.querySelectorAll('.wa-quick-replies').forEach(el => el.remove()); }
+
+    function startWaConversation() {
+      const isHe = currentLang === 'he';
+      waStep = 1;
+      const opts = isHe
+        ? ['בניין מגורים', 'בניין משרדים', 'רק בודק/ת אפשרויות']
+        : ['Residential building', 'Office building', 'Just browsing'];
+      addBotBubble(
+        isHe ? 'היי! 👋 איך אפשר לעזור לכם עם ניהול הבניין שלכם? מאיזה סוג בניין מדובר?'
+             : 'Hi! 👋 How can we help with your building management? What type of building is it?',
+        opts
+      );
+    }
+
+    function handleQuickReply(choice) {
+      clearQuickReplies();
+      addMeBubble(choice);
+      const isHe = currentLang === 'he';
+      if (waStep === 1) {
+        waLeadData.type = choice;
+        waStep = 2;
+        setTimeout(() => addBotBubble(isHe
+          ? 'מעולה! כדי שנוכל לחזור אליכם עם כל הפרטים, מה השם המלא שלכם?'
+          : 'Great! So we can get back to you with all the details, what\'s your full name?'), 300);
+      }
+    }
+
+    function sendWaPopupMessage() {
+      const isHe = currentLang === 'he';
+      const input = document.getElementById('waPopupInput');
+      const text = input.value.trim();
+      if (!text) return;
+      addMeBubble(text);
+      input.value = '';
+
+      if (waStep === 2) {
+        waLeadData.name = text;
+        waStep = 3;
+        setTimeout(() => addBotBubble(isHe
+          ? `נעים מאוד ${text}! מה מספר הטלפון שלכם, כדי שנוכל להתקשר או להמשיך בוואטסאפ?`
+          : `Nice to meet you ${text}! What's your phone number so we can call or continue on WhatsApp?`), 300);
+      } else if (waStep === 3) {
+        waLeadData.phone = text;
+        waStep = 4;
+        setTimeout(() => {
+          const body = document.getElementById('waPopupBody');
+          addBotBubble(isHe
+            ? 'תודה! קיבלנו את כל הפרטים 🎉 אפשר להמשיך את השיחה ישירות בוואטסאפ עם נציג אמיתי, או להשאיר את הפרטים כאן ואנחנו נחזור אליכם.'
+            : 'Thanks! We got all your details 🎉 You can continue the chat directly on WhatsApp with a real rep, or just leave your details here and we\'ll get back to you.');
+          setTimeout(() => {
+            const btnWrap = document.createElement('div');
+            btnWrap.className = 'wa-quick-replies';
+            const contBtn = document.createElement('button');
+            contBtn.className = 'wa-quick-btn';
+            contBtn.style.background = '#25D366';
+            contBtn.style.color = 'white';
+            contBtn.style.borderColor = '#25D366';
+            contBtn.innerHTML = (isHe ? 'המשך בוואטסאפ 💬' : 'Continue on WhatsApp 💬');
+            contBtn.onclick = () => finalizeWaHandoff();
+            btnWrap.appendChild(contBtn);
+            body.appendChild(btnWrap);
+            body.scrollTop = body.scrollHeight;
+          }, 750);
+        }, 300);
+      } else if (waStep >= 4) {
+        setTimeout(() => addBotBubble(isHe
+          ? 'קיבלנו, תודה! נציג יחזור אליכם בהקדם 🙌'
+          : 'Got it, thanks! A representative will get back to you shortly 🙌'), 300);
+      }
+    }
+
+    function finalizeWaHandoff() {
+      const isHe = currentLang === 'he';
+      const text = isHe
+        ? `שלום! השיחה שלנו ב-BUILDIX 🏢\n\nסוג בניין: ${waLeadData.type}\nשם: ${waLeadData.name}\nטלפון: ${waLeadData.phone}\n\nממשיכים כאן בוואטסאפ 🙂`
+        : `Hello! Our BUILDIX chat 🏢\n\nBuilding type: ${waLeadData.type}\nName: ${waLeadData.name}\nPhone: ${waLeadData.phone}\n\nContinuing here on WhatsApp 🙂`;
+      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    document.getElementById('waPopupInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendWaPopupMessage();
+    });
 
     let currentLang = 'he';
 
     const translations = {
       he: {
-        'nav-about':'אודות','nav-services':'שירותים','nav-how':'איך זה עובד',
-        'nav-contact':'צור קשר','nav-login':'התחברות','nav-register':'הרשמה','langBtn':'EN',
+        'nav-home':'דף הבית','nav-aboutus':'אודותינו','nav-services':'שירותים','nav-how':'איך זה עובד',
+        'nav-why':'למה BUILDIX','nav-faq':'שאלות נפוצות','nav-contact':'צור קשר',
+        'nav-login':'התחברות','nav-register':'הרשמה','langBtn':'EN',
         'hero-tag':'ניהול בניינים חכם',
         'hero-title':'המומחיות שלנו,<br><span style="color:#c9a227">השקט שלכם.</span>',
         'hero-desc':'אנו מעניקים מעטפת ניהול הוליסטית למגדלי מגורים ובנייני בוטיק, המשלבת תחזוקה מונעת, שקיפות פיננסית מוחלטת וסטנדרט שירות של מלון חמישה כוכבים. כי בניהול נדל"ן, אין מקום לפשרות.',
@@ -593,26 +1321,77 @@
         'svc4-title':'ניהול דיירים','svc4-desc':'רשימת דיירים, אישור גישה וניהול הרשאות לפי תפקיד — דייר, טכנאי או מנהל.',
         'svc5-title':'לוח מודעות','svc5-desc':'הודעות מהמנהל לדיירים עם תאריכי תוקף ורמות דחיפות — תקשורת ברורה ושקופה.',
         'svc6-title':'דוחות וייצוא','svc6-desc':'דוחות חודשיים, ייצוא Excel ו-PDF וגרפים אינטראקטיביים — כל הנתונים בלחיצה אחת.',
-        'how-tag':'איך זה עובד',
-        'how-title':'מתחילים ב<span style="color:#c9a227">4 צעדים</span>',
-        'how-desc':'תהליך פשוט וברור להתחלת עבודה עם BUILDIX',
-        'step1-title':'נרשמים למערכת','step1-desc':'מנהל הבניין נרשם ויוצר פרופיל בניין תוך דקות.',
-        'step2-title':'מוסיפים משתמשים','step2-desc':'הזמנת דיירים וטכנאים לפי תפקיד.',
-        'step3-title':'מדווחים תקלות','step3-desc':'דיירים מדווחים, טכנאים מטפלים, מנהל עוקב.',
-        'step4-title':'מנתחים ומשפרים','step4-desc':'דוחות, גרפים וסטטיסטיקות לשיפור מתמיד.',
+        'process-tag':'התהליך שלנו',
+        'process-title':'מדיווח <span style="color:#c9a227">לפתרון</span>, צעד אחר צעד',
+        'process-desc':'כך תקלה הופכת לפתרון בשקיפות מלאה, מהרגע שדווחה ועד לסגירה המאושרת',
+        'proc1-title':'דיווח תקלה','proc1-desc':'דייר מדווח תקלה עם תמונה, מיקום ורמת דחיפות — תוך פחות מדקה מהטלפון.',
+        'proc2-title':'שיוך טכנאי','proc2-desc':'המנהל משייך את הטכנאי המתאים, וזה מקבל התראה מיידית בדוא"ל ובמערכת.',
+        'proc3-title':'טיפול ועדכון סטטוס','proc3-desc':'הטכנאי מעדכן סטטוס בזמן אמת — בטיפול, ממתין לחלק — כולם רואים היכן זה עומד.',
+        'proc4-title':'חשבונית ואישור','proc4-desc':'הטכנאי מצרף חשבונית, המנהל בודק ומאשר, והתקלה נסגרת רק לאחר אישור מלא.',
+        'proc5-title':'דיווח וסגירה','proc5-desc':'הדייר מקבל עדכון סופי במייל, והכל מתועד לדוח החודשי לשקיפות מלאה.',
+        'adv-tag':'היתרונות שלנו',
+        'adv-title':'היתרון שלנו, <span style="color:#c9a227">השקט הנפשי שלכם</span>',
+        'adv-desc':'שילוב של טכנולוגיה, שירות אישי וסטנדרט מקצועי שאין שני לו',
+        'adv1-title':'פתרונות מתקדמים','adv1-desc':'שימוש בטכנולוגיה חכמה כדי להעניק שקיפות מלאה וניהול יעיל של כל מערכות הבניין.',
+        'adv2-title':'שירות אישי ואכפתי','adv2-desc':'זמינות מלאה 24/7 לכל קריאה. אנחנו מתייחסים לבניין שלכם בדיוק כמו לבית הפרטי שלנו.',
+        'adv3-title':'ניהול חכם ומתוכנן','adv3-desc':'אסטרטגיית תחזוקה מונעת שחוסכת לוועד הבית כסף, זמן וכאבי ראש עתידיים.',
+        'adv4-title':'שקיפות מלאה לדיירים','adv4-desc':'כל דייר רואה בדיוק מה קורה עם התקלה שדיווח — בלי טלפונים, בלי אי ודאות.',
+        'adv5-title':'שקיפות פיננסית','adv5-desc':'ניהול כספי ועד הבית וגבייה בצורה מאוזנת, מדויקת וגלויה לחלוטין לפני כל דיירים.',
+        'adv6-title':'שותפות ואמינות','adv6-desc':'התנהלות שקופה בגובה העיניים מול ועד הבית, ועבודה מול אנשי מקצוע אמינים בלבד.',
+        'testi-tag':'מה אומרים עלינו',
+        'testi-title':'אנחנו מאמינים <span style="color:#c9a227">בעבודה קשה, אמינות ומקצועיות</span>',
+        'testi-desc':'כך זה מרגיש לנהל בניין עם BUILDIX, מפי אלו שכבר חוו את זה',
+        'testi1-text':'"סוף סוף אני יודע בדיוק מה קורה בבניין בלי לרדוף אחרי אף אחד. כל תקלה מתועדת, ואני רואה בזמן אמת מתי היא נסגרה. חסך לי המון כאבי ראש כוועד בית."',
+        'testi1-name':'דוד לוי','testi1-role':'יו"ר ועד בית, רמת גן',
+        'testi2-text':'"כדיירת, הדבר שהכי שינה לי את החוויה זה שאני יכולה לדווח תקלה עם תמונה מהטלפון ולראות בדיוק באיזה שלב היא נמצאת. אין יותר הודעות וואטסאפ שהולכות לאיבוד."',
+        'testi2-name':'מיכל אברהם','testi2-role':'דיירת, מגדל מגורים בפתח תקווה',
+        'testi3-text':'"בתור טכנאי שעובד עם כמה בניינים, המערכת הזאת פשוט חוסכת לי זמן. אני מקבל את הקריאה עם כל הפרטים, מעדכן סטטוס בלחיצה, ומצרף חשבונית ישר מהטלפון."',
+        'testi3-name':'עידן שמעוני','testi3-role':'טכנאי תחזוקה עצמאי',
+        'who-tag':'מי אנחנו',
+        'who-title':'הסיפור <span style="color:#c9a227">מאחורי BUILDIX</span>',
+        'who-p1':'הכל התחיל מתסכול פשוט: קבוצת וואטסאפ עמוסה, קובץ אקסל שאף אחד לא מעדכן, ותקלה שנשארת פתוחה שבועות כי אף אחד לא זוכר למי היא הוקצתה. שתי סטודנטיות למערכות מידע, נועה והודיה, ראו את זה קורה שוב ושוב בבניינים סביבן — והחליטו שיש דרך טובה יותר.',
+        'who-p2':'כך נולדה BUILDIX: מערכת אחת שמחליפה את כל הכלים המפוזרים במקום מרכזי, שקוף ופשוט לשימוש — גם למי שלא "טכנולוגי". דיווח תקלה שלוקח פחות מדקה, מעקב שקוף לכל דייר, ותחזוקה מונעת שמונעת בעיות לפני שהן קורות.',
+        'who-p3':'היום BUILDIX ממשיכה להתפתח מתוך אותה מטרה: לתת לכל בניין — קטן כגדול — ניהול ברמה מקצועית, בלי הכאוס ובלי הבלגן.',
+        'who-btn':'בואו נדבר על הבניין שלכם',
+        'founder1-role':'מייסדת שותפה, Frontend & UX',
+        'founder2-role':'מייסדת שותפה, Backend & מערכות',
+        'comp-tag':'למה BUILDIX',
+        'comp-title':'BUILDIX מול <span style="color:#c9a227">הדרך הישנה</span>',
+        'comp-desc':'ההבדל בין ניהול בניין מסודר לבין כאוס של וואטסאפ ואקסל',
+        'comp-col1':'תחום','comp-col2':'BUILDIX','comp-col3':'וואטסאפ ואקסל',
+        'comp-row1':'זמן תגובה לתקלה','comp-row1-a':'עד 24 שעות','comp-row1-b':'48-72 שעות ויותר',
+        'comp-row2':'שקיפות לדיירים','comp-row2-a':'מעקב מלא בזמן אמת','comp-row2-b':'ללא מעקב ברור',
+        'comp-row3':'תחזוקה מונעת','comp-row3-a':'תזכורות אוטומטיות','comp-row3-b':'ידני ולעיתים נשכח',
+        'comp-row4':'דוחות וחשבוניות','comp-row4-a':'אוטומטי ומאורגן','comp-row4-b':'קבצים מפוזרים',
+        'comp-row5':'היסטוריית תקלות','comp-row5-a':'מתועד לצמיתות','comp-row5-b':'נעלם בגלילה',
+        'faq-tag':'שאלות ותשובות','faq-title':'עושים לכם <span style="color:#c9a227">סדר</span>','faq-desc':'אנחנו כאן עם כל התשובות',
+        'faq1-q':'האם המערכת מתאימה גם לבניין קטן וגם לבניין גדול?',
+        'faq1-a':'כן, BUILDIX בנויה כך שתתאים לבניין בודד מכל גודל — בין אם מדובר בבניין מגורים קטן או בניין משרדים גדול. המערכת מתמקדת כרגע בניהול בניין יחיד, עם אפשרות עתידית להרחבה למספר בניינים.',
+        'faq2-q':'מי יכול להירשם למערכת ואיך מתבצע האישור?',
+        'faq2-a':'דיירים וטכנאים יכולים להירשם עצמאית דרך עמוד ההרשמה. כל בקשת הרשמה חדשה ממתינה לאישור ידני של מנהל הבניין, כדי לוודא שרק מי שבאמת שייך לבניין מקבל גישה.',
+        'faq3-q':'איך מתבצע דיווח תקלה, וכמה זמן זה לוקח?',
+        'faq3-a':'דייר בוחר סוג תקלה, קומה ויחידה, מוסיף תיאור ותמונה (אופציונלי), ובוחר רמת דחיפות — הכל תוך פחות מדקה מהטלפון. הטכנאי הרלוונטי מקבל התראה מיידית ברגע שהתקלה משויכת אליו.',
+        'faq4-q':'מתי תקלה נחשבת סגורה סופית?',
+        'faq4-a':'תקלה נסגרת רק לאחר שהטכנאי מדווח שסיים וצירף חשבונית, והמנהל מאשר אותה. כך יש בקרה כפולה שמונעת סגירת תקלות בטעות או בלי טיפול בפועל.',
+        'faq5-q':'איך אני יודע כמה הבניין חוסך בעזרת המערכת?',
+        'faq5-a':'בעמוד הדוחות תוכלו לראות גרפים ונתונים על צריכת אנרגיה, עלויות חשבוניות ותקלות לאורך זמן, וכן לייצא דוחות ל-Excel ו-PDF להצגה בפני ועד הבית.',
+        'faq6-q':'האם הנתונים שלנו מאובטחים?',
+        'faq6-a':'כן. סיסמאות מוצפנות, הגישה מוגבלת לפי תפקיד (דייר, טכנאי, מנהל), וכל בקשת הרשמה עוברת אישור ידני של המנהל לפני קבלת גישה למידע כלשהו.',
         'contact-tag':'צור קשר',
         'contact-title':'מוכנים <span style="color:#c9a227">להתחיל?</span>',
         'contact-desc':'השאירו פרטים ונחזור אליכם בהקדם לשיחת היכרות ללא עלות',
         'contact-name-lbl':'שם מלא','contact-phone-lbl':'טלפון',
         'contact-building-lbl':'שם הבניין / כתובת','contact-msg-lbl':'הודעה (אופציונלי)',
         'whatsapp-btn-text':'שלחו הודעה בוואטסאפ',
-        'footer-about':'אודות','footer-services':'שירותים','footer-how':'איך זה עובד',
+        'footer-about':'אודות','footer-services':'שירותים','footer-how':'איך זה עובד','footer-faq':'שאלות נפוצות',
         'footer-contact':'צור קשר','footer-login':'כניסה',
         'footer-copy':'© 2026 BUILDIX — Building Management Simplified | נועה כהן & הודיה בר',
+        'wa-status-text':'בדרך כלל עונים תוך כמה דקות',
       },
       en: {
-        'nav-about':'About','nav-services':'Services','nav-how':'How It Works',
-        'nav-contact':'Contact','nav-login':'Login','nav-register':'Register','langBtn':'עב',
+        'nav-home':'Home','nav-aboutus':'About Us','nav-services':'Services','nav-how':'How It Works',
+        'nav-why':'Why BUILDIX','nav-faq':'FAQ','nav-contact':'Contact',
+        'nav-login':'Login','nav-register':'Register','langBtn':'עב',
         'hero-tag':'Smart Building Management',
         'hero-title':'Our Expertise,<br><span style="color:#c9a227">Your Peace of Mind.</span>',
         'hero-desc':'We provide holistic management for residential towers and boutique buildings, combining preventive maintenance, complete financial transparency and five-star hotel service standards. Because in real estate management, there is no room for compromise.',
@@ -635,22 +1414,72 @@
         'svc4-title':'Tenant Management','svc4-desc':'Tenant list, access approval and role-based permissions — tenant, technician or manager.',
         'svc5-title':'Notice Board','svc5-desc':'Manager announcements with expiry dates and urgency levels — clear and transparent communication.',
         'svc6-title':'Reports & Export','svc6-desc':'Monthly reports, Excel & PDF export and interactive charts — all data in one click.',
-        'how-tag':'How It Works',
-        'how-title':'Start in <span style="color:#c9a227">4 Steps</span>',
-        'how-desc':'A simple and clear process to start using BUILDIX',
-        'step1-title':'Register','step1-desc':'Building manager registers and creates a profile in minutes.',
-        'step2-title':'Add Users','step2-desc':'Invite tenants and technicians by role.',
-        'step3-title':'Report Faults','step3-desc':'Tenants report, technicians fix, manager tracks.',
-        'step4-title':'Analyze & Improve','step4-desc':'Reports, graphs and statistics for continuous improvement.',
+        'process-tag':'Our Process',
+        'process-title':'From Report to <span style="color:#c9a227">Resolution</span>, Step by Step',
+        'process-desc':'How a fault becomes a fully transparent resolution, from the moment it\'s reported until approved closure',
+        'proc1-title':'Report a Fault','proc1-desc':'A tenant reports a fault with a photo, location and urgency — in under a minute from their phone.',
+        'proc2-title':'Assign a Technician','proc2-desc':'The manager assigns the right technician, who gets an instant email and in-app alert.',
+        'proc3-title':'Handling & Status Update','proc3-desc':'The technician updates status in real time — in progress, waiting for parts — everyone can see where it stands.',
+        'proc4-title':'Invoice & Approval','proc4-desc':'The technician attaches an invoice, the manager reviews and approves, and only then does the fault close.',
+        'proc5-title':'Report & Closure','proc5-desc':'The tenant gets a final email update, and everything is logged for the monthly report.',
+        'adv-tag':'Our Advantages',
+        'adv-title':'Our Advantage, <span style="color:#c9a227">Your Peace of Mind</span>',
+        'adv-desc':'A combination of technology, personal service and a professional standard like no other',
+        'adv1-title':'Advanced Solutions','adv1-desc':'Using smart technology to provide full transparency and efficient management of all building systems.',
+        'adv2-title':'Personal, Caring Service','adv2-desc':'Full 24/7 availability for every call. We treat your building just like our own home.',
+        'adv3-title':'Smart, Planned Management','adv3-desc':'A preventive maintenance strategy that saves the building committee money, time and future headaches.',
+        'adv4-title':'Full Tenant Transparency','adv4-desc':'Every tenant sees exactly what\'s happening with their reported fault — no calls, no uncertainty.',
+        'adv5-title':'Financial Transparency','adv5-desc':'Balanced, accurate and fully visible management of committee funds and collections for all residents.',
+        'adv6-title':'Partnership & Trust','adv6-desc':'Transparent, eye-level conduct with the building committee, working only with trusted professionals.',
+        'testi-tag':'What People Say',
+        'testi-title':'We Believe in <span style="color:#c9a227">Hard Work, Trust & Professionalism</span>',
+        'testi-desc':'This is what it feels like to manage a building with BUILDIX, from those who\'ve experienced it',
+        'testi1-text':'"Finally I know exactly what\'s happening in the building without chasing anyone. Every fault is documented, and I see in real time when it\'s closed. Saved me a ton of headaches as committee chair."',
+        'testi1-name':'David Levy','testi1-role':'Building Committee Chair, Ramat Gan',
+        'testi2-text':'"As a tenant, what changed my experience most is that I can report a fault with a photo from my phone and see exactly what stage it\'s at. No more WhatsApp messages getting lost."',
+        'testi2-name':'Michal Avraham','testi2-role':'Tenant, Residential Tower, Petah Tikva',
+        'testi3-text':'"As a technician working across several buildings, this system simply saves me time. I get the ticket with all the details, update status with a tap, and attach the invoice straight from my phone."',
+        'testi3-name':'Idan Shimoni','testi3-role':'Independent Maintenance Technician',
+        'who-tag':'Who We Are',
+        'who-title':'The Story <span style="color:#c9a227">Behind BUILDIX</span>',
+        'who-p1':'It all started from a simple frustration: an overloaded WhatsApp group, an Excel file nobody updates, and a fault left open for weeks because no one remembers who it was assigned to. Two information systems students, Noa and Hodaya, saw this happen again and again in buildings around them — and decided there had to be a better way.',
+        'who-p2':'That\'s how BUILDIX was born: one system that replaces all the scattered tools with a single centralized, transparent, easy-to-use place — even for those who aren\'t "techy". A fault report that takes under a minute, transparent tracking for every tenant, and preventive maintenance that stops problems before they happen.',
+        'who-p3':'Today BUILDIX keeps growing with the same mission: giving every building — small or large — professional-grade management, without the chaos.',
+        'who-btn':'Let\'s talk about your building',
+        'founder1-role':'Co-Founder, Frontend & UX',
+        'founder2-role':'Co-Founder, Backend & Systems',
+        'comp-tag':'Why BUILDIX',
+        'comp-title':'BUILDIX vs. <span style="color:#c9a227">The Old Way</span>',
+        'comp-desc':'The difference between organized building management and WhatsApp/Excel chaos',
+        'comp-col1':'Area','comp-col2':'BUILDIX','comp-col3':'WhatsApp & Excel',
+        'comp-row1':'Fault Response Time','comp-row1-a':'Up to 24 hours','comp-row1-b':'48-72 hours or more',
+        'comp-row2':'Tenant Transparency','comp-row2-a':'Full real-time tracking','comp-row2-b':'No clear tracking',
+        'comp-row3':'Preventive Maintenance','comp-row3-a':'Automatic reminders','comp-row3-b':'Manual and often forgotten',
+        'comp-row4':'Reports & Invoices','comp-row4-a':'Automatic & organized','comp-row4-b':'Scattered files',
+        'comp-row5':'Fault History','comp-row5-a':'Permanently documented','comp-row5-b':'Lost in scrolling',
+        'faq-tag':'FAQ','faq-title':'We\'ve Got <span style="color:#c9a227">Answers</span>','faq-desc':'We\'re here with all the answers',
+        'faq1-q':'Does the system work for both small and large buildings?',
+        'faq1-a':'Yes, BUILDIX is built to fit a single building of any size — whether a small residential building or a large office building. The system currently focuses on single-building management, with future expansion planned.',
+        'faq2-q':'Who can register and how is approval handled?',
+        'faq2-a':'Tenants and technicians can register independently through the registration page. Every new request awaits manual approval by the building manager, ensuring only real residents get access.',
+        'faq3-q':'How does fault reporting work, and how long does it take?',
+        'faq3-a':'A tenant selects the fault type, floor and unit, adds a description and photo (optional), and picks an urgency level — all in under a minute. The relevant technician gets an instant alert once assigned.',
+        'faq4-q':'When is a fault considered fully closed?',
+        'faq4-a':'A fault only closes after the technician reports completion with an invoice, and the manager approves it. This double-check prevents faults from closing by mistake or without actual handling.',
+        'faq5-q':'How do I know how much the building is saving?',
+        'faq5-a':'The reports page shows graphs and data on energy consumption, invoice costs and faults over time, plus Excel/PDF export to present to the building committee.',
+        'faq6-q':'Is our data secure?',
+        'faq6-a':'Yes. Passwords are encrypted, access is role-based (tenant, technician, manager), and every registration request goes through manual manager approval before any access is granted.',
         'contact-tag':'Contact Us',
         'contact-title':'Ready to <span style="color:#c9a227">Start?</span>',
         'contact-desc':'Leave your details and we\'ll get back to you for a free introductory call',
         'contact-name-lbl':'Full Name','contact-phone-lbl':'Phone',
         'contact-building-lbl':'Building Name / Address','contact-msg-lbl':'Message (optional)',
         'whatsapp-btn-text':'Send WhatsApp Message',
-        'footer-about':'About','footer-services':'Services','footer-how':'How It Works',
+        'footer-about':'About','footer-services':'Services','footer-how':'How It Works','footer-faq':'FAQ',
         'footer-contact':'Contact','footer-login':'Login',
         'footer-copy':'© 2026 BUILDIX — Building Management Simplified | Noa Cohen & Hodaya Bar',
+        'wa-status-text':'Usually replies within minutes',
       }
     };
 
@@ -669,6 +1498,7 @@
       document.getElementById('contact-phone').placeholder = '050-0000000';
       document.getElementById('contact-building').placeholder = lang === 'he' ? 'רחוב הרצל 1, תל אביב' : '1 Herzl St, Tel Aviv';
       document.getElementById('contact-message').placeholder = lang === 'he' ? 'ספרו לנו קצת על הבניין שלכם...' : 'Tell us a bit about your building...';
+      document.getElementById('waPopupInput').placeholder = lang === 'he' ? 'כתבו הודעה...' : 'Type a message...';
     }
 
     function toggleLang() { applyLang(currentLang === 'he' ? 'en' : 'he'); }
